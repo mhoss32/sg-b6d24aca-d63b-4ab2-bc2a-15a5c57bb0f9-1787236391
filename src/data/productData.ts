@@ -257,98 +257,98 @@ export const productNodes: ProductNode[] = [
   },
   {
     id: "uc-01",
-    label: "Vulnerability Remediation",
+    label: "UC-01: Vulnerability Remediation",
     type: "useCase",
     description: "Identify, prioritize, and remediate security vulnerabilities across the IBM Z estate with full audit trail.",
     connections: ["predictive"],
   },
   {
     id: "uc-02",
-    label: "Patch Management",
+    label: "UC-02: Patch Management",
     type: "useCase",
     description: "Automated PTF impact analysis, test plan generation, and orchestrated patch execution with rollback capability.",
     connections: ["change"],
   },
   {
     id: "uc-03",
-    label: "Audit and Compliance",
+    label: "UC-03: Audit and Compliance",
     type: "useCase",
     description: "Generate structured, auditor-ready compliance evidence from a continuous environment record.",
     connections: ["predictive"],
   },
   {
     id: "uc-04",
-    label: "Staff Onboarding",
+    label: "UC-04: Staff Onboarding",
     type: "useCase",
     description: "Get new team members productive fast with AI-guided environment orientation and knowledge transfer.",
     connections: ["system"],
   },
   {
     id: "uc-05",
-    label: "Application Discovery",
+    label: "UC-05: Application Discovery and Dependency Analysis",
     type: "useCase",
     description: "Complete dependency mapping and blast radius analysis across the full middleware stack.",
     connections: ["system"],
   },
   {
     id: "uc-06",
-    label: "Health Assessment",
+    label: "UC-06: Change Readiness and Health Assessment",
     type: "useCase",
     description: "Pre-event health checks joining configuration state, security posture, PTF currency, and performance constraints.",
     connections: ["predictive"],
   },
   {
     id: "uc-07",
-    label: "Application Change Mgmt",
+    label: "UC-07: Application Change Management",
     type: "useCase",
     description: "Developer-native change lifecycle with impact analysis, test generation, and deployment orchestration.",
     connections: ["change"],
   },
   {
     id: "uc-08",
-    label: "Platform Upgrade",
+    label: "UC-08: Platform Upgrade and Migration",
     type: "useCase",
     description: "Major z/OS and middleware upgrade planning with compatibility assessment and phased execution.",
     connections: ["change"],
   },
   {
     id: "uc-09",
-    label: "Drift Control",
+    label: "UC-09: Environment Parity and Drift Control",
     type: "useCase",
     description: "Continuous environment parity monitoring with unauthorized change detection and automated remediation.",
     connections: ["predictive"],
   },
   {
     id: "uc-10",
-    label: "DR Validation",
+    label: "UC-10: Disaster Recovery Validation",
     type: "useCase",
     description: "Continuous DR readiness assessment with cross-environment comparison and failover simulation.",
     connections: ["predictive"],
   },
   {
     id: "uc-11",
-    label: "Capacity Planning",
+    label: "UC-11: Capacity Planning and Performance Readiness",
     type: "useCase",
     description: "Proactive capacity management with load projection, constraint identification, and validated configuration changes.",
     connections: ["predictive"],
   },
   {
     id: "uc-12",
-    label: "App Modernization",
+    label: "UC-12: Application Modernization",
     type: "useCase",
     description: "Legacy application analysis, technical debt identification, and safe phased modernization.",
     connections: ["change"],
   },
   {
     id: "uc-13",
-    label: "Regulatory Response",
+    label: "UC-13: Regulatory Change Response",
     type: "useCase",
     description: "Rapid regulatory compliance with scoped inventory, gap analysis, and sequenced remediation.",
     connections: ["change"],
   },
   {
     id: "uc-14",
-    label: "Change Governance",
+    label: "UC-14: Change Governance and Traceability",
     type: "useCase",
     description: "Complete change attribution, undocumented change detection, and ITSM integration for audit readiness.",
     connections: ["change"],
@@ -358,7 +358,7 @@ export const productNodes: ProductNode[] = [
 export const useCaseDetails: Record<string, UseCaseDetail> = {
   "uc-01": {
     id: "uc-01",
-    label: "Vulnerability Remediation",
+    label: "UC-01: Vulnerability Remediation",
     description: "Identify, prioritize, and remediate security vulnerabilities across the IBM Z estate with full audit trail and change attribution.",
     personas: [
       { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Primary" },
@@ -411,7 +411,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
   },
   "uc-02": {
     id: "uc-02",
-    label: "Patch Management",
+    label: "UC-02: Patch Management",
     description: "Automated PTF impact analysis, test plan generation, and orchestrated patch execution with full audit trail and rollback capability.",
     personas: [
       { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Primary" },
@@ -466,7 +466,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
   },
   "uc-03": {
     id: "uc-03",
-    label: "Audit and Compliance",
+    label: "UC-03: Audit and Compliance",
     description: "Generate structured, auditor-ready compliance evidence from a continuous environment record — privileged access, configuration compliance, change history, and undocumented change detection.",
     personas: [
       { name: "Derek", role: "Compliance Evidence Provider", engagement: "Primary" },
@@ -518,7 +518,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
   },
   "uc-04": {
     id: "uc-04",
-    label: "Staff Onboarding",
+    label: "UC-04: Staff Onboarding",
     description: "Get new team members productive fast with AI-guided environment orientation, knowledge transfer, and guided first change execution.",
     personas: [
       { name: "Chris", role: "z/OS Systems Programmer (early career)", engagement: "Primary" },
@@ -568,7 +568,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
   },
   "uc-05": {
     id: "uc-05",
-    label: "Application Discovery and Dependency Analysis",
+    label: "UC-05: Application Discovery and Dependency Analysis",
     description: "Complete, accurate picture of any application and its dependencies — what it connects to, what depends on it, and what would be affected by a change.",
     personas: [
       { name: "Angie", role: "Application Architect", engagement: "Primary" },
@@ -617,7 +617,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
   },
   "uc-06": {
     id: "uc-06",
-    label: "Change Readiness and Health Assessment",
+    label: "UC-06: Change Readiness and Health Assessment",
     description: "Structured, repeatable health assessment joining configuration state, security posture, PTF currency, and performance constraints before any significant event.",
     personas: [
       { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Primary" },
@@ -667,7 +667,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
   },
   "uc-07": {
     id: "uc-07",
-    label: "Application Change Management",
+    label: "UC-07: Application Change Management",
     description: "Developer-native change lifecycle with instant impact analysis, automated test plan generation, background environment provisioning, and deployment orchestration.",
     personas: [
       { name: "Kathleen", role: "z/OS Application Developer (experienced)", engagement: "Primary" },
@@ -719,7 +719,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
   },
   "uc-08": {
     id: "uc-08",
-    label: "Platform Upgrade and Migration",
+    label: "UC-08: Platform Upgrade and Migration",
     description: "Major z/OS and middleware upgrade planning with full compatibility assessment, sequencing analysis, and phased execution with isolation testing.",
     personas: [
       { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Primary" },
@@ -769,7 +769,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
   },
   "uc-09": {
     id: "uc-09",
-    label: "Environment Parity and Drift Control",
+    label: "UC-09: Environment Parity and Drift Control",
     description: "Continuous, automated drift monitoring across all environment tiers — detecting what changed, correlating to change records, and guiding operators from detection to resolution.",
     personas: [
       { name: "Annette", role: "IT Operations Engineer (L2 Operator)", engagement: "Primary" },
@@ -818,7 +818,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
   },
   "uc-10": {
     id: "uc-10",
-    label: "Disaster Recovery Validation",
+    label: "UC-10: Disaster Recovery Validation",
     description: "Continuous DR readiness assessment — comparing DR to production, quantifying drift, and running isolated failover simulation before any real test or incident.",
     personas: [
       { name: "Greg", role: "Infrastructure Architect", engagement: "Primary" },
@@ -868,7 +868,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
   },
   "uc-11": {
     id: "uc-11",
-    label: "Capacity Planning and Performance Readiness",
+    label: "UC-11: Capacity Planning and Performance Readiness",
     description: "Proactive capacity management with load projection, constraint identification, dark capacity discovery, and validated configuration changes before peak events.",
     personas: [
       { name: "Alex", role: "Performance / Application Engineer", engagement: "Primary" },
@@ -917,7 +917,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
   },
   "uc-12": {
     id: "uc-12",
-    label: "Application Modernization",
+    label: "UC-12: Application Modernization",
     description: "Legacy application analysis, technical debt identification, and safe phased modernization with code-level impact assessment and regression validation.",
     personas: [
       { name: "Angie", role: "Application Architect", engagement: "Primary" },
@@ -967,7 +967,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
   },
   "uc-13": {
     id: "uc-13",
-    label: "Regulatory Change Response",
+    label: "UC-13: Regulatory Change Response",
     description: "Rapid regulatory compliance with scoped inventory, gap analysis, encryption assessment, and sequenced remediation with continuous post-remediation monitoring.",
     personas: [
       { name: "Sage", role: "Security Administrator (mid-level)", engagement: "Primary" },
@@ -1019,7 +1019,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
   },
   "uc-14": {
     id: "uc-14",
-    label: "Change Governance and Traceability",
+    label: "UC-14: Change Governance and Traceability",
     description: "Complete change attribution for every Atlas-executed change, undocumented change detection via baseline diff, and bi-directional ITSM integration for audit readiness.",
     personas: [
       { name: "Quinn", role: "IT Operations Manager", engagement: "Primary" },
