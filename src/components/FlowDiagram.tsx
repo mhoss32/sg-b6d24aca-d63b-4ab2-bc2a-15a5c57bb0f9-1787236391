@@ -206,7 +206,7 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
         {/* Connection line */}
         <div className="absolute top-[52px] left-0 right-0 h-0.5 bg-gradient-to-r from-border/20 via-border/40 to-border/20 hidden lg:block" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {diagram.stages.map((stage, stageIndex) => (
             <StageCard
               key={stage.name}
@@ -308,7 +308,7 @@ function StageCard({
       {/* Stage card */}
       <div
         className={cn(
-          "flex-1 rounded-xl border bg-card/30 backdrop-blur-sm p-4 transition-all",
+          "rounded-xl border bg-card/30 backdrop-blur-sm p-5 transition-all",
           isManaging
             ? "border-cyan/40 shadow-lg shadow-cyan/5"
             : "border-border/30 hover:border-cyan/20",
@@ -324,9 +324,9 @@ function StageCard({
           {stage.description}
         </p>
 
-        {/* Markers — compact by default, expand on hover */}
+        {/* Markers — stacked vertically with full text */}
         {stageMarkers.length > 0 && !isManaging && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-col gap-1.5 mt-2">
             {stageMarkers.map((marker) => (
               <MarkerChip
                 key={marker.globalIndex}
@@ -491,7 +491,7 @@ function MarkerChip({
   return (
     <div
       className={cn(
-        "group inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium border cursor-default select-none transition-all duration-200",
+        "group inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-medium border cursor-default select-none transition-all duration-200",
         mc.bg,
         mc.color,
         mc.border,
@@ -501,7 +501,7 @@ function MarkerChip({
       onDoubleClick={() => editable && onStartEdit()}
     >
       <Icon className={cn("w-3 h-3 flex-shrink-0", mc.color)} />
-      <span className="max-w-0 overflow-hidden group-hover:max-w-[160px] transition-all duration-300 whitespace-nowrap">
+      <span className="whitespace-normal leading-snug">
         {marker.text}
       </span>
     </div>
