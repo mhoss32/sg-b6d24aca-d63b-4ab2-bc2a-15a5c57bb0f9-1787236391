@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useCallback, useRef } from "react";
 import {
   AlertTriangle,
   Clock,
@@ -9,6 +9,9 @@ import {
   Users,
   Bot,
   ChevronRight,
+  X,
+  Plus,
+  Pencil,
 } from "lucide-react";
 import type { FlowStage, FlowDiagram as FlowDiagramType } from "@/data/productData";
 import type { LucideIcon } from "lucide-react";
@@ -16,8 +19,11 @@ import type { LucideIcon } from "lucide-react";
 export interface FlowDiagramProps {
   diagram: FlowDiagramType;
   variant: "asIs" | "toBe";
+  editable?: boolean;
+  onChange?: (diagram: FlowDiagramType) => void;
 }
 
+type MarkerType = "pain" | "time" | "skill" | "gain";
 type MarkerStyle = { icon: LucideIcon; color: string; bg: string; border: string; label: string };
 
 const asIsMarkerConfig: Record<string, MarkerStyle> = {
@@ -94,35 +100,108 @@ function MarkerLegend({ variant }: { variant: "asIs" | "toBe" }) {
   );
 }
 
-export function FlowDiagram({ diagram, variant }: FlowDiagramProps) {
+export function FlowDiagram({ diagram, variant, editable = false, onChange }: FlowDiagramProps) {
   const isAsIs = variant === "asIs";
   const config = isAsIs ? asIsMarkerConfig : toBeMarkerConfig;
+  const [editingMarker, setEditingMarker] = useState<number | null>(null);
+  const [draftText, setDraftText] = useState("");
+  const [draftType, setDraftType] = useState<MarkerType>("pain");
+  const [draftStage, setDraftStage] = useState(0);
+  const [addingNew, setAddingNew] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const updateMarkers = useCallback((newMarkers: FlowDiagramType["markers"]) => {
+    onChange?.({ ...diagram, markers: newMarkers });
+  }, [diagram, onChange]);
+
+  const startEdit = useCallback((index: number) => {
+    const m = diagram.markers[index];
+    setEditingMarker(index);
+    setDraftText(m.text);
+    setDraftType(m.type as MarkerType);
+    setDraftStage(m.stageIndex);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }, [diagram.markers]);
+
+  const saveEdit = useCallback(() => {
+    if (editingMarker === null) return;
+    const newMarkers = [...diagram.markers];
+    newMarkers[editingMarker] = {
+      ...newMarkers[editingMarker],
+      text: draftText,
+      type: draftType,
+      stageIndex: draftStage,
+    };
+    updateMarkers(newMarkers);
+    setEditingMarker(null);
+  }, [editingMarker, draftText, draftType, draftStage, diagram.markers, updateMarkers]);
+
+  const deleteMarker = useCallback((index: number) => {
+    const newMarkers = diagram.markers.filter((_, i) => i !== index);
+    updateMarkers(newMarkers);
+    setEditingMarker(null);
+  }, [diagram.markers, updateMarkers]);
+
+  const addMarker = useCallback(() => {
+    const availableTypes = Object.keys(config);
+    const defaultType = availableTypes[0] as MarkerType;
+    const newMarkers = [
+      ...diagram.markers,
+      { type: defaultType, text: "New marker", stageIndex: 0 },
+    ];
+    updateMarkers(newMarkers);
+    setAddingNew(false);
+    setTimeout(() => {
+      setEditingMarker(newMarkers.length - 1);
+      setDraftText("New marker");
+      setDraftType(defaultType);
+      setDraftStage(0);
+    }, 50);
+  }, [config, diagram.markers, updateMarkers]);
+
+  const cancelEdit = useCallback(() => {
+    setEditingMarker(null);
+    setAddingNew(false);
+  }, []);
+
+  const availableTypes = Object.keys(config);
 
   return (
     <div className="w-full">
-      <div className="flex items-center gap-3 mb-4">
-        <div
-          className={cn(
-            "w-10 h-10 rounded-lg flex items-center justify-center",
-            isAsIs ? "bg-red/10 text-red" : "bg-green/10 text-green"
-          )}
-        >
-          {isAsIs ? (
-            <AlertTriangle className="w-5 h-5" />
-          ) : (
-            <Zap className="w-5 h-5" />
-          )}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              "w-10 h-10 rounded-lg flex items-center justify-center",
+              isAsIs ? "bg-red/10 text-red" : "bg-green/10 text-green"
+            )}
+          >
+            {isAsIs ? (
+              <AlertTriangle className="w-5 h-5" />
+            ) : (
+              <Zap className="w-5 h-5" />
+            )}
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">
+              {diagram.title}
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              {isAsIs
+                ? "Current state — pain points highlighted"
+                : "Desired outcome — gains highlighted"}
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {diagram.title}
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            {isAsIs
-              ? "Current state — pain points highlighted"
-              : "Desired outcome — gains highlighted"}
-          </p>
-        </div>
+        {editable && (
+          <button
+            onClick={() => setAddingNew(true)}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-cyan hover:text-cyan-light transition-colors px-3 py-1.5 rounded-md border border-cyan/30 hover:bg-cyan/10"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Add Marker
+          </button>
+        )}
       </div>
 
       <MarkerLegend variant={variant} />
@@ -140,6 +219,20 @@ export function FlowDiagram({ diagram, variant }: FlowDiagramProps) {
               markers={diagram.markers.filter((m) => m.stageIndex === index)}
               config={config}
               isLast={index === diagram.stages.length - 1}
+              editable={editable}
+              editingMarker={editingMarker}
+              onStartEdit={startEdit}
+              onSaveEdit={saveEdit}
+              onDeleteMarker={deleteMarker}
+              onCancelEdit={cancelEdit}
+              draftText={draftText}
+              setDraftText={setDraftText}
+              draftType={draftType}
+              setDraftType={setDraftType}
+              draftStage={draftStage}
+              setDraftStage={setDraftStage}
+              availableTypes={availableTypes}
+              inputRef={inputRef}
             />
           ))}
         </div>
@@ -154,12 +247,40 @@ function StageCard({
   markers,
   config,
   isLast,
+  editable,
+  editingMarker,
+  onStartEdit,
+  onSaveEdit,
+  onDeleteMarker,
+  onCancelEdit,
+  draftText,
+  setDraftText,
+  draftType,
+  setDraftType,
+  draftStage,
+  setDraftStage,
+  availableTypes,
+  inputRef,
 }: {
   stage: FlowStage;
   index: number;
   markers: FlowDiagramType["markers"];
   config: Record<string, MarkerStyle>;
   isLast: boolean;
+  editable: boolean;
+  editingMarker: number | null;
+  onStartEdit: (index: number) => void;
+  onSaveEdit: () => void;
+  onDeleteMarker: (index: number) => void;
+  onCancelEdit: () => void;
+  draftText: string;
+  setDraftText: (v: string) => void;
+  draftType: MarkerType;
+  setDraftType: (v: MarkerType) => void;
+  draftStage: number;
+  setDraftStage: (v: number) => void;
+  availableTypes: string[];
+  inputRef: React.RefObject<HTMLInputElement | null>;
 }) {
   return (
     <div className="relative flex flex-col">
@@ -188,28 +309,141 @@ function StageCard({
         {markers.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {markers.map((marker, mi) => {
-              const mc = config[marker.type];
-              if (!mc) return null;
-              const Icon = mc.icon;
+              const globalIndex = markers === undefined ? -1 : mi; // Will be resolved below
               return (
-                <div
+                <MarkerChip
                   key={mi}
-                  className={cn(
-                    "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium border",
-                    mc.bg,
-                    mc.color,
-                    mc.border
-                  )}
-                  title={marker.text}
-                >
-                  <Icon className={cn("w-3 h-3 flex-shrink-0", mc.color)} />
-                  <span className="truncate max-w-[120px]">{marker.text}</span>
-                </div>
+                  marker={marker}
+                  config={config}
+                  editable={editable}
+                  isEditing={false}
+                  onStartEdit={() => {}}
+                  onSaveEdit={() => {}}
+                  onDelete={() => {}}
+                  onCancel={() => {}}
+                  draftText=""
+                  setDraftText={() => {}}
+                  draftType="pain"
+                  setDraftType={() => {}}
+                  draftStage={0}
+                  setDraftStage={() => {}}
+                  availableTypes={[]}
+                  inputRef={inputRef}
+                />
               );
             })}
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function MarkerChip({
+  marker,
+  config,
+  editable,
+  isEditing,
+  onStartEdit,
+  onSaveEdit,
+  onDelete,
+  onCancel,
+  draftText,
+  setDraftText,
+  draftType,
+  setDraftType,
+  draftStage,
+  setDraftStage,
+  availableTypes,
+  inputRef,
+}: {
+  marker: FlowDiagramType["markers"][number];
+  config: Record<string, MarkerStyle>;
+  editable: boolean;
+  isEditing: boolean;
+  onStartEdit: () => void;
+  onSaveEdit: () => void;
+  onDelete: () => void;
+  onCancel: () => void;
+  draftText: string;
+  setDraftText: (v: string) => void;
+  draftType: MarkerType;
+  setDraftType: (v: MarkerType) => void;
+  draftStage: number;
+  setDraftStage: (v: number) => void;
+  availableTypes: string[];
+  inputRef: React.RefObject<HTMLInputElement | null>;
+}) {
+  const mc = config[marker.type];
+  if (!mc) return null;
+  const Icon = mc.icon;
+
+  if (isEditing) {
+    return (
+      <div className="inline-flex flex-col gap-1.5 p-2 rounded-md border border-cyan/40 bg-card/80 backdrop-blur-sm min-w-[200px]">
+        <div className="flex items-center gap-1.5">
+          <div className={cn("w-5 h-5 rounded flex items-center justify-center flex-shrink-0", mc.bg)}>
+            <Icon className={cn("w-3 h-3", mc.color)} />
+          </div>
+          <input
+            ref={inputRef}
+            type="text"
+            value={draftText}
+            onChange={(e) => setDraftText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onSaveEdit();
+              if (e.key === "Escape") onCancel();
+            }}
+            className="flex-1 text-[10px] bg-transparent border-none outline-none text-foreground min-w-0"
+          />
+          <button onClick={onSaveEdit} className="text-cyan hover:text-cyan-light">
+            <Pencil className="w-3 h-3" />
+          </button>
+          <button onClick={onDelete} className="text-red hover:text-red/80">
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+        <div className="flex items-center gap-2">
+          <select
+            value={draftType}
+            onChange={(e) => setDraftType(e.target.value as MarkerType)}
+            className="text-[10px] bg-background border border-border/30 rounded px-1 py-0.5 text-foreground outline-none"
+          >
+            {availableTypes.map((t) => (
+              <option key={t} value={t}>{config[t]?.label || t}</option>
+            ))}
+          </select>
+          <select
+            value={draftStage}
+            onChange={(e) => setDraftStage(Number(e.target.value))}
+            className="text-[10px] bg-background border border-border/30 rounded px-1 py-0.5 text-foreground outline-none"
+          >
+            {Array.from({ length: 6 }, (_, i) => (
+              <option key={i} value={i}>Stage {i + 1}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium border cursor-default select-none",
+        mc.bg,
+        mc.color,
+        mc.border,
+        editable && "hover:border-cyan/50 cursor-pointer"
+      )}
+      title={marker.text}
+      onDoubleClick={() => editable && onStartEdit()}
+    >
+      <Icon className={cn("w-3 h-3 flex-shrink-0", mc.color)} />
+      <span className="truncate max-w-[140px]">{marker.text}</span>
+      {editable && (
+        <Pencil className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 ml-0.5" />
+      )}
     </div>
   );
 }

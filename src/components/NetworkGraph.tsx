@@ -98,7 +98,9 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
   const transformRef = useRef({ x: 0, y: 0, scale: 1 });
   const panningRef = useRef<{ active: boolean; lastX: number; lastY: number } | null>(null);
   const animRef = useRef<number>(0);
+  const imagesRef = useRef<Record<string, HTMLImageElement>>({});
   const [dims, setDims] = useState({ w: 0, h: 0 });
+  const [imagesLoaded, setImagesLoaded] = useState(false);
 
   const initLayout = useCallback((w: number, h: number) => {
     nodesRef.current = computeLayout(w, h);
@@ -118,6 +120,37 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
     ro.observe(container);
     return () => ro.disconnect();
   }, [initLayout]);
+
+  useEffect(() => {
+    const icons: Record<string, string> = {
+      system: "/pillars/system-intelligence.png",
+      change: "/pillars/change-intelligence.png",
+      predictive: "/pillars/predictive-intelligence.png",
+    };
+    const loaded: Record<string, HTMLImageElement> = {};
+    let count = 0;
+    const total = Object.keys(icons).length;
+
+    for (const [key, src] of Object.entries(icons)) {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        loaded[key] = img;
+        count++;
+        if (count === total) {
+          imagesRef.current = loaded;
+          setImagesLoaded(true);
+        }
+      };
+      img.onerror = () => {
+        count++;
+        if (count === total) {
+          imagesRef.current = loaded;
+          setImagesLoaded(true);
+        }
+      };
+    }
+  }, []);
 
   const getMouseWorldPos = useCallback((e: React.MouseEvent | MouseEvent) => {
     const canvas = canvasRef.current;
@@ -266,66 +299,83 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
         ctx.fillStyle = grad;
         ctx.fill();
 
-        // Label — smart fit inside bubble
-        const baseFontSize = node.type === "atlas" ? 14 : node.type === "useCase" ? 9 : 11;
-        const maxWidth = node.radius * 1.4; // 70% of diameter
-        const maxLines = node.type === "useCase" ? 3 : 2;
-
-        ctx.fillStyle = node.type === "useCase" ? "#94A3B8" : "#E2E8F0";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        // Find best font size and line breaks
-        let fontSize = baseFontSize;
-        let lines: string[] = [];
-        const words = node.label.split(" ");
-
-        for (let attempt = 0; attempt < 5; attempt++) {
-          ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
-          lines = [];
-          let currentLine = "";
-
-          for (const word of words) {
-            const testLine = currentLine ? currentLine + " " + word : word;
-            const metrics = ctx.measureText(testLine);
-            if (metrics.width > maxWidth && currentLine) {
-              lines.push(currentLine);
-              currentLine = word;
-            } else {
-              currentLine = testLine;
-            }
+        // Draw pillar icons
+        if (node.type === "systemIntelligence" || node.type === "changeIntelligence" || node.type === "predictiveIntelligence") {
+          const key = node.id === "system" ? "system" : node.id === "change" ? "change" : "predictive";
+          const img = imagesRef.current[key];
+          if (img) {
+            const iconSize = node.radius * 0.8;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, node.radius - 3, 0, Math.PI * 2);
+            ctx.clip();
+            ctx.drawImage(img, node.x - iconSize / 2, node.y - iconSize / 2, iconSize, iconSize);
+            ctx.restore();
           }
-          if (currentLine) lines.push(currentLine);
-
-          if (lines.length <= maxLines) break;
-          fontSize -= 0.5;
         }
 
-        // If still too many lines, force truncate by putting fewer words per line
-        if (lines.length > maxLines) {
-          ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
-          const avgCharsPerLine = Math.floor(node.label.length / maxLines);
-          lines = [];
-          let currentLine = "";
-          for (const word of words) {
-            const testLine = currentLine ? currentLine + " " + word : word;
-            if (testLine.length > avgCharsPerLine + 3 && currentLine) {
-              lines.push(currentLine);
-              currentLine = word;
-            } else {
-              currentLine = testLine;
+        // Label — smart fit inside bubble (skip pillars with icons)
+        if (node.type !== "systemIntelligence" && node.type !== "changeIntelligence" && node.type !== "predictiveIntelligence") {
+          const baseFontSize = node.type === "atlas" ? 14 : node.type === "useCase" ? 9 : 11;
+          const maxWidth = node.radius * 1.4; // 70% of diameter
+          const maxLines = node.type === "useCase" ? 3 : 2;
+
+          ctx.fillStyle = node.type === "useCase" ? "#94A3B8" : "#E2E8F0";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+
+          // Find best font size and line breaks
+          let fontSize = baseFontSize;
+          let lines: string[] = [];
+          const words = node.label.split(" ");
+
+          for (let attempt = 0; attempt < 5; attempt++) {
+            ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
+            lines = [];
+            let currentLine = "";
+
+            for (const word of words) {
+              const testLine = currentLine ? currentLine + " " + word : word;
+              const metrics = ctx.measureText(testLine);
+              if (metrics.width > maxWidth && currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
+              } else {
+                currentLine = testLine;
+              }
             }
+            if (currentLine) lines.push(currentLine);
+
+            if (lines.length <= maxLines) break;
+            fontSize -= 0.5;
           }
-          if (currentLine) lines.push(currentLine);
-        }
 
-        const lineHeight = fontSize * 1.25;
-        const totalHeight = lines.length * lineHeight;
-        const startY = node.y - totalHeight / 2 + lineHeight / 2;
+          // If still too many lines, force truncate by putting fewer words per line
+          if (lines.length > maxLines) {
+            ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
+            const avgCharsPerLine = Math.floor(node.label.length / maxLines);
+            lines = [];
+            let currentLine = "";
+            for (const word of words) {
+              const testLine = currentLine ? currentLine + " " + word : word;
+              if (testLine.length > avgCharsPerLine + 3 && currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
+              } else {
+                currentLine = testLine;
+              }
+            }
+            if (currentLine) lines.push(currentLine);
+          }
 
-        for (let i = 0; i < lines.length; i++) {
-          ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
-          ctx.fillText(lines[i], node.x, startY + i * lineHeight);
+          const lineHeight = fontSize * 1.25;
+          const totalHeight = lines.length * lineHeight;
+          const startY = node.y - totalHeight / 2 + lineHeight / 2;
+
+          for (let i = 0; i < lines.length; i++) {
+            ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
+            ctx.fillText(lines[i], node.x, startY + i * lineHeight);
+          }
         }
       }
 

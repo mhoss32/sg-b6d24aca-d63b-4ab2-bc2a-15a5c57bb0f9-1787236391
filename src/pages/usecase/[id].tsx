@@ -95,8 +95,8 @@ export default function UseCaseDetailPage() {
               Use Case
             </span>
             {pillar && (
-              <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full border border-border/30", pillar.bg, pillar.text)}>
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: pillar.color }} />
+              <span className={cn("inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full border border-border/30", pillar.bg, pillar.text)}>
+                <img src={`/pillars/${pillarId}-intelligence.png`} alt="" className="w-4 h-4 object-contain" />
                 {pillar.name}
               </span>
             )}
