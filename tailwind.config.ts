@@ -61,6 +61,25 @@ const config: Config = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        cyan: {
+          DEFAULT: "#00D4FF",
+          light: "rgba(0, 212, 255, 0.15)",
+          glow: "rgba(0, 212, 255, 0.4)",
+        },
+        coral: {
+          DEFAULT: "#FF6B6B",
+          light: "rgba(255, 107, 107, 0.15)",
+          glow: "rgba(255, 107, 107, 0.4)",
+        },
+        purple: {
+          DEFAULT: "#A78BFA",
+          light: "rgba(167, 139, 250, 0.15)",
+          glow: "rgba(167, 139, 250, 0.4)",
+        },
+      },
+      fontFamily: {
+        sans: ["IBM Plex Sans", "system-ui", "sans-serif"],
+        mono: ["IBM Plex Mono", "ui-monospace", "monospace"],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -69,25 +88,27 @@ const config: Config = {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        pulse: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
+        },
+        "float-slow": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-6px)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        pulse: "pulse 3s ease-in-out infinite",
+        "float-slow": "float-slow 4s ease-in-out infinite",
       },
     },
   },

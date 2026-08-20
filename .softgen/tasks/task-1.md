@@ -13,9 +13,9 @@ position: 1
 Set up the dark network graph design system and mock data for the product exploration app.
 
 ## Checklist
-- [ ] Update globals.css with dark theme tokens, fonts, and glow effects
-- [ ] Update tailwind.config.ts with custom colors, fonts, and animations
-- [ ] Create src/data/productData.ts with use cases, user stories, and functionality nodes
+- [x] Update globals.css with dark theme tokens, fonts, and glow effects
+- [x] Update tailwind.config.ts with custom colors, fonts, and animations
+- [x] Create src/data/productData.ts with use cases, user stories, and functionality nodes
 
 ## Acceptance
 - Design tokens are defined and usable
