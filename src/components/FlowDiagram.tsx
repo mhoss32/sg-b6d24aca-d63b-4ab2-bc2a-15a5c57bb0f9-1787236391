@@ -393,7 +393,10 @@ function StageCard({
                   ) : (
                     <div
                       className="flex items-center gap-2 p-2 rounded-md border border-border/20 bg-background/50 hover:border-cyan/30 transition-colors cursor-pointer group"
-                      onDoubleClick={() => onStartEdit(marker.globalIndex)}
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        onStartEdit(marker.globalIndex);
+                      }}
                       title="Double-click to edit"
                     >
                       {(() => {
@@ -498,7 +501,10 @@ function MarkerChip({
         editable && "hover:border-cyan/50 cursor-pointer"
       )}
       title={editable ? "Double-click to edit" : marker.text}
-      onDoubleClick={() => editable && onStartEdit()}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        if (editable) onStartEdit();
+      }}
     >
       <Icon className={cn("w-3 h-3 flex-shrink-0", mc.color)} />
       <span className="whitespace-normal leading-snug">
