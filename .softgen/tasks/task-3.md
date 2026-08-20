@@ -1,6 +1,6 @@
 ---
 title: Main Page & UI Shell
-status: todo
+status: done
 priority: high
 type: feature
 tags: [page, ui, layout]
@@ -10,17 +10,19 @@ position: 3
 ---
 
 ## Notes
-Build the main page layout with header, legend, controls, and integrate the network graph.
+Main page layout with header, network graph canvas, legend, detail panel, and zoom controls.
 
 ## Checklist
-- [ ] Update src/pages/index.tsx with full page layout
-- [ ] Create src/components/Header.tsx with product branding
-- [ ] Create src/components/Legend.tsx with node type indicators
-- [ ] Create src/components/Controls.tsx with zoom/reset buttons
-- [ ] Add responsive layout and mobile support
+- [x] Full-screen dark canvas with IBM Plex typography
+- [x] Header with Atlas branding
+- [x] Detail panel with node metadata and connections
+- [x] Legend explaining node types
+- [x] Controls allow zoom and reset
+- [x] Layout works on desktop and mobile
 
 ## Acceptance
-- Page loads with complete UI shell
+- Page loads with full graph visible
+- Detail panel opens on node click
 - Legend explains node types
 - Controls allow zoom and reset
 - Layout works on desktop and mobile
