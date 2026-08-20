@@ -14,8 +14,10 @@ export function DetailPanel({ node, onClose }: DetailPanelProps) {
 
   const config = nodeTypeConfig[node.type];
 
+  const isPillar = node.type === "systemIntelligence" || node.type === "changeIntelligence" || node.type === "predictiveIntelligence";
+
   return (
-    <div className="absolute top-0 right-0 h-full w-full sm:w-[400px] bg-card/95 backdrop-blur-md border-l border-border z-20 flex flex-col animate-in slide-in-from-right duration-300">
+    <div className="absolute top-0 right-0 h-full w-full sm:w-[420px] bg-card/95 backdrop-blur-md border-l border-border z-20 flex flex-col animate-in slide-in-from-right duration-300">
       <div className="flex items-center justify-between p-6 border-b border-border">
         <div className="flex items-center gap-3">
           <span
@@ -44,9 +46,34 @@ export function DetailPanel({ node, onClose }: DetailPanelProps) {
           </p>
         </div>
 
+        {node.status && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Status:</span>
+            <span
+              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
+              style={{
+                borderColor: config.color + "40",
+                backgroundColor: config.color + "10",
+                color: config.color,
+              }}
+            >
+              {node.status}
+            </span>
+          </div>
+        )}
+
+        {node.primaryPersona && (
+          <div>
+            <h3 className="text-sm font-mono uppercase tracking-wider text-muted-foreground mb-2">
+              Primary Persona
+            </h3>
+            <p className="text-sm text-foreground">{node.primaryPersona}</p>
+          </div>
+        )}
+
         <div>
           <h3 className="text-sm font-mono uppercase tracking-wider text-muted-foreground mb-3">
-            Key Details
+            {isPillar ? "Key Capabilities" : "Key Details"}
           </h3>
           <ul className="space-y-2">
             {node.details.map((detail, i) => (
@@ -64,9 +91,31 @@ export function DetailPanel({ node, onClose }: DetailPanelProps) {
           </ul>
         </div>
 
+        {node.scenarios && node.scenarios.length > 0 && (
+          <div>
+            <h3 className="text-sm font-mono uppercase tracking-wider text-muted-foreground mb-3">
+              Scenarios
+            </h3>
+            <ul className="space-y-2">
+              {node.scenarios.map((scenario, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-3 text-sm text-foreground"
+                >
+                  <span
+                    className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: config.color }}
+                  />
+                  {scenario}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div>
           <h3 className="text-sm font-mono uppercase tracking-wider text-muted-foreground mb-3">
-            Connections
+            {isPillar ? "Contains" : "Related"}
           </h3>
           <div className="flex flex-wrap gap-2">
             {node.connections.map((connId) => {

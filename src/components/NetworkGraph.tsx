@@ -9,18 +9,36 @@ interface SimNode extends ProductNode {
   vx: number;
   vy: number;
   radius: number;
+  targetY: number;
+  targetXRange: [number, number];
 }
 
 const NODE_RADIUS: Record<NodeType, number> = {
-  useCase: 42,
-  userStory: 34,
-  functionality: 30,
+  atlas: 55,
+  systemIntelligence: 48,
+  changeIntelligence: 48,
+  predictiveIntelligence: 48,
+  useCase: 30,
 };
 
 const COLORS: Record<NodeType, string> = {
-  useCase: "#00D4FF",
-  userStory: "#FF6B6B",
-  functionality: "#A78BFA",
+  atlas: "#F59E0B",
+  systemIntelligence: "#00D4FF",
+  changeIntelligence: "#FF6B6B",
+  predictiveIntelligence: "#A78BFA",
+  useCase: "#E2E8F0",
+};
+
+const PILLAR_X_POSITIONS: Record<string, number> = {
+  system: 0.22,
+  change: 0.5,
+  predictive: 0.78,
+};
+
+const PILLAR_USE_CASES: Record<string, string[]> = {
+  system: ["uc-04", "uc-05"],
+  change: ["uc-02", "uc-07", "uc-08", "uc-12", "uc-13", "uc-14"],
+  predictive: ["uc-01", "uc-03", "uc-06", "uc-09", "uc-10", "uc-11"],
 };
 
 interface NetworkGraphProps {
@@ -38,16 +56,62 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
   const [dims, setDims] = useState({ w: 0, h: 0 });
 
   const initSim = useCallback((w: number, h: number) => {
-    const sim: SimNode[] = productNodes.map((n, i) => {
-      const angle = (i / productNodes.length) * Math.PI * 2;
-      const dist = Math.min(w, h) * 0.25;
+    const sim: SimNode[] = productNodes.map((n) => {
+      let x = w / 2;
+      let y = h * 0.5;
+      let targetY = h * 0.5;
+      let targetXRange: [number, number] = [0, w];
+
+      if (n.type === "atlas") {
+        x = w / 2;
+        y = h * 0.1;
+        targetY = h * 0.1;
+        targetXRange = [w * 0.35, w * 0.65];
+      } else if (n.type === "systemIntelligence") {
+        x = w * 0.22;
+        y = h * 0.32;
+        targetY = h * 0.32;
+        targetXRange = [w * 0.1, w * 0.34];
+      } else if (n.type === "changeIntelligence") {
+        x = w / 2;
+        y = h * 0.32;
+        targetY = h * 0.32;
+        targetXRange = [w * 0.38, w * 0.62];
+      } else if (n.type === "predictiveIntelligence") {
+        x = w * 0.78;
+        y = h * 0.32;
+        targetY = h * 0.32;
+        targetXRange = [w * 0.66, w * 0.9];
+      } else if (n.type === "useCase") {
+        // Find which pillar this use case belongs to
+        let pillarId = "";
+        for (const [pid, ucs] of Object.entries(PILLAR_USE_CASES)) {
+          if (ucs.includes(n.id)) {
+            pillarId = pid;
+            break;
+          }
+        }
+        const pillarX = pillarId ? PILLAR_X_POSITIONS[pillarId] * w : w / 2;
+        const useCases = pillarId ? PILLAR_USE_CASES[pillarId] : [];
+        const idx = useCases.indexOf(n.id);
+        const total = useCases.length;
+        const spread = Math.min(w * 0.16, total * 70);
+        const offset = total > 1 ? (idx - (total - 1) / 2) * (spread / Math.max(total - 1, 1)) : 0;
+        x = pillarX + offset + (Math.random() - 0.5) * 20;
+        y = h * 0.62 + (idx % 2) * h * 0.12 + (Math.random() - 0.5) * 20;
+        targetY = h * 0.62 + (idx % 2) * h * 0.12;
+        targetXRange = [pillarX - spread / 2 - 30, pillarX + spread / 2 + 30];
+      }
+
       return {
         ...n,
-        x: w / 2 + Math.cos(angle) * dist + (Math.random() - 0.5) * 60,
-        y: h / 2 + Math.sin(angle) * dist + (Math.random() - 0.5) * 60,
+        x,
+        y,
         vx: 0,
         vy: 0,
         radius: NODE_RADIUS[n.type],
+        targetY,
+        targetXRange,
       };
     });
     simRef.current = sim;
@@ -105,7 +169,7 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
     if (drag.nodeId) {
       const node = simRef.current.find((n) => n.id === drag.nodeId);
       if (node) {
-        node.x = pos.x;
+        node.x = Math.max(node.targetXRange[0], Math.min(node.targetXRange[1], pos.x));
         node.y = pos.y;
         node.vx = 0;
         node.vy = 0;
@@ -171,16 +235,23 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
 
         let fx = 0, fy = 0;
 
-        // Repulsion
+        // Repulsion between all nodes
         for (let j = 0; j < sim.length; j++) {
           if (i === j) continue;
           const o = sim[j];
           const dx = n.x - o.x;
           const dy = n.y - o.y;
           const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          const force = 4000 / (dist * dist);
-          fx += (dx / dist) * force;
-          fy += (dy / dist) * force;
+          const minDist = n.radius + o.radius + 25;
+          if (dist < minDist) {
+            const force = 3000 / (dist * dist);
+            fx += (dx / dist) * force;
+            fy += (dy / dist) * force;
+          } else {
+            const force = 1200 / (dist * dist);
+            fx += (dx / dist) * force;
+            fy += (dy / dist) * force;
+          }
         }
 
         // Attraction along connections
@@ -197,22 +268,32 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
             const dx = b.x - a.x;
             const dy = b.y - a.y;
             const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            const force = (dist - 180) * 0.003;
+            let targetDist = 180;
+            if (a.type === "atlas" || b.type === "atlas") targetDist = 140;
+            if (a.type === "useCase" && b.type === "useCase") targetDist = 250;
+            const force = (dist - targetDist) * 0.004;
             fx += (dx / dist) * force;
             fy += (dy / dist) * force;
           }
         }
 
-        // Centering
-        const cdx = dims.w / 2 - n.x;
-        const cdy = dims.h / 2 - n.y;
-        fx += cdx * 0.0003;
-        fy += cdy * 0.0003;
+        // Tier constraint - pull toward target Y
+        const yDiff = n.targetY - n.y;
+        fy += yDiff * 0.015;
 
-        n.vx = (n.vx + fx) * 0.85;
-        n.vy = (n.vy + fy) * 0.85;
+        // X range constraint
+        const midX = (n.targetXRange[0] + n.targetXRange[1]) / 2;
+        const xDiff = midX - n.x;
+        fx += xDiff * 0.003;
+
+        n.vx = (n.vx + fx) * 0.88;
+        n.vy = (n.vy + fy) * 0.88;
         n.x += n.vx;
         n.y += n.vy;
+
+        // Hard bounds
+        n.x = Math.max(n.radius + 10, Math.min(dims.w - n.radius - 10, n.x));
+        n.y = Math.max(n.radius + 10, Math.min(dims.h - n.radius - 10, n.y));
       }
 
       // Render
@@ -231,8 +312,9 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
         const isHighlighted = selectedNodeId && (conn.source === selectedNodeId || conn.target === selectedNodeId);
 
         const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-        grad.addColorStop(0, COLORS[a.type] + (isHighlighted ? "60" : "18"));
-        grad.addColorStop(1, COLORS[b.type] + (isHighlighted ? "60" : "18"));
+        const alpha = isHighlighted ? "60" : "14";
+        grad.addColorStop(0, COLORS[a.type] + alpha);
+        grad.addColorStop(1, COLORS[b.type] + alpha);
         ctx.strokeStyle = grad;
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
@@ -250,11 +332,11 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
       // Nodes
       for (const node of sim) {
         const isSelected = node.id === selectedNodeId;
-        const isHovered = false;
 
+        // Node body
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(10, 10, 15, 0.85)";
+        ctx.fillStyle = "rgba(10, 10, 15, 0.9)";
         ctx.fill();
 
         // Glow ring
@@ -263,7 +345,7 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
         ctx.strokeStyle = COLORS[node.type] + (isSelected ? "FF" : "CC");
         ctx.lineWidth = isSelected ? 3 : 1.5;
         ctx.shadowColor = COLORS[node.type];
-        ctx.shadowBlur = isSelected ? 20 : 10;
+        ctx.shadowBlur = isSelected ? 25 : (node.type === "atlas" ? 18 : 12);
         ctx.stroke();
         ctx.shadowBlur = 0;
 
@@ -271,23 +353,30 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius - 2, 0, Math.PI * 2);
         const grad = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, node.radius - 2);
-        grad.addColorStop(0, COLORS[node.type] + "15");
-        grad.addColorStop(1, COLORS[node.type] + "05");
+        grad.addColorStop(0, COLORS[node.type] + "12");
+        grad.addColorStop(1, COLORS[node.type] + "04");
         ctx.fillStyle = grad;
         ctx.fill();
 
         // Label
-        ctx.fillStyle = "#E2E8F0";
-        ctx.font = `500 ${node.type === "useCase" ? 13 : 11}px "IBM Plex Sans", sans-serif`;
+        ctx.fillStyle = node.type === "useCase" ? "#94A3B8" : "#E2E8F0";
+        const fontSize = node.type === "atlas" ? 15 : node.type === "useCase" ? 10 : 12;
+        ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        const words = node.label.split(" ");
-        if (words.length <= 2) {
-          ctx.fillText(node.label, node.x, node.y);
+
+        if (node.type === "useCase") {
+          // Multi-line for use cases
+          const words = node.label.split(" ");
+          if (words.length <= 2) {
+            ctx.fillText(node.label, node.x, node.y);
+          } else {
+            const mid = Math.ceil(words.length / 2);
+            ctx.fillText(words.slice(0, mid).join(" "), node.x, node.y - 5);
+            ctx.fillText(words.slice(mid).join(" "), node.x, node.y + 6);
+          }
         } else {
-          const mid = Math.ceil(words.length / 2);
-          ctx.fillText(words.slice(0, mid).join(" "), node.x, node.y - 7);
-          ctx.fillText(words.slice(mid).join(" "), node.x, node.y + 7);
+          ctx.fillText(node.label, node.x, node.y);
         }
       }
 
