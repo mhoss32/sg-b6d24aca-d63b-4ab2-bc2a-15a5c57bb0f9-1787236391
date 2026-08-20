@@ -107,16 +107,15 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
   const [draftText, setDraftText] = useState("");
   const [draftType, setDraftType] = useState<MarkerType>("pain");
   const [draftStage, setDraftStage] = useState(0);
-  const [addingNew, setAddingNew] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const updateMarkers = useCallback((newMarkers: FlowDiagramType["markers"]) => {
     onChange?.({ ...diagram, markers: newMarkers });
   }, [diagram, onChange]);
 
-  const startEdit = useCallback((index: number) => {
-    const m = diagram.markers[index];
-    setEditingMarker(index);
+  const startEdit = useCallback((globalIndex: number) => {
+    const m = diagram.markers[globalIndex];
+    setEditingMarker(globalIndex);
     setDraftText(m.text);
     setDraftType(m.type as MarkerType);
     setDraftStage(m.stageIndex);
@@ -136,8 +135,8 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
     setEditingMarker(null);
   }, [editingMarker, draftText, draftType, draftStage, diagram.markers, updateMarkers]);
 
-  const deleteMarker = useCallback((index: number) => {
-    const newMarkers = diagram.markers.filter((_, i) => i !== index);
+  const deleteMarker = useCallback((globalIndex: number) => {
+    const newMarkers = diagram.markers.filter((_, i) => i !== globalIndex);
     updateMarkers(newMarkers);
     setEditingMarker(null);
   }, [diagram.markers, updateMarkers]);
@@ -150,7 +149,6 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
       { type: defaultType, text: "New marker", stageIndex: 0 },
     ];
     updateMarkers(newMarkers);
-    setAddingNew(false);
     setTimeout(() => {
       setEditingMarker(newMarkers.length - 1);
       setDraftText("New marker");
@@ -161,7 +159,6 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
 
   const cancelEdit = useCallback(() => {
     setEditingMarker(null);
-    setAddingNew(false);
   }, []);
 
   const availableTypes = Object.keys(config);
@@ -195,7 +192,7 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
         </div>
         {editable && (
           <button
-            onClick={() => setAddingNew(true)}
+            onClick={addMarker}
             className="inline-flex items-center gap-1.5 text-xs font-medium text-cyan hover:text-cyan-light transition-colors px-3 py-1.5 rounded-md border border-cyan/30 hover:bg-cyan/10"
           >
             <Plus className="w-3.5 h-3.5" />
@@ -211,14 +208,17 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
         <div className="absolute top-[52px] left-0 right-0 h-0.5 bg-gradient-to-r from-border/20 via-border/40 to-border/20 hidden lg:block" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          {diagram.stages.map((stage, index) => (
+          {diagram.stages.map((stage, stageIndex) => (
             <StageCard
               key={stage.name}
               stage={stage}
-              index={index}
-              markers={diagram.markers.filter((m) => m.stageIndex === index)}
+              index={stageIndex}
+              markers={diagram.markers}
+              stageMarkers={diagram.markers
+                .map((m, gi) => ({ ...m, globalIndex: gi }))
+                .filter((m) => m.stageIndex === stageIndex)}
               config={config}
-              isLast={index === diagram.stages.length - 1}
+              isLast={stageIndex === diagram.stages.length - 1}
               editable={editable}
               editingMarker={editingMarker}
               onStartEdit={startEdit}
@@ -244,7 +244,7 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
 function StageCard({
   stage,
   index,
-  markers,
+  stageMarkers,
   config,
   isLast,
   editable,
@@ -264,14 +264,14 @@ function StageCard({
 }: {
   stage: FlowStage;
   index: number;
-  markers: FlowDiagramType["markers"];
+  stageMarkers: Array<{ type: string; text: string; stageIndex: number; globalIndex: number }>;
   config: Record<string, MarkerStyle>;
   isLast: boolean;
   editable: boolean;
   editingMarker: number | null;
-  onStartEdit: (index: number) => void;
+  onStartEdit: (globalIndex: number) => void;
   onSaveEdit: () => void;
-  onDeleteMarker: (index: number) => void;
+  onDeleteMarker: (globalIndex: number) => void;
   onCancelEdit: () => void;
   draftText: string;
   setDraftText: (v: string) => void;
@@ -306,32 +306,29 @@ function StageCard({
         </p>
 
         {/* Markers */}
-        {markers.length > 0 && (
+        {stageMarkers.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {markers.map((marker, mi) => {
-              const globalIndex = markers === undefined ? -1 : mi; // Will be resolved below
-              return (
-                <MarkerChip
-                  key={mi}
-                  marker={marker}
-                  config={config}
-                  editable={editable}
-                  isEditing={false}
-                  onStartEdit={() => {}}
-                  onSaveEdit={() => {}}
-                  onDelete={() => {}}
-                  onCancel={() => {}}
-                  draftText=""
-                  setDraftText={() => {}}
-                  draftType="pain"
-                  setDraftType={() => {}}
-                  draftStage={0}
-                  setDraftStage={() => {}}
-                  availableTypes={[]}
-                  inputRef={inputRef}
-                />
-              );
-            })}
+            {stageMarkers.map((marker) => (
+              <MarkerChip
+                key={marker.globalIndex}
+                marker={marker}
+                config={config}
+                editable={editable}
+                isEditing={editingMarker === marker.globalIndex}
+                onStartEdit={() => onStartEdit(marker.globalIndex)}
+                onSaveEdit={onSaveEdit}
+                onDelete={() => onDeleteMarker(marker.globalIndex)}
+                onCancel={onCancelEdit}
+                draftText={draftText}
+                setDraftText={setDraftText}
+                draftType={draftType}
+                setDraftType={setDraftType}
+                draftStage={draftStage}
+                setDraftStage={setDraftStage}
+                availableTypes={availableTypes}
+                inputRef={inputRef}
+              />
+            ))}
           </div>
         )}
       </div>
@@ -357,7 +354,7 @@ function MarkerChip({
   availableTypes,
   inputRef,
 }: {
-  marker: FlowDiagramType["markers"][number];
+  marker: { type: string; text: string; stageIndex: number; globalIndex: number };
   config: Record<string, MarkerStyle>;
   editable: boolean;
   isEditing: boolean;
@@ -380,7 +377,7 @@ function MarkerChip({
 
   if (isEditing) {
     return (
-      <div className="inline-flex flex-col gap-1.5 p-2 rounded-md border border-cyan/40 bg-card/80 backdrop-blur-sm min-w-[200px]">
+      <div className="inline-flex flex-col gap-1.5 p-2 rounded-md border border-cyan/40 bg-card/80 backdrop-blur-sm min-w-[200px] z-20 relative">
         <div className="flex items-center gap-1.5">
           <div className={cn("w-5 h-5 rounded flex items-center justify-center flex-shrink-0", mc.bg)}>
             <Icon className={cn("w-3 h-3", mc.color)} />
@@ -396,10 +393,10 @@ function MarkerChip({
             }}
             className="flex-1 text-[10px] bg-transparent border-none outline-none text-foreground min-w-0"
           />
-          <button onClick={onSaveEdit} className="text-cyan hover:text-cyan-light">
+          <button onClick={onSaveEdit} className="text-cyan hover:text-cyan-light p-0.5">
             <Pencil className="w-3 h-3" />
           </button>
-          <button onClick={onDelete} className="text-red hover:text-red/80">
+          <button onClick={onDelete} className="text-red hover:text-red/80 p-0.5">
             <X className="w-3 h-3" />
           </button>
         </div>
@@ -430,19 +427,19 @@ function MarkerChip({
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium border cursor-default select-none",
+        "group inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium border cursor-default select-none",
         mc.bg,
         mc.color,
         mc.border,
         editable && "hover:border-cyan/50 cursor-pointer"
       )}
-      title={marker.text}
+      title={editable ? "Double-click to edit" : marker.text}
       onDoubleClick={() => editable && onStartEdit()}
     >
       <Icon className={cn("w-3 h-3 flex-shrink-0", mc.color)} />
       <span className="truncate max-w-[140px]">{marker.text}</span>
       {editable && (
-        <Pencil className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 ml-0.5" />
+        <Pencil className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 ml-0.5 transition-opacity" />
       )}
     </div>
   );

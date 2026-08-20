@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { ArrowLeft, Network, ChevronDown, Users, GitBranch, Layers } from "lucide-react";
-import { getNodeById, useCaseDetails, type ProductNode } from "@/data/productData";
+import { getNodeById, useCaseDetails, type ProductNode, type UseCaseDetail } from "@/data/productData";
 import { PersonaCard } from "@/components/PersonaCard";
 import { FlowDiagram } from "@/components/FlowDiagram";
 import { SEO } from "@/components/SEO";
@@ -31,7 +31,13 @@ export default function UseCaseDetailPage() {
   const { id } = router.query;
 
   const node = id && typeof id === "string" ? getNodeById(id) : null;
-  const detail = id && typeof id === "string" ? useCaseDetails[id] : null;
+  const initialDetail = id && typeof id === "string" ? useCaseDetails[id] : null;
+  const [detail, setDetail] = useState<UseCaseDetail | null>(initialDetail);
+
+  // Update detail when initialDetail changes (router navigation)
+  React.useEffect(() => {
+    if (initialDetail) setDetail(initialDetail);
+  }, [initialDetail]);
 
   // Derive pillar from node connections
   const pillarId = node?.connections[0];
@@ -141,17 +147,27 @@ export default function UseCaseDetailPage() {
                 </div>
                 <div className="text-left">
                   <h2 className="text-lg font-semibold text-foreground">Current State & Desired Outcome</h2>
-                  <p className="text-xs text-muted-foreground font-normal">As-Is flow with pain point legends · To-Be flow with wow legends</p>
+                  <p className="text-xs text-muted-foreground font-normal">As-Is flow with pain point legends · To-Be flow with wow legends · Double-click markers to edit</p>
                 </div>
               </div>
             </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-6 pt-2 pb-4">
                 <section className="rounded-xl border border-border/20 bg-background/50 p-6">
-                  <FlowDiagram diagram={detail.asIs} variant="asIs" />
+                  <FlowDiagram
+                    diagram={detail.asIs}
+                    variant="asIs"
+                    editable
+                    onChange={(asIs) => setDetail({ ...detail, asIs })}
+                  />
                 </section>
                 <section className="rounded-xl border border-border/20 bg-background/50 p-6">
-                  <FlowDiagram diagram={detail.toBe} variant="toBe" />
+                  <FlowDiagram
+                    diagram={detail.toBe}
+                    variant="toBe"
+                    editable
+                    onChange={(toBe) => setDetail({ ...detail, toBe })}
+                  />
                 </section>
               </div>
             </AccordionContent>

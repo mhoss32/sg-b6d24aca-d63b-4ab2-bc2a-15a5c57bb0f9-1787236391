@@ -11,11 +11,11 @@ interface LayoutNode extends ProductNode {
 }
 
 const NODE_RADIUS: Record<NodeType, number> = {
-  atlas: 60,
-  systemIntelligence: 55,
-  changeIntelligence: 55,
-  predictiveIntelligence: 55,
-  useCase: 50,
+  atlas: 68,
+  systemIntelligence: 62,
+  changeIntelligence: 62,
+  predictiveIntelligence: 62,
+  useCase: 58,
 };
 
 const COLORS: Record<NodeType, string> = {
@@ -316,8 +316,8 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
 
         // Label — smart fit inside bubble (skip pillars with icons)
         if (node.type !== "systemIntelligence" && node.type !== "changeIntelligence" && node.type !== "predictiveIntelligence") {
-          const baseFontSize = node.type === "atlas" ? 14 : node.type === "useCase" ? 9 : 11;
-          const maxWidth = node.radius * 1.4; // 70% of diameter
+          const baseFontSize = node.type === "atlas" ? 13 : node.type === "useCase" ? 8 : 10;
+          const maxWidth = node.radius * 1.3; // 65% of diameter
           const maxLines = node.type === "useCase" ? 3 : 2;
 
           ctx.fillStyle = node.type === "useCase" ? "#94A3B8" : "#E2E8F0";
@@ -329,7 +329,7 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
           let lines: string[] = [];
           const words = node.label.split(" ");
 
-          for (let attempt = 0; attempt < 5; attempt++) {
+          for (let attempt = 0; attempt < 8; attempt++) {
             ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
             lines = [];
             let currentLine = "";
@@ -348,17 +348,19 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
 
             if (lines.length <= maxLines) break;
             fontSize -= 0.5;
+            if (fontSize < 7) break;
           }
 
-          // If still too many lines, force truncate by putting fewer words per line
+          // If still too many lines, force aggressive truncate
           if (lines.length > maxLines) {
+            fontSize = Math.max(fontSize, 7);
             ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
-            const avgCharsPerLine = Math.floor(node.label.length / maxLines);
+            const targetCharsPerLine = Math.floor(maxWidth / (fontSize * 0.55));
             lines = [];
             let currentLine = "";
             for (const word of words) {
               const testLine = currentLine ? currentLine + " " + word : word;
-              if (testLine.length > avgCharsPerLine + 3 && currentLine) {
+              if (testLine.length > targetCharsPerLine && currentLine) {
                 lines.push(currentLine);
                 currentLine = word;
               } else {
@@ -366,9 +368,17 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
               }
             }
             if (currentLine) lines.push(currentLine);
+            // Truncate if still too many
+            if (lines.length > maxLines) {
+              lines = lines.slice(0, maxLines);
+              const last = lines[maxLines - 1];
+              if (last.length > 3) {
+                lines[maxLines - 1] = last.slice(0, -3) + "...";
+              }
+            }
           }
 
-          const lineHeight = fontSize * 1.25;
+          const lineHeight = fontSize * 1.2;
           const totalHeight = lines.length * lineHeight;
           const startY = node.y - totalHeight / 2 + lineHeight / 2;
 
