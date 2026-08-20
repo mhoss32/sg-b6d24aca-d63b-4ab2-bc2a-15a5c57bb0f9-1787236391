@@ -24,7 +24,7 @@ export interface FlowStage {
 export interface FlowDiagram {
   title: string;
   stages: FlowStage[];
-  markers: { type: "pain" | "gain" | "time" | "artefact" | "skill"; text: string; stageIndex: number }[];
+  markers: { type: "pain" | "time" | "skill" | "gain"; text: string; stageIndex: number }[];
 }
 
 export interface Capability {

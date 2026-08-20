@@ -2,12 +2,11 @@
 
 import React from "react";
 import {
-  ArrowRight,
-  Clock,
   AlertTriangle,
-  FileX,
+  Clock,
+  User,
   Zap,
-  FileCheck,
+  Users,
   Bot,
   ChevronRight,
 } from "lucide-react";
@@ -19,28 +18,89 @@ export interface FlowDiagramProps {
   variant: "asIs" | "toBe";
 }
 
-type MarkerStyle = { icon: LucideIcon; color: string; bg: string; border: string };
+type MarkerStyle = { icon: LucideIcon; color: string; bg: string; border: string; label: string };
 
-const markerConfig: Record<string, Record<string, MarkerStyle>> = {
-  asIs: {
-    time: { icon: Clock, color: "text-amber", bg: "bg-amber/10", border: "border-amber/30" },
-    pain: { icon: AlertTriangle, color: "text-red", bg: "bg-red/10", border: "border-red/30" },
-    artefact: { icon: FileX, color: "text-orange", bg: "bg-orange/10", border: "border-orange/30" },
+const asIsMarkerConfig: Record<string, MarkerStyle> = {
+  pain: {
+    icon: AlertTriangle,
+    color: "text-orange",
+    bg: "bg-orange/10",
+    border: "border-orange/30",
+    label: "Business Impact",
   },
-  toBe: {
-    time: { icon: Zap, color: "text-cyan", bg: "bg-cyan/10", border: "border-cyan/30" },
-    skill: { icon: Bot, color: "text-purple", bg: "bg-purple/10", border: "border-purple/30" },
-    artefact: { icon: FileCheck, color: "text-green", bg: "bg-green/10", border: "border-green/30" },
+  time: {
+    icon: Clock,
+    color: "text-amber",
+    bg: "bg-amber/10",
+    border: "border-amber/30",
+    label: "Lost Time",
+  },
+  skill: {
+    icon: User,
+    color: "text-red",
+    bg: "bg-red/10",
+    border: "border-red/30",
+    label: "Skill Gap / Bottleneck",
   },
 };
 
+const toBeMarkerConfig: Record<string, MarkerStyle> = {
+  time: {
+    icon: Zap,
+    color: "text-cyan",
+    bg: "bg-cyan/10",
+    border: "border-cyan/30",
+    label: "Time Saving",
+  },
+  gain: {
+    icon: Users,
+    color: "text-purple",
+    bg: "bg-purple/10",
+    border: "border-purple/30",
+    label: "New Capabilities",
+  },
+  skill: {
+    icon: Bot,
+    color: "text-green",
+    bg: "bg-green/10",
+    border: "border-green/30",
+    label: "Atlas AI & Automation",
+  },
+};
+
+function MarkerLegend({ variant }: { variant: "asIs" | "toBe" }) {
+  const config = variant === "asIs" ? asIsMarkerConfig : toBeMarkerConfig;
+  const title = variant === "asIs" ? "Pain Points" : "Wows!";
+  const titleColor = variant === "asIs" ? "text-red" : "text-green";
+
+  return (
+    <div className="flex flex-wrap items-center gap-3 mb-4 p-3 rounded-lg border border-border/20 bg-background/50">
+      <span className={cn("text-xs font-semibold uppercase tracking-wider", titleColor)}>
+        {title}
+      </span>
+      <div className="w-px h-4 bg-border/40" />
+      {Object.entries(config).map(([key, style]) => {
+        const Icon = style.icon;
+        return (
+          <div key={key} className="flex items-center gap-1.5">
+            <div className={cn("w-5 h-5 rounded flex items-center justify-center", style.bg)}>
+              <Icon className={cn("w-3 h-3", style.color)} />
+            </div>
+            <span className="text-[11px] text-muted-foreground">{style.label}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function FlowDiagram({ diagram, variant }: FlowDiagramProps) {
   const isAsIs = variant === "asIs";
-  const config = markerConfig[variant];
+  const config = isAsIs ? asIsMarkerConfig : toBeMarkerConfig;
 
   return (
     <div className="w-full">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-4">
         <div
           className={cn(
             "w-10 h-10 rounded-lg flex items-center justify-center",
@@ -64,6 +124,8 @@ export function FlowDiagram({ diagram, variant }: FlowDiagramProps) {
           </p>
         </div>
       </div>
+
+      <MarkerLegend variant={variant} />
 
       <div className="relative">
         {/* Connection line */}

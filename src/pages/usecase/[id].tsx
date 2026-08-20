@@ -126,7 +126,7 @@ export default function UseCaseDetailPage() {
                 </div>
                 <div className="text-left">
                   <h2 className="text-lg font-semibold text-foreground">Current State & Desired Outcome</h2>
-                  <p className="text-xs text-muted-foreground font-normal">As-Is flow with pain points · To-Be flow with gains</p>
+                  <p className="text-xs text-muted-foreground font-normal">As-Is flow with pain point legends · To-Be flow with wow legends</p>
                 </div>
               </div>
             </AccordionTrigger>
