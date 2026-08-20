@@ -1,6 +1,829 @@
-export type NodeType = "atlas" | "systemIntelligence" | "changeIntelligence" | "predictive
-...
- glowClass: "glow-white",
+export type NodeType = "atlas" | "systemIntelligence" | "changeIntelligence" | "predictiveIntelligence" | "useCase";
+
+export interface Persona {
+  name: string;
+  role: string;
+  engagement: "Primary" | "Secondary";
+}
+
+export interface FlowStage {
+  name: string;
+  description: string;
+}
+
+export interface FlowDiagram {
+  title: string;
+  stages: FlowStage[];
+  markers: { type: "pain" | "gain" | "time" | "artefact" | "skill"; text: string; stageIndex: number }[];
+}
+
+export interface UseCaseDetail {
+  id: string;
+  label: string;
+  description: string;
+  personas: Persona[];
+  asIs: FlowDiagram;
+  toBe: FlowDiagram;
+}
+
+export interface ProductNode {
+  id: string;
+  label: string;
+  type: NodeType;
+  description: string;
+  connections: string[];
+}
+
+export const productNodes: ProductNode[] = [
+  {
+    id: "atlas",
+    label: "Atlas",
+    type: "atlas",
+    description: "AI-powered platform for IBM Z environment intelligence, change management, and predictive operations.",
+    connections: ["system", "change", "predictive"],
+  },
+  {
+    id: "system",
+    label: "System Intelligence",
+    type: "systemIntelligence",
+    description: "Know your environment — topology, inventory, relationships, health. GA Dec 2026.",
+    connections: ["atlas", "uc-04", "uc-05"],
+  },
+  {
+    id: "change",
+    label: "Change Intelligence",
+    type: "changeIntelligence",
+    description: "Change safely — impact analysis, planning, testing, provisioning. GA Dec 2026 (MVP); H1 2027 (full).",
+    connections: ["atlas", "uc-02", "uc-07", "uc-08", "uc-12", "uc-13", "uc-14"],
+  },
+  {
+    id: "predictive",
+    label: "Predictive Intelligence",
+    type: "predictiveIntelligence",
+    description: "Stay ahead — drift detection, anomaly prediction, DR readiness. H2 2027.",
+    connections: ["atlas", "uc-01", "uc-03", "uc-06", "uc-09", "uc-10", "uc-11"],
+  },
+  {
+    id: "uc-01",
+    label: "Vulnerability Remediation",
+    type: "useCase",
+    description: "Identify, prioritize, and remediate security vulnerabilities across the IBM Z estate with full audit trail.",
+    connections: ["predictive"],
+  },
+  {
+    id: "uc-02",
+    label: "Patch Management",
+    type: "useCase",
+    description: "Automated PTF impact analysis, test plan generation, and orchestrated patch execution with rollback capability.",
+    connections: ["change"],
+  },
+  {
+    id: "uc-03",
+    label: "Audit and Compliance",
+    type: "useCase",
+    description: "Generate structured, auditor-ready compliance evidence from a continuous environment record.",
+    connections: ["predictive"],
+  },
+  {
+    id: "uc-04",
+    label: "Staff Onboarding",
+    type: "useCase",
+    description: "Get new team members productive fast with AI-guided environment orientation and knowledge transfer.",
+    connections: ["system"],
+  },
+  {
+    id: "uc-05",
+    label: "Application Discovery",
+    type: "useCase",
+    description: "Complete dependency mapping and blast radius analysis across the full middleware stack.",
+    connections: ["system"],
+  },
+  {
+    id: "uc-06",
+    label: "Health Assessment",
+    type: "useCase",
+    description: "Pre-event health checks joining configuration state, security posture, PTF currency, and performance constraints.",
+    connections: ["predictive"],
+  },
+  {
+    id: "uc-07",
+    label: "Application Change Mgmt",
+    type: "useCase",
+    description: "Developer-native change lifecycle with impact analysis, test generation, and deployment orchestration.",
+    connections: ["change"],
+  },
+  {
+    id: "uc-08",
+    label: "Platform Upgrade",
+    type: "useCase",
+    description: "Major z/OS and middleware upgrade planning with compatibility assessment and phased execution.",
+    connections: ["change"],
+  },
+  {
+    id: "uc-09",
+    label: "Drift Control",
+    type: "useCase",
+    description: "Continuous environment parity monitoring with unauthorized change detection and automated remediation.",
+    connections: ["predictive"],
+  },
+  {
+    id: "uc-10",
+    label: "DR Validation",
+    type: "useCase",
+    description: "Continuous DR readiness assessment with cross-environment comparison and failover simulation.",
+    connections: ["predictive"],
+  },
+  {
+    id: "uc-11",
+    label: "Capacity Planning",
+    type: "useCase",
+    description: "Proactive capacity management with load projection, constraint identification, and validated configuration changes.",
+    connections: ["predictive"],
+  },
+  {
+    id: "uc-12",
+    label: "App Modernization",
+    type: "useCase",
+    description: "Legacy application analysis, technical debt identification, and safe phased modernization.",
+    connections: ["change"],
+  },
+  {
+    id: "uc-13",
+    label: "Regulatory Response",
+    type: "useCase",
+    description: "Rapid regulatory compliance with scoped inventory, gap analysis, and sequenced remediation.",
+    connections: ["change"],
+  },
+  {
+    id: "uc-14",
+    label: "Change Governance",
+    type: "useCase",
+    description: "Complete change attribution, undocumented change detection, and ITSM integration for audit readiness.",
+    connections: ["change"],
+  },
+];
+
+export const useCaseDetails: Record<string, UseCaseDetail> = {
+  "uc-01": {
+    id: "uc-01",
+    label: "Vulnerability Remediation",
+    description: "Identify, prioritize, and remediate security vulnerabilities across the IBM Z estate with full audit trail and change attribution.",
+    personas: [
+      { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Primary" },
+      { name: "Sage", role: "Security Administrator (mid-level)", engagement: "Secondary" },
+      { name: "Fred", role: "Security Architect", engagement: "Secondary" },
+      { name: "Alice", role: "z/OS Systems Programmer (mid-level)", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Detect", description: "Security advisories arrive via email or portal" },
+        { name: "Assess", description: "Manual CVE impact analysis across LPARs" },
+        { name: "Plan", description: "Remediation planned by memory and experience" },
+        { name: "Execute", description: "PTF apply with manual validation" },
+        { name: "Verify", description: "Post-apply check for regression" },
+        { name: "Document", description: "Change record assembled after the fact" },
+      ],
+      markers: [
+        { type: "time", text: "Typically a 2–3 day process across a large estate", stageIndex: 2 },
+        { type: "pain", text: "Requires the most experienced systems programmer to trace dependencies from memory", stageIndex: 2 },
+        { type: "pain", text: "The DR environment is typically patched last or forgotten", stageIndex: 3 },
+        { type: "pain", text: "Change records assembled from memory and email threads", stageIndex: 5 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Detect", description: "Atlas proactively surfaces security gaps from continuous monitoring" },
+        { name: "Assess", description: "AI-generated blast radius and impact analysis in minutes" },
+        { name: "Plan", description: "Atlas generates sequenced remediation plan with dependency resolution" },
+        { name: "Execute", description: "Orchestrated apply with automated validation at each step" },
+        { name: "Verify", description: "Post-apply behavioral monitoring confirms no regression" },
+        { name: "Document", description: "Complete audit trail generated automatically with named attribution" },
+      ],
+      markers: [
+        { type: "time", text: "Minutes not days for impact analysis", stageIndex: 1 },
+        { type: "gain", text: "Auto-generated topology map shows exact affected components", stageIndex: 1 },
+        { type: "gain", text: "DR environment included in every remediation cycle automatically", stageIndex: 3 },
+        { type: "skill", text: "Atlas replaces expert memory with queryable topology model", stageIndex: 2 },
+      ],
+    },
+  },
+  "uc-02": {
+    id: "uc-02",
+    label: "Patch Management",
+    description: "Automated PTF impact analysis, test plan generation, and orchestrated patch execution with full audit trail and rollback capability.",
+    personas: [
+      { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Primary" },
+      { name: "Stan", role: "Subsystem SME (CICS, Db2, MQ, IMS)", engagement: "Secondary" },
+      { name: "Alice", role: "z/OS Systems Programmer (mid-level)", engagement: "Secondary" },
+      { name: "Annette", role: "IT Operations Engineer", engagement: "Secondary" },
+      { name: "Quinn", role: "IT Operations Manager", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Identify", description: "Query SMP/E for PTF inventory manually" },
+        { name: "Analyze", description: "Cross-reference PTFs against application topology by expert knowledge" },
+        { name: "Plan", description: "Manual test plan creation and sequencing" },
+        { name: "Provision", description: "Test environment requested via ticket — hours to days wait" },
+        { name: "Validate", description: "Smoke tests run manually or skipped under time pressure" },
+        { name: "Execute", description: "Production apply with informal rollback plan" },
+      ],
+      markers: [
+        { type: "time", text: "4–8 hours for manual impact analysis", stageIndex: 1 },
+        { type: "pain", text: "Test environments often skipped — production becomes the test environment", stageIndex: 4 },
+        { type: "pain", text: "Prerequisite chains resolved by expert memory — missed prerequisites cause outages", stageIndex: 2 },
+        { type: "pain", text: "Rollback planning is improvised when things go wrong", stageIndex: 5 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Identify", description: "Atlas surfaces missing and at-risk PTFs proactively" },
+        { name: "Analyze", description: "Topology-aware impact analysis with prerequisite chain resolution" },
+        { name: "Plan", description: "AI-generated test plan scoped to the specific change" },
+        { name: "Provision", description: "Isolated test environment provisioned automatically" },
+        { name: "Validate", description: "Automated smoke and function test execution with failure attribution" },
+        { name: "Execute", description: "Orchestrated production apply with known-good rollback state preserved" },
+      ],
+      markers: [
+        { type: "time", text: "Under 30 minutes for complete impact analysis", stageIndex: 1 },
+        { type: "gain", text: "Prerequisite chains resolved automatically — no missed dependencies", stageIndex: 1 },
+        { type: "artefact", text: "Complete change record generated automatically with test evidence", stageIndex: 5 },
+        { type: "skill", text: "Mid-level engineers can execute with Atlas guidance — reduced expert dependency", stageIndex: 2 },
+      ],
+    },
+  },
+  "uc-03": {
+    id: "uc-03",
+    label: "Audit and Compliance",
+    description: "Generate structured, auditor-ready compliance evidence from a continuous environment record — privileged access, configuration compliance, change history, and undocumented change detection.",
+    personas: [
+      { name: "Derek", role: "Compliance Evidence Provider", engagement: "Primary" },
+      { name: "Sage", role: "Security Administrator (mid-level)", engagement: "Secondary" },
+      { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Secondary" },
+      { name: "Quinn", role: "IT Operations Manager", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Scope", description: "Manually define audit scope across multiple systems" },
+        { name: "Collect", description: "Pull RACF exports, SMP/E data, and change logs separately" },
+        { name: "Analyze", description: "Cross-reference findings in spreadsheets by hand" },
+        { name: "Surface", description: "Discover gaps during the audit, not before" },
+        { name: "Remediate", description: "Fix findings under time pressure during audit window" },
+        { name: "Package", description: "Assemble evidence package manually from multiple exports" },
+      ],
+      markers: [
+        { type: "time", text: "10–30 engineer-days for a large production estate", stageIndex: 1 },
+        { type: "pain", text: "Undocumented changes discovered by auditors, not the internal team", stageIndex: 3 },
+        { type: "pain", text: "Separation of duties analysis performed manually under deadline pressure", stageIndex: 2 },
+        { type: "pain", text: "No proactive detection — gaps surface only when specifically looked for", stageIndex: 3 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Scope", description: "Atlas confirms audit scope from continuous environment record" },
+        { name: "Collect", description: "All evidence assembled automatically from live topology model" },
+        { name: "Analyze", description: "Cross-source compliance analysis with severity classification" },
+        { name: "Surface", description: "Proactive gap detection — Atlas finds issues before auditors do" },
+        { name: "Remediate", description: "Atlas-generated remediation plans with validation before apply" },
+        { name: "Package", description: "Structured auditor-ready artifact generated in minutes" },
+      ],
+      markers: [
+        { type: "time", text: "Under 2 engineer-days — most evidence generated in hours", stageIndex: 1 },
+        { type: "gain", text: "46 undocumented changes in 12 months surfaced proactively", stageIndex: 3 },
+        { type: "gain", text: "Behavioral anomaly detection finds patterns no human thought to look for", stageIndex: 3 },
+        { type: "skill", text: "Compliance professional can operate without deep z/OS expertise", stageIndex: 5 },
+      ],
+    },
+  },
+  "uc-04": {
+    id: "uc-04",
+    label: "Staff Onboarding",
+    description: "Get new team members productive fast with AI-guided environment orientation, knowledge transfer, and guided first change execution.",
+    personas: [
+      { name: "Chris", role: "z/OS Systems Programmer (early career)", engagement: "Primary" },
+      { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Secondary" },
+      { name: "Annette", role: "IT Operations Engineer", engagement: "Secondary" },
+      { name: "Alice", role: "z/OS Systems Programmer (mid-level)", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Orient", description: "New hire shadows experienced colleague informally" },
+        { name: "Explore", description: "Read whatever documentation exists — frequently outdated" },
+        { name: "Question", description: "Ask the one expert who is always too busy" },
+        { name: "Learn", description: "Build mental model over months of trial and error" },
+        { name: "First Change", description: "Execute first change with minimal guidance" },
+      ],
+      markers: [
+        { type: "time", text: "3–6 months common for new systems programmer to reach independence", stageIndex: 3 },
+        { type: "pain", text: "Critical knowledge lives in people's heads — when they retire, it's gone", stageIndex: 2 },
+        { type: "pain", text: "No mechanism to systematically capture and transfer environmental knowledge", stageIndex: 2 },
+        { type: "pain", text: "First changes carry high incident risk due to incomplete understanding", stageIndex: 4 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Orient", description: "Atlas provides structured environment overview in first week" },
+        { name: "Explore", description: "Natural language queries answer any environment question instantly" },
+        { name: "Assess Risk", description: "Atlas proactively surfaces highest-priority open risks" },
+        { name: "Document", description: "System Intelligence Brief generated as persistent knowledge artifact" },
+        { name: "First Change", description: "Atlas-guided safe change execution with plan, test, and apply workflow" },
+      ],
+      markers: [
+        { type: "time", text: "Under 4 weeks to independent contribution", stageIndex: 0 },
+        { type: "gain", text: "Environment knowledge persists in Atlas regardless of staff turnover", stageIndex: 3 },
+        { type: "gain", text: "Proactive risk surfacing shows what matters before the new hire knows to ask", stageIndex: 2 },
+        { type: "skill", text: "Atlas replaces shadowing with queryable, always-current environment model", stageIndex: 1 },
+      ],
+    },
+  },
+  "uc-05": {
+    id: "uc-05",
+    label: "Application Discovery and Dependency Analysis",
+    description: "Complete, accurate picture of any application and its dependencies — what it connects to, what depends on it, and what would be affected by a change.",
+    personas: [
+      { name: "Angie", role: "Application Architect", engagement: "Primary" },
+      { name: "Kathleen", role: "z/OS Application Developer (experienced)", engagement: "Secondary" },
+      { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Secondary" },
+      { name: "Greg", role: "Infrastructure Architect", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Identify", description: "Developer identifies the application to analyze" },
+        { name: "Investigate", description: "Contact Db2 DBA, CICS specialist, MQ team separately" },
+        { name: "Compile", description: "Piece together dependency picture from multiple specialists" },
+        { name: "Validate", description: "Cross-check findings manually — often incomplete" },
+        { name: "Decide", description: "Scope change based on incomplete understanding" },
+      ],
+      markers: [
+        { type: "time", text: "1–3 days for manual multi-team dependency analysis", stageIndex: 1 },
+        { type: "pain", text: "Each specialist only knows their subsystem — cross-subsystem dependencies missed", stageIndex: 1 },
+        { type: "pain", text: "Process is not reproducible — different engineers get different answers", stageIndex: 2 },
+        { type: "pain", text: "Blast radius routinely underestimated before changes", stageIndex: 4 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Identify", description: "User names the application or component" },
+        { name: "Traverse", description: "Atlas traverses topology graph across all subsystems and LPARs" },
+        { name: "Map", description: "Complete dependency map with connection types and shared resources" },
+        { name: "Assess Risk", description: "Proactive risk identification during traversal" },
+        { name: "Decide", description: "Blast radius quantified in applications, transactions, and data assets" },
+      ],
+      markers: [
+        { type: "time", text: "Under 15 minutes for complete dependency analysis", stageIndex: 1 },
+        { type: "gain", text: "Cross-subsystem lateral connections visible for the first time", stageIndex: 1 },
+        { type: "gain", text: "Reproducible — same query returns same structured result every time", stageIndex: 2 },
+        { type: "skill", text: "Developers and architects can self-serve without z/OS specialist involvement", stageIndex: 1 },
+      ],
+    },
+  },
+  "uc-06": {
+    id: "uc-06",
+    label: "Change Readiness and Health Assessment",
+    description: "Structured, repeatable health assessment joining configuration state, security posture, PTF currency, and performance constraints before any significant event.",
+    personas: [
+      { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Primary" },
+      { name: "Sage", role: "Security Administrator (mid-level)", engagement: "Secondary" },
+      { name: "Derek", role: "Compliance Evidence Provider", engagement: "Secondary" },
+      { name: "Quinn", role: "IT Operations Manager", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Plan", description: "Coordinate manual health check across multiple team members" },
+        { name: "Review PTFs", description: "Check SMP/E for missing PTFs and HIPERs" },
+        { name: "Review Security", description: "Check RACF panels for configuration issues" },
+        { name: "Review Config", description: "Check Db2 ZPARMs and CICS settings separately" },
+        { name: "Compile", description: "Assemble findings into informal summary" },
+      ],
+      markers: [
+        { type: "time", text: "2–8 hours for manual multi-tool health review", stageIndex: 0 },
+        { type: "pain", text: "Cross-subsystem compound risks never identified — each tool shows only its slice", stageIndex: 3 },
+        { type: "pain", text: "No structured artifact produced — findings live in email and memory", stageIndex: 4 },
+        { type: "pain", text: "Same checks repeated before every event with no historical comparison", stageIndex: 0 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Scope", description: "User defines scope — full environment or specific LPAR/stack" },
+        { name: "Assess", description: "Atlas joins all configuration sources in single analysis" },
+        { name: "Rank", description: "Findings organized by severity with compound risk identification" },
+        { name: "Generate", description: "Structured health artifact produced for governance sign-off" },
+        { name: "Baseline", description: "Post-assessment state registered for ongoing drift monitoring" },
+      ],
+      markers: [
+        { type: "time", text: "Under 30 minutes for complete health assessment", stageIndex: 1 },
+        { type: "gain", text: "Compound risks identified that no single tool can see", stageIndex: 1 },
+        { type: "gain", text: "Health baseline enables trend comparison across events", stageIndex: 4 },
+        { type: "skill", text: "Any team member can request health check — not just Zach", stageIndex: 1 },
+      ],
+    },
+  },
+  "uc-07": {
+    id: "uc-07",
+    label: "Application Change Management",
+    description: "Developer-native change lifecycle with instant impact analysis, automated test plan generation, background environment provisioning, and deployment orchestration.",
+    personas: [
+      { name: "Kathleen", role: "z/OS Application Developer (experienced)", engagement: "Primary" },
+      { name: "Deb", role: "z/OS Application Developer (early tenure)", engagement: "Secondary" },
+      { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Secondary" },
+      { name: "Angie", role: "Application Architect", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Understand", description: "Developer tries to understand what the change will touch" },
+        { name: "Request Env", description: "File ticket for test environment — wait hours to days" },
+        { name: "Code", description: "Write code with incomplete system context" },
+        { name: "Test", description: "Manual testing against shared environment" },
+        { name: "Deploy", description: "Multiple handoffs to infrastructure team for CICS/IMS config" },
+      ],
+      markers: [
+        { type: "time", text: "1–3 days from assignment to first test run", stageIndex: 1 },
+        { type: "pain", text: "Impact discovered in integration testing or production — too late to fix cheaply", stageIndex: 0 },
+        { type: "pain", text: "No test automation — regression detection depends on individual discipline", stageIndex: 3 },
+        { type: "pain", text: "Every change requires sysprog babysitting — creates bottleneck", stageIndex: 4 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Understand", description: "Atlas shows exact blast radius before first line of code" },
+        { name: "Plan", description: "AI-generated test plan scoped to the specific change" },
+        { name: "Develop", description: "Code in IDE with Atlas context available" },
+        { name: "Provision", description: "Isolated test environment ready in background" },
+        { name: "Test", description: "Automated regression tests catch issues immediately" },
+        { name: "Deploy", description: "Atlas orchestrates CICS/IMS configuration steps" },
+      ],
+      markers: [
+        { type: "time", text: "Under 2 hours from assignment to first test run", stageIndex: 0 },
+        { type: "gain", text: "Impact visible before coding — no surprises in production", stageIndex: 0 },
+        { type: "gain", text: "Isolated environment — no contention with other developers", stageIndex: 3 },
+        { type: "skill", text: "Developers self-serve — sysprog freed from babysitting routine changes", stageIndex: 4 },
+      ],
+    },
+  },
+  "uc-08": {
+    id: "uc-08",
+    label: "Platform Upgrade and Migration",
+    description: "Major z/OS and middleware upgrade planning with full compatibility assessment, sequencing analysis, and phased execution with isolation testing.",
+    personas: [
+      { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Primary" },
+      { name: "Greg", role: "Infrastructure Architect", engagement: "Secondary" },
+      { name: "Alice", role: "z/OS Systems Programmer (mid-level)", engagement: "Secondary" },
+      { name: "Angie", role: "Application Architect", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Research", description: "Review IBM upgrade guides and SMP/E compatibility notes" },
+        { name: "Assess", description: "Manual compatibility check across applications" },
+        { name: "Plan", description: "Sequencing determined by expert memory and spreadsheets" },
+        { name: "Test", description: "Dedicated lab environment difficult to schedule" },
+        { name: "Execute", description: "Production cutover with emergency rollback as safety net" },
+      ],
+      markers: [
+        { type: "time", text: "Months of manual planning for a z/OS version upgrade", stageIndex: 0 },
+        { type: "pain", text: "Compatibility issues discovered during testing or production cutover", stageIndex: 1 },
+        { type: "pain", text: "Sequencing mistakes — wrong upgrade order for interdependent subsystems", stageIndex: 2 },
+        { type: "pain", text: "Emergency rollbacks not uncommon due to missed dependencies", stageIndex: 4 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Assess", description: "Atlas scopes full compatibility impact across all LPARs in minutes" },
+        { name: "Sequence", description: "AI-derived correct upgrade order from subsystem interdependencies" },
+        { name: "Plan", description: "Phased, risk-ordered plan with remediation before production" },
+        { name: "Test", description: "Each phase validated in isolated environment before promotion" },
+        { name: "Execute", description: "Orchestrated promotion with named authorization at each gate" },
+      ],
+      markers: [
+        { type: "time", text: "Compatibility assessment in under 1 day vs. weeks manually", stageIndex: 0 },
+        { type: "gain", text: "Sequencing risks detected before execution — no wrong-order failures", stageIndex: 1 },
+        { type: "gain", text: "Every phase tested in isolation — production is never the first test", stageIndex: 3 },
+        { type: "skill", text: "Atlas applies compatibility knowledge automatically — no expert memorization required", stageIndex: 0 },
+      ],
+    },
+  },
+  "uc-09": {
+    id: "uc-09",
+    label: "Environment Parity and Drift Control",
+    description: "Continuous, automated drift monitoring across all environment tiers — detecting what changed, correlating to change records, and guiding operators from detection to resolution.",
+    personas: [
+      { name: "Annette", role: "IT Operations Engineer (L2 Operator)", engagement: "Primary" },
+      { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Secondary" },
+      { name: "Alex", role: "Performance / Application Engineer", engagement: "Secondary" },
+      { name: "Greg", role: "Infrastructure Architect", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Compare", description: "Manual parameter export and comparison in spreadsheets" },
+        { name: "Detect", description: "Discover drift during incident or audit — not proactively" },
+        { name: "Investigate", description: "Manually trace what changed and when" },
+        { name: "Decide", description: "Assess whether drift is intentional or unauthorized" },
+        { name: "Remediate", description: "Manual alignment or rollback with no structured plan" },
+      ],
+      markers: [
+        { type: "time", text: "Drift discovered days to weeks after it occurs", stageIndex: 1 },
+        { type: "pain", text: "No automated detection — relies on human observation or audit", stageIndex: 1 },
+        { type: "pain", text: "QA environment drift from production is endemic — test results cannot be trusted", stageIndex: 0 },
+        { type: "pain", text: "Unauthorized changes accumulate with no detection mechanism", stageIndex: 3 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Monitor", description: "Atlas compares environments continuously on schedule" },
+        { name: "Detect", description: "Alert generated same day when drift exceeds threshold" },
+        { name: "Classify", description: "Atlas classifies by risk type and checks change record correlation" },
+        { name: "Decide", description: "Operator reviews evidence and chooses accept / escalate / remediate" },
+        { name: "Remediate", description: "Atlas generates alignment plan and orchestrates execution" },
+      ],
+      markers: [
+        { type: "time", text: "Same-day drift detection within one Atlas discovery cycle", stageIndex: 1 },
+        { type: "gain", text: "Unauthorized changes flagged immediately with full evidence trail", stageIndex: 2 },
+        { type: "gain", text: "QA parity confirmed on demand — no more 'test doesn't look like prod'", stageIndex: 0 },
+        { type: "skill", text: "L2 operator can triage without escalating to Zach for basic facts", stageIndex: 3 },
+      ],
+    },
+  },
+  "uc-10": {
+    id: "uc-10",
+    label: "Disaster Recovery Validation",
+    description: "Continuous DR readiness assessment — comparing DR to production, quantifying drift, and running isolated failover simulation before any real test or incident.",
+    personas: [
+      { name: "Greg", role: "Infrastructure Architect", engagement: "Primary" },
+      { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Secondary" },
+      { name: "Quinn", role: "IT Operations Manager", engagement: "Secondary" },
+      { name: "Derek", role: "Compliance Evidence Provider", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Schedule", description: "DR test scheduled annually or quarterly" },
+        { name: "Prepare", description: "Manual comparison of configuration snapshots before test" },
+        { name: "Test", description: "Run DR test and discover failures" },
+        { name: "Analyze", description: "Post-mortem identifies changes applied to prod but not DR" },
+        { name: "Remediate", description: "Fix gaps under time pressure before next test cycle" },
+      ],
+      markers: [
+        { type: "time", text: "DR readiness assessed only in weeks before scheduled test", stageIndex: 1 },
+        { type: "pain", text: "Comparison relies on spreadsheets and team member memory", stageIndex: 1 },
+        { type: "pain", text: "Failures are predictable in retrospect but preventable in advance", stageIndex: 2 },
+        { type: "pain", text: "DR environment quietly diverges from production for months between tests", stageIndex: 0 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Monitor", description: "Atlas monitors DR environments daily against production" },
+        { name: "Detect", description: "High-severity drift alerted as it appears — not weeks before test" },
+        { name: "Predict", description: "Atlas models which drift items would cause test failure" },
+        { name: "Simulate", description: "Isolated DR failover simulation under production-level load" },
+        { name: "Certify", description: "Atlas-produced pass verdict before the actual test date" },
+      ],
+      markers: [
+        { type: "time", text: "Continuous monitoring — not a point-in-time assessment", stageIndex: 0 },
+        { type: "gain", text: "Pre-test simulation validates DR before real test depends on it", stageIndex: 3 },
+        { type: "gain", text: "Failure impact prediction converts diff list into prioritized action plan", stageIndex: 2 },
+        { type: "skill", text: "Atlas replaces expert memory with continuous automated comparison", stageIndex: 0 },
+      ],
+    },
+  },
+  "uc-11": {
+    id: "uc-11",
+    label: "Capacity Planning and Performance Readiness",
+    description: "Proactive capacity management with load projection, constraint identification, dark capacity discovery, and validated configuration changes before peak events.",
+    personas: [
+      { name: "Alex", role: "Performance / Application Engineer", engagement: "Primary" },
+      { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Secondary" },
+      { name: "Annette", role: "IT Operations Engineer", engagement: "Secondary" },
+      { name: "Quinn", role: "IT Operations Manager", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Forecast", description: "Manual analysis of prior-year SMF data in spreadsheets" },
+        { name: "Size", description: "Configuration sizing by experience and rule of thumb" },
+        { name: "Test", description: "Performance testing skipped due to lab scheduling difficulty" },
+        { name: "Monitor", description: "Discover constraints during production incidents" },
+        { name: "Diagnose", description: "Multi-team conference call to trace root cause" },
+      ],
+      markers: [
+        { type: "time", text: "Root cause diagnosis takes 1–3 business days across specialist teams", stageIndex: 4 },
+        { type: "pain", text: "Capacity planning relies on institutional memory of one or two engineers", stageIndex: 0 },
+        { type: "pain", text: "Post-change performance regression discovered by accident or user complaint", stageIndex: 3 },
+        { type: "pain", text: "Dark capacity is invisible — teams procure capacity they already have", stageIndex: 1 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Project", description: "Atlas models load projection against current configuration" },
+        { name: "Identify", description: "Constraint identification with headroom quantification" },
+        { name: "Plan", description: "Configuration change plan with validated test criteria" },
+        { name: "Validate", description: "Isolated environment testing at simulated load before production" },
+        { name: "Monitor", description: "Continuous threshold alerting before breach during live events" },
+      ],
+      markers: [
+        { type: "time", text: "Root cause identified in under 2 hours in a single conversation", stageIndex: 4 },
+        { type: "gain", text: "Proactive constraint discovery before peak events — not during them", stageIndex: 1 },
+        { type: "gain", text: "Post-change regression detected same day via automated correlation", stageIndex: 3 },
+        { type: "skill", text: "Atlas replaces multi-team investigation with unified cross-pillar analysis", stageIndex: 4 },
+      ],
+    },
+  },
+  "uc-12": {
+    id: "uc-12",
+    label: "Application Modernization",
+    description: "Legacy application analysis, technical debt identification, and safe phased modernization with code-level impact assessment and regression validation.",
+    personas: [
+      { name: "Angie", role: "Application Architect", engagement: "Primary" },
+      { name: "Kathleen", role: "z/OS Application Developer (experienced)", engagement: "Secondary" },
+      { name: "Deb", role: "z/OS Application Developer (early tenure)", engagement: "Secondary" },
+      { name: "Greg", role: "Infrastructure Architect", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Research", description: "Manual code reading and asking remaining experts" },
+        { name: "Assess", description: "Incomplete technical debt picture from static analysis" },
+        { name: "Plan", description: "Modernization plan built on incomplete understanding" },
+        { name: "Change", description: "High-risk changes to tightly coupled code with unknown blast radius" },
+        { name: "Validate", description: "Limited regression testing — issues found in production" },
+      ],
+      markers: [
+        { type: "time", text: "Research phase takes weeks or months for large legacy applications", stageIndex: 0 },
+        { type: "pain", text: "People who built the applications are often gone — knowledge lost", stageIndex: 0 },
+        { type: "pain", text: "Monolithic shared copybooks — change one field, affect 47 programs unpredictably", stageIndex: 3 },
+        { type: "pain", text: "Modernization plans built on incomplete understanding cause production incidents", stageIndex: 4 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Assess", description: "Atlas produces technical debt assessment in minutes" },
+        { name: "Prioritize", description: "Architect reviews and selects modernization workstreams" },
+        { name: "Plan", description: "Phased remediation plan with risk-ordered sequencing" },
+        { name: "Execute", description: "Code changes validated in isolation before production" },
+        { name: "Validate", description: "Regression and behavioral testing at each phase" },
+      ],
+      markers: [
+        { type: "time", text: "Technical debt assessment in under 1 week vs. weeks manually", stageIndex: 0 },
+        { type: "gain", text: "Field usage analysis shows which of 312 copybook fields can be separated safely", stageIndex: 0 },
+        { type: "gain", text: "Deprecated API usage mapped across all 12 affected programs automatically", stageIndex: 0 },
+        { type: "skill", text: "Atlas provides the topology awareness that makes modernization tractable", stageIndex: 2 },
+      ],
+    },
+  },
+  "uc-13": {
+    id: "uc-13",
+    label: "Regulatory Change Response",
+    description: "Rapid regulatory compliance with scoped inventory, gap analysis, encryption assessment, and sequenced remediation with continuous post-remediation monitoring.",
+    personas: [
+      { name: "Sage", role: "Security Administrator (mid-level)", engagement: "Primary" },
+      { name: "Derek", role: "Compliance Evidence Provider", engagement: "Secondary" },
+      { name: "Lupita", role: "Key Management and Cryptography Services", engagement: "Secondary" },
+      { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Secondary" },
+      { name: "Quinn", role: "IT Operations Manager", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Discover", description: "Manual inventory of regulated data across multiple teams" },
+        { name: "Assess", description: "Security team reviews RACF; DBA reviews Db2; app team identifies data touchpoints" },
+        { name: "Plan", description: "Multi-team project plan assembled by hand" },
+        { name: "Remediate", description: "Execute changes with minimal cross-workstream coordination" },
+        { name: "Verify", description: "Limited post-remediation verification" },
+      ],
+      markers: [
+        { type: "time", text: "2–4 weeks for manual regulated data inventory across the estate", stageIndex: 0 },
+        { type: "pain", text: "No one has the full picture until it is assembled by hand", stageIndex: 1 },
+        { type: "pain", text: "Post-remediation verification minimal — new gaps discovered at next audit", stageIndex: 4 },
+        { type: "pain", text: "Remediation sequencing errors cause production batch job failures", stageIndex: 3 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Scope", description: "Atlas confirms regulatory scope from classification criteria" },
+        { name: "Inventory", description: "All regulated data discovered across datasets, Db2, IMS, VSAM in hours" },
+        { name: "Analyze", description: "Gap analysis with access control, encryption, and audit trail assessment" },
+        { name: "Sequence", description: "Safe remediation order with cross-workstream dependency awareness" },
+        { name: "Execute", description: "Orchestrated remediation with 48-hour post-change monitoring" },
+        { name: "Monitor", description: "Continuous detection of new regulated data after initial remediation" },
+      ],
+      markers: [
+        { type: "time", text: "Complete inventory in under 1 day vs. weeks manually", stageIndex: 1 },
+        { type: "gain", text: "Dependency-aware sequencing prevents production batch failures", stageIndex: 3 },
+        { type: "gain", text: "New regulated datasets detected post-remediation before next audit cycle", stageIndex: 5 },
+        { type: "skill", text: "Atlas replaces multi-team manual project with unified automated workflow", stageIndex: 1 },
+      ],
+    },
+  },
+  "uc-14": {
+    id: "uc-14",
+    label: "Change Governance and Traceability",
+    description: "Complete change attribution for every Atlas-executed change, undocumented change detection via baseline diff, and bi-directional ITSM integration for audit readiness.",
+    personas: [
+      { name: "Quinn", role: "IT Operations Manager", engagement: "Primary" },
+      { name: "Annette", role: "IT Operations Engineer", engagement: "Secondary" },
+      { name: "Derek", role: "Compliance Evidence Provider", engagement: "Secondary" },
+      { name: "Zach", role: "z/OS Systems Programmer (experienced)", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Change", description: "Changes applied via ISPF, operator commands, SMP/E" },
+        { name: "Record", description: "Change record created manually after the fact" },
+        { name: "Review", description: "Operations manager has no visibility into out-of-window changes" },
+        { name: "Audit", description: "Auditors discover gaps in change traceability" },
+        { name: "Remediate", description: "Retroactive documentation under audit pressure" },
+      ],
+      markers: [
+        { type: "pain", text: "Significant fraction of changes have no associated change record", stageIndex: 1 },
+        { type: "pain", text: "Emergency changes frequently miss records entirely", stageIndex: 1 },
+        { type: "pain", text: "No automated detection of changes outside change windows", stageIndex: 2 },
+        { type: "pain", text: "46 undocumented changes in 12 months discovered during audit", stageIndex: 3 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Execute", description: "Every Atlas-executed change automatically attributed and recorded" },
+        { name: "Detect", description: "Config-as-Code baseline diff identifies out-of-Atlas changes" },
+        { name: "Correlate", description: "Atlas cross-references against ServiceNow change records" },
+        { name: "Alert", description: "Unauthorized and out-of-window changes surfaced immediately" },
+        { name: "Remediate", description: "Atlas generates rollback or documentation plan" },
+      ],
+      markers: [
+        { type: "gain", text: "100% change record coverage for Atlas-executed changes", stageIndex: 0 },
+        { type: "gain", text: "Undocumented changes detected within 24 hours, not at next audit", stageIndex: 1 },
+        { type: "gain", text: "Complete audit trail generated automatically — no manual assembly", stageIndex: 3 },
+        { type: "skill", text: "Atlas replaces after-the-fact record creation with continuous attribution", stageIndex: 0 },
+      ],
+    },
+  },
+};
+
+export const getNodeById = (id: string): ProductNode | undefined =>
+  productNodes.find((n) => n.id === id);
+
+export const getConnections = (): { source: string; target: string }[] => {
+  const conns: { source: string; target: string }[] = [];
+  for (const node of productNodes) {
+    for (const targetId of node.connections) {
+      conns.push({ source: node.id, target: targetId });
+    }
+  }
+  return conns;
+};
+
+export const nodeTypeConfig: Record<NodeType, { color: string; label: string; glowClass: string; bgClass: string; textClass: string }> = {
+  atlas: {
+    color: "#F59E0B",
+    label: "Platform",
+    glowClass: "glow-amber",
+    bgClass: "bg-amber",
+    textClass: "text-amber",
+  },
+  systemIntelligence: {
+    color: "#00D4FF",
+    label: "System Intelligence",
+    glowClass: "glow-cyan",
+    bgClass: "bg-cyan",
+    textClass: "text-cyan",
+  },
+  changeIntelligence: {
+    color: "#FF6B6B",
+    label: "Change Intelligence",
+    glowClass: "glow-coral",
+    bgClass: "bg-coral",
+    textClass: "text-coral",
+  },
+  predictiveIntelligence: {
+    color: "#A78BFA",
+    label: "Predictive Intelligence",
+    glowClass: "glow-purple",
+    bgClass: "bg-purple",
+    textClass: "text-purple",
+  },
+  useCase: {
+    color: "#E2E8F0",
+    label: "Use Case",
+    glowClass: "glow-white",
     bgClass: "bg-slate",
     textClass: "text-slate",
   },
