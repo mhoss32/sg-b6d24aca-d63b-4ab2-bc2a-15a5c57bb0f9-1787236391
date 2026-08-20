@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { productNodes, getConnections, type ProductNode, type NodeType, nodeTypeConfig } from "@/data/productData";
 
 interface LayoutNode extends ProductNode {
