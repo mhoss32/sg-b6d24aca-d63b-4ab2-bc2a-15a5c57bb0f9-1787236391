@@ -33,6 +33,15 @@ export default function UseCaseDetailPage() {
   const node = id && typeof id === "string" ? getNodeById(id) : null;
   const detail = id && typeof id === "string" ? useCaseDetails[id] : null;
 
+  // Derive pillar from node connections
+  const pillarId = node?.connections[0];
+  const pillarConfig: Record<string, { name: string; color: string; bg: string; text: string }> = {
+    system: { name: "System Intelligence", color: "#00D4FF", bg: "bg-cyan/10", text: "text-cyan" },
+    change: { name: "Change Intelligence", color: "#FF6B6B", bg: "bg-coral/10", text: "text-coral" },
+    predictive: { name: "Predictive Intelligence", color: "#A78BFA", bg: "bg-purple/10", text: "text-purple" },
+  };
+  const pillar = pillarId ? pillarConfig[pillarId] : null;
+
   if (!node || !detail) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -77,7 +86,7 @@ export default function UseCaseDetailPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Use Case Header */}
         <section>
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-3">
             <div
               className="w-4 h-4 rounded-full"
               style={{ backgroundColor: "#00D4FF", boxShadow: "0 0 12px rgba(0,212,255,0.5)" }}
@@ -85,6 +94,12 @@ export default function UseCaseDetailPage() {
             <span className="text-sm font-mono uppercase tracking-wider text-cyan">
               Use Case
             </span>
+            {pillar && (
+              <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full border border-border/30", pillar.bg, pillar.text)}>
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: pillar.color }} />
+                {pillar.name}
+              </span>
+            )}
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
             {node.label}

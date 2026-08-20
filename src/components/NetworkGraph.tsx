@@ -11,11 +11,11 @@ interface LayoutNode extends ProductNode {
 }
 
 const NODE_RADIUS: Record<NodeType, number> = {
-  atlas: 55,
-  systemIntelligence: 48,
-  changeIntelligence: 48,
-  predictiveIntelligence: 48,
-  useCase: 30,
+  atlas: 60,
+  systemIntelligence: 55,
+  changeIntelligence: 55,
+  predictiveIntelligence: 55,
+  useCase: 50,
 };
 
 const COLORS: Record<NodeType, string> = {
@@ -34,15 +34,15 @@ const PILLAR_USE_CASES: Record<string, string[]> = {
 
 function computeLayout(w: number, h: number): LayoutNode[] {
   const atlasX = w / 2;
-  const atlasY = h * 0.10;
+  const atlasY = h * 0.12;
 
   const pillarY = h * 0.30;
   const systemX = w * 0.20;
   const changeX = w * 0.50;
   const predictiveX = w * 0.80;
 
-  const useCaseStartY = h * 0.52;
-  const rowGap = h * 0.18;
+  const useCaseStartY = h * 0.48;
+  const rowGap = h * 0.14;
 
   const positions: Record<string, { x: number; y: number }> = {
     atlas: { x: atlasX, y: atlasY },
@@ -61,14 +61,14 @@ function computeLayout(w: number, h: number): LayoutNode[] {
   for (const [pillarId, ucIds] of Object.entries(PILLAR_USE_CASES)) {
     const centerX = pillarCenters[pillarId];
     const total = ucIds.length;
-    const perRow = 3;
+    const perRow = 2;
     const rows = Math.ceil(total / perRow);
 
     for (let i = 0; i < total; i++) {
       const row = Math.floor(i / perRow);
       const col = i % perRow;
       const inRow = Math.min(perRow, total - row * perRow);
-      const spread = Math.min(w * 0.18, 220);
+      const spread = Math.min(w * 0.22, 300);
       const offset = inRow > 1 ? (col - (inRow - 1) / 2) * (spread / (inRow - 1)) : 0;
       positions[ucIds[i]] = {
         x: centerX + offset,
@@ -266,24 +266,66 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
         ctx.fillStyle = grad;
         ctx.fill();
 
-        // Label
+        // Label — smart fit inside bubble
+        const baseFontSize = node.type === "atlas" ? 14 : node.type === "useCase" ? 9 : 11;
+        const maxWidth = node.radius * 1.4; // 70% of diameter
+        const maxLines = node.type === "useCase" ? 3 : 2;
+
         ctx.fillStyle = node.type === "useCase" ? "#94A3B8" : "#E2E8F0";
-        const fontSize = node.type === "atlas" ? 15 : node.type === "useCase" ? 10 : 12;
-        ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
-        if (node.type === "useCase") {
-          const words = node.label.split(" ");
-          if (words.length <= 2) {
-            ctx.fillText(node.label, node.x, node.y);
-          } else {
-            const mid = Math.ceil(words.length / 2);
-            ctx.fillText(words.slice(0, mid).join(" "), node.x, node.y - 5);
-            ctx.fillText(words.slice(mid).join(" "), node.x, node.y + 6);
+        // Find best font size and line breaks
+        let fontSize = baseFontSize;
+        let lines: string[] = [];
+        const words = node.label.split(" ");
+
+        for (let attempt = 0; attempt < 5; attempt++) {
+          ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
+          lines = [];
+          let currentLine = "";
+
+          for (const word of words) {
+            const testLine = currentLine ? currentLine + " " + word : word;
+            const metrics = ctx.measureText(testLine);
+            if (metrics.width > maxWidth && currentLine) {
+              lines.push(currentLine);
+              currentLine = word;
+            } else {
+              currentLine = testLine;
+            }
           }
-        } else {
-          ctx.fillText(node.label, node.x, node.y);
+          if (currentLine) lines.push(currentLine);
+
+          if (lines.length <= maxLines) break;
+          fontSize -= 0.5;
+        }
+
+        // If still too many lines, force truncate by putting fewer words per line
+        if (lines.length > maxLines) {
+          ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
+          const avgCharsPerLine = Math.floor(node.label.length / maxLines);
+          lines = [];
+          let currentLine = "";
+          for (const word of words) {
+            const testLine = currentLine ? currentLine + " " + word : word;
+            if (testLine.length > avgCharsPerLine + 3 && currentLine) {
+              lines.push(currentLine);
+              currentLine = word;
+            } else {
+              currentLine = testLine;
+            }
+          }
+          if (currentLine) lines.push(currentLine);
+        }
+
+        const lineHeight = fontSize * 1.25;
+        const totalHeight = lines.length * lineHeight;
+        const startY = node.y - totalHeight / 2 + lineHeight / 2;
+
+        for (let i = 0; i < lines.length; i++) {
+          ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
+          ctx.fillText(lines[i], node.x, startY + i * lineHeight);
         }
       }
 
