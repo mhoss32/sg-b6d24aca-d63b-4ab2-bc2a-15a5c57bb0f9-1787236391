@@ -1,32 +1,28 @@
-<![CDATA[
 ---
 title: Persona Detail Pages with Use Case Tiles
-status: in_progress
+status: done
 priority: high
 type: feature
-tags: [persona, page, tiles]
+tags: [persona, detail-page, tiles]
 created_by: agent
-created_at: 2026-08-20T10:15:00Z
+created_at: 2026-08-20T10:25:00Z
 position: 5
 ---
 
 ## Notes
-When a user clicks a persona on a use case detail page, they should see a persona overview page with:
-- Persona summary from personas.md
-- Role, experience, primary concerns
-- Explorable tiles for use cases, split by Primary vs Secondary engagement
-- Brief role summary within each use case
+Persona detail pages show full persona profiles from personas.md with explorable use case tiles split by Primary/Secondary engagement.
 
 ## Checklist
-- [ ] Extract persona data from personas.md into the data model
-- [ ] Create persona use case engagement mapping (Primary/Secondary per use case)
-- [ ] Create `/persona/[name].tsx` page with overview and tiles
-- [ ] Update `PersonaCard` to link to persona detail pages
-- [ ] Update use case detail page persona cards to link to persona pages
-- [ ] Style persona page consistently with dark theme
+- [x] PersonaData model with 18 personas from personas.md
+- [x] getPersonaUseCases helper to find use cases by engagement
+- [x] Persona detail page at /persona/[name] with overview, quote, pain points, concerns
+- [x] Primary use case tiles with cyan accent
+- [x] Secondary use case tiles with purple accent
+- [x] Each tile links to use case detail page
+- [x] Persona cards on use case pages link to persona profiles
 
 ## Acceptance
-- Clicking a persona on a use case page navigates to their detail page
-- Persona page shows their summary and all associated use cases
+- Clicking a persona from any use case navigates to their profile
+- Profile shows summary, role, experience, concerns, pain points, and quote
 - Use cases are split into Primary and Secondary sections
 - Each use case tile links back to the use case page
