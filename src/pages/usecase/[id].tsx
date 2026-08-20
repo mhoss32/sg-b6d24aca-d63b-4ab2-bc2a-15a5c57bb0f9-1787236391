@@ -97,7 +97,7 @@ export default function UseCaseDetailPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {detail.personas.map((persona) => (
-              <PersonaCard key={persona.name} persona={persona} />
+              <PersonaCard key={persona.name} persona={persona} href={`/persona/${persona.name.toLowerCase()}`} />
             ))}
           </div>
         </section>

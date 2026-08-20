@@ -1,16 +1,18 @@
 "use client";
 
 import React from "react";
-import { User, Star, UserCircle } from "lucide-react";
+import Link from "next/link";
+import { User, Star, UserCircle, ArrowRight } from "lucide-react";
 import type { Persona } from "@/data/productData";
 
 export interface PersonaCardProps {
   persona: Persona;
+  href?: string;
 }
 
-export function PersonaCard({ persona }: PersonaCardProps) {
+export function PersonaCard({ persona, href }: PersonaCardProps) {
   const isPrimary = persona.engagement === "Primary";
-  return (
+  const content = (
     <div
       className={cn(
         "relative rounded-xl border p-5 transition-all duration-300",
@@ -37,7 +39,7 @@ export function PersonaCard({ persona }: PersonaCardProps) {
         >
           <UserCircle className="w-7 h-7" />
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
             <h4 className="font-semibold text-foreground truncate">
               {persona.name}
@@ -53,11 +55,27 @@ export function PersonaCard({ persona }: PersonaCardProps) {
               {persona.engagement}
             </span>
           </div>
-          <p className="text-sm text-muted-foreground">{persona.role}</p>
+          <p className="text-sm text-muted-foreground mb-2">{persona.role}</p>
+          {href && (
+            <div className="flex items-center gap-1 text-xs text-cyan group-hover:text-cyan-light transition-colors">
+              <span>View profile</span>
+              <ArrowRight className="w-3 h-3" />
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="block group">
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }
 
 function cn(...classes: (string | false | undefined)[]) {
