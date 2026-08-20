@@ -9,7 +9,7 @@ export interface PersonaCardProps {
 }
 
 export function PersonaCard({ persona }: PersonaCardProps) {
-  const isPrimary = persona.engagementType === "primary";
+  const isPrimary = persona.engagement === "Primary";
   return (
     <div
       className={cn(
@@ -50,15 +50,10 @@ export function PersonaCard({ persona }: PersonaCardProps) {
                   : "bg-muted text-muted-foreground"
               )}
             >
-              {persona.engagementType}
+              {persona.engagement}
             </span>
           </div>
-          <p className="text-sm text-muted-foreground mb-2">{persona.role}</p>
-          {persona.description && (
-            <p className="text-xs text-muted-foreground/80 leading-relaxed">
-              {persona.description}
-            </p>
-          )}
+          <p className="text-sm text-muted-foreground">{persona.role}</p>
         </div>
       </div>
     </div>

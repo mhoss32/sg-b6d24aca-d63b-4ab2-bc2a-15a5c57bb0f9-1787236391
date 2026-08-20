@@ -21,7 +21,7 @@ export interface FlowDiagramProps {
 const markerConfig = {
   asIs: {
     time: { icon: Clock, color: "text-amber", bg: "bg-amber/10", border: "border-amber/30" },
-    skill: { icon: AlertTriangle, color: "text-red", bg: "bg-red/10", border: "border-red/30" },
+    pain: { icon: AlertTriangle, color: "text-red", bg: "bg-red/10", border: "border-red/30" },
     artefact: { icon: FileX, color: "text-orange", bg: "bg-orange/10", border: "border-orange/30" },
   },
   toBe: {
@@ -69,9 +69,10 @@ export function FlowDiagram({ diagram, variant }: FlowDiagramProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {diagram.stages.map((stage, index) => (
             <StageCard
-              key={stage.id}
+              key={stage.name}
               stage={stage}
               index={index}
+              markers={diagram.markers.filter((m) => m.stageIndex === index)}
               config={config}
               isLast={index === diagram.stages.length - 1}
             />
@@ -85,11 +86,13 @@ export function FlowDiagram({ diagram, variant }: FlowDiagramProps) {
 function StageCard({
   stage,
   index,
+  markers,
   config,
   isLast,
 }: {
   stage: FlowStage;
   index: number;
+  markers: FlowDiagramType["markers"];
   config: typeof markerConfig.asIs;
   isLast: boolean;
 }) {
@@ -110,31 +113,31 @@ function StageCard({
       {/* Stage card */}
       <div className="flex-1 rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm p-4 hover:border-cyan/20 transition-colors">
         <h4 className="text-sm font-medium text-foreground mb-2 leading-snug">
-          {stage.label}
+          {stage.name}
         </h4>
         <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
           {stage.description}
         </p>
 
         {/* Markers */}
-        {stage.markers.length > 0 && (
+        {markers.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {stage.markers.map((marker) => {
+            {markers.map((marker, mi) => {
               const mc = config[marker.type];
               const Icon = mc.icon;
               return (
                 <div
-                  key={marker.type}
+                  key={mi}
                   className={cn(
                     "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium border",
                     mc.bg,
                     mc.color,
                     mc.border
                   )}
-                  title={marker.label}
+                  title={marker.text}
                 >
                   <Icon className="w-3 h-3 flex-shrink-0" />
-                  <span className="truncate max-w-[120px]">{marker.label}</span>
+                  <span className="truncate max-w-[120px]">{marker.text}</span>
                 </div>
               );
             })}

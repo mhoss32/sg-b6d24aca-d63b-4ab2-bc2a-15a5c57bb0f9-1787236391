@@ -97,19 +97,19 @@ export default function UseCaseDetailPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {detail.personas.map((persona) => (
-              <PersonaCard key={persona.id} persona={persona} />
+              <PersonaCard key={persona.name} persona={persona} />
             ))}
           </div>
         </section>
 
         {/* As-Is Flow */}
         <section className="rounded-2xl border border-border/20 bg-card/20 p-6 sm:p-8">
-          <FlowDiagram diagram={detail.asIsFlow} variant="asIs" />
+          <FlowDiagram diagram={detail.asIs} variant="asIs" />
         </section>
 
         {/* To-Be Flow */}
         <section className="rounded-2xl border border-border/20 bg-card/20 p-6 sm:p-8">
-          <FlowDiagram diagram={detail.toBeFlow} variant="toBe" />
+          <FlowDiagram diagram={detail.toBe} variant="toBe" />
         </section>
 
         {/* Footer */}
