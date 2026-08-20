@@ -104,6 +104,7 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
   const isAsIs = variant === "asIs";
   const config = isAsIs ? asIsMarkerConfig : toBeMarkerConfig;
   const [editingMarker, setEditingMarker] = useState<number | null>(null);
+  const [managingStage, setManagingStage] = useState<number | null>(null);
   const [draftText, setDraftText] = useState("");
   const [draftType, setDraftType] = useState<MarkerType>("pain");
   const [draftStage, setDraftStage] = useState(0);
@@ -141,23 +142,29 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
     setEditingMarker(null);
   }, [diagram.markers, updateMarkers]);
 
-  const addMarker = useCallback(() => {
+  const addMarkerToStage = useCallback((stageIndex: number) => {
     const availableTypes = Object.keys(config);
     const defaultType = availableTypes[0] as MarkerType;
     const newMarkers = [
       ...diagram.markers,
-      { type: defaultType, text: "New marker", stageIndex: 0 },
+      { type: defaultType, text: "New marker", stageIndex },
     ];
     updateMarkers(newMarkers);
     setTimeout(() => {
       setEditingMarker(newMarkers.length - 1);
       setDraftText("New marker");
       setDraftType(defaultType);
-      setDraftStage(0);
+      setDraftStage(stageIndex);
     }, 50);
   }, [config, diagram.markers, updateMarkers]);
 
   const cancelEdit = useCallback(() => {
+    setEditingMarker(null);
+    setManagingStage(null);
+  }, []);
+
+  const startStageManage = useCallback((stageIndex: number) => {
+    setManagingStage(stageIndex);
     setEditingMarker(null);
   }, []);
 
@@ -187,18 +194,10 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
               {isAsIs
                 ? "Current state — pain points highlighted"
                 : "Desired outcome — gains highlighted"}
+              {editable && " · Double-click a step to manage markers"}
             </p>
           </div>
         </div>
-        {editable && (
-          <button
-            onClick={addMarker}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-cyan hover:text-cyan-light transition-colors px-3 py-1.5 rounded-md border border-cyan/30 hover:bg-cyan/10"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Add Marker
-          </button>
-        )}
       </div>
 
       <MarkerLegend variant={variant} />
@@ -220,10 +219,13 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
               isLast={stageIndex === diagram.stages.length - 1}
               editable={editable}
               editingMarker={editingMarker}
+              managingStage={managingStage}
               onStartEdit={startEdit}
               onSaveEdit={saveEdit}
               onDeleteMarker={deleteMarker}
               onCancelEdit={cancelEdit}
+              onStartStageManage={startStageManage}
+              onAddMarker={addMarkerToStage}
               draftText={draftText}
               setDraftText={setDraftText}
               draftType={draftType}
@@ -248,10 +250,13 @@ function StageCard({
   isLast,
   editable,
   editingMarker,
+  managingStage,
   onStartEdit,
   onSaveEdit,
   onDeleteMarker,
   onCancelEdit,
+  onStartStageManage,
+  onAddMarker,
   draftText,
   setDraftText,
   draftType,
@@ -268,10 +273,13 @@ function StageCard({
   isLast: boolean;
   editable: boolean;
   editingMarker: number | null;
+  managingStage: number | null;
   onStartEdit: (globalIndex: number) => void;
   onSaveEdit: () => void;
   onDeleteMarker: (globalIndex: number) => void;
   onCancelEdit: () => void;
+  onStartStageManage: (stageIndex: number) => void;
+  onAddMarker: (stageIndex: number) => void;
   draftText: string;
   setDraftText: (v: string) => void;
   draftType: MarkerType;
@@ -281,6 +289,8 @@ function StageCard({
   availableTypes: string[];
   inputRef: React.RefObject<HTMLInputElement | null>;
 }) {
+  const isManaging = managingStage === index;
+
   return (
     <div className="relative flex flex-col">
       {/* Stage number and connector */}
@@ -296,7 +306,17 @@ function StageCard({
       </div>
 
       {/* Stage card */}
-      <div className="flex-1 rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm p-4 hover:border-cyan/20 transition-colors">
+      <div
+        className={cn(
+          "flex-1 rounded-xl border bg-card/30 backdrop-blur-sm p-4 transition-all",
+          isManaging
+            ? "border-cyan/40 shadow-lg shadow-cyan/5"
+            : "border-border/30 hover:border-cyan/20",
+          editable && !isManaging && "cursor-pointer"
+        )}
+        onDoubleClick={() => editable && onStartStageManage(index)}
+        title={editable && !isManaging ? "Double-click to manage markers" : undefined}
+      >
         <h4 className="text-sm font-medium text-foreground mb-2 leading-snug">
           {stage.name}
         </h4>
@@ -304,8 +324,8 @@ function StageCard({
           {stage.description}
         </p>
 
-        {/* Markers */}
-        {stageMarkers.length > 0 && (
+        {/* Markers — compact by default, expand on hover */}
+        {stageMarkers.length > 0 && !isManaging && (
           <div className="flex flex-wrap gap-1.5">
             {stageMarkers.map((marker) => (
               <MarkerChip
@@ -328,6 +348,80 @@ function StageCard({
                 inputRef={inputRef}
               />
             ))}
+          </div>
+        )}
+
+        {/* Marker manager — shown when stage is double-clicked */}
+        {isManaging && (
+          <div className="space-y-2 mt-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-cyan">
+                Markers
+              </span>
+              <button
+                onClick={() => onAddMarker(index)}
+                className="inline-flex items-center gap-1 text-[10px] font-medium text-cyan hover:text-cyan-light transition-colors px-2 py-1 rounded-md border border-cyan/30 hover:bg-cyan/10"
+              >
+                <Plus className="w-3 h-3" />
+                Add
+              </button>
+            </div>
+
+            {stageMarkers.length === 0 && (
+              <p className="text-[10px] text-muted-foreground italic">No markers for this step</p>
+            )}
+
+            <div className="space-y-1.5">
+              {stageMarkers.map((marker) => (
+                <div key={marker.globalIndex}>
+                  {editingMarker === marker.globalIndex ? (
+                    <MarkerEditor
+                      marker={marker}
+                      config={config}
+                      draftText={draftText}
+                      setDraftText={setDraftText}
+                      draftType={draftType}
+                      setDraftType={setDraftType}
+                      draftStage={draftStage}
+                      setDraftStage={setDraftStage}
+                      availableTypes={availableTypes}
+                      onSave={onSaveEdit}
+                      onDelete={() => onDeleteMarker(marker.globalIndex)}
+                      onCancel={onCancelEdit}
+                      inputRef={inputRef}
+                    />
+                  ) : (
+                    <div
+                      className="flex items-center gap-2 p-2 rounded-md border border-border/20 bg-background/50 hover:border-cyan/30 transition-colors cursor-pointer group"
+                      onDoubleClick={() => onStartEdit(marker.globalIndex)}
+                      title="Double-click to edit"
+                    >
+                      {(() => {
+                        const mc = config[marker.type];
+                        if (!mc) return null;
+                        const Icon = mc.icon;
+                        return (
+                          <div className={cn("w-5 h-5 rounded flex items-center justify-center flex-shrink-0", mc.bg)}>
+                            <Icon className={cn("w-3 h-3", mc.color)} />
+                          </div>
+                        );
+                      })()}
+                      <span className="text-[11px] text-foreground flex-1 min-w-0 truncate">
+                        {marker.text}
+                      </span>
+                      <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={onCancelEdit}
+              className="w-full text-[10px] text-muted-foreground hover:text-foreground transition-colors py-1"
+            >
+              Done
+            </button>
           </div>
         )}
       </div>
@@ -376,57 +470,28 @@ function MarkerChip({
 
   if (isEditing) {
     return (
-      <div className="inline-flex flex-col gap-1.5 p-2 rounded-md border border-cyan/40 bg-card/80 backdrop-blur-sm min-w-[200px] z-20 relative">
-        <div className="flex items-center gap-1.5">
-          <div className={cn("w-5 h-5 rounded flex items-center justify-center flex-shrink-0", mc.bg)}>
-            <Icon className={cn("w-3 h-3", mc.color)} />
-          </div>
-          <input
-            ref={inputRef}
-            type="text"
-            value={draftText}
-            onChange={(e) => setDraftText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") onSaveEdit();
-              if (e.key === "Escape") onCancel();
-            }}
-            className="flex-1 text-[10px] bg-transparent border-none outline-none text-foreground min-w-0"
-          />
-          <button onClick={onSaveEdit} className="text-cyan hover:text-cyan-light p-0.5">
-            <Pencil className="w-3 h-3" />
-          </button>
-          <button onClick={onDelete} className="text-red hover:text-red/80 p-0.5">
-            <X className="w-3 h-3" />
-          </button>
-        </div>
-        <div className="flex items-center gap-2">
-          <select
-            value={draftType}
-            onChange={(e) => setDraftType(e.target.value as MarkerType)}
-            className="text-[10px] bg-background border border-border/30 rounded px-1 py-0.5 text-foreground outline-none"
-          >
-            {availableTypes.map((t) => (
-              <option key={t} value={t}>{config[t]?.label || t}</option>
-            ))}
-          </select>
-          <select
-            value={draftStage}
-            onChange={(e) => setDraftStage(Number(e.target.value))}
-            className="text-[10px] bg-background border border-border/30 rounded px-1 py-0.5 text-foreground outline-none"
-          >
-            {Array.from({ length: 6 }, (_, i) => (
-              <option key={i} value={i}>Stage {i + 1}</option>
-            ))}
-          </select>
-        </div>
-      </div>
+      <MarkerEditor
+        marker={marker}
+        config={config}
+        draftText={draftText}
+        setDraftText={setDraftText}
+        draftType={draftType}
+        setDraftType={setDraftType}
+        draftStage={draftStage}
+        setDraftStage={setDraftStage}
+        availableTypes={availableTypes}
+        onSave={onSaveEdit}
+        onDelete={onDelete}
+        onCancel={onCancel}
+        inputRef={inputRef}
+      />
     );
   }
 
   return (
     <div
       className={cn(
-        "group inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium border cursor-default select-none",
+        "group inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium border cursor-default select-none transition-all duration-200",
         mc.bg,
         mc.color,
         mc.border,
@@ -436,10 +501,89 @@ function MarkerChip({
       onDoubleClick={() => editable && onStartEdit()}
     >
       <Icon className={cn("w-3 h-3 flex-shrink-0", mc.color)} />
-      <span className="truncate max-w-[140px]">{marker.text}</span>
-      {editable && (
-        <Pencil className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 ml-0.5 transition-opacity" />
-      )}
+      <span className="max-w-0 overflow-hidden group-hover:max-w-[160px] transition-all duration-300 whitespace-nowrap">
+        {marker.text}
+      </span>
+    </div>
+  );
+}
+
+function MarkerEditor({
+  marker,
+  config,
+  draftText,
+  setDraftText,
+  draftType,
+  setDraftType,
+  draftStage,
+  setDraftStage,
+  availableTypes,
+  onSave,
+  onDelete,
+  onCancel,
+  inputRef,
+}: {
+  marker: { type: string; text: string; stageIndex: number; globalIndex: number };
+  config: Record<string, MarkerStyle>;
+  draftText: string;
+  setDraftText: (v: string) => void;
+  draftType: MarkerType;
+  setDraftType: (v: MarkerType) => void;
+  draftStage: number;
+  setDraftStage: (v: number) => void;
+  availableTypes: string[];
+  onSave: () => void;
+  onDelete: () => void;
+  onCancel: () => void;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+}) {
+  const mc = config[marker.type];
+  const Icon = mc?.icon || AlertTriangle;
+
+  return (
+    <div className="flex flex-col gap-1.5 p-2 rounded-md border border-cyan/40 bg-card/80 backdrop-blur-sm z-20 relative">
+      <div className="flex items-center gap-1.5">
+        <div className={cn("w-5 h-5 rounded flex items-center justify-center flex-shrink-0", mc?.bg || "bg-muted")}>
+          <Icon className={cn("w-3 h-3", mc?.color || "text-foreground")} />
+        </div>
+        <input
+          ref={inputRef}
+          type="text"
+          value={draftText}
+          onChange={(e) => setDraftText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") onSave();
+            if (e.key === "Escape") onCancel();
+          }}
+          className="flex-1 text-[10px] bg-transparent border-none outline-none text-foreground min-w-0"
+        />
+        <button onClick={onSave} className="text-cyan hover:text-cyan-light p-0.5">
+          <Pencil className="w-3 h-3" />
+        </button>
+        <button onClick={onDelete} className="text-red hover:text-red/80 p-0.5">
+          <X className="w-3 h-3" />
+        </button>
+      </div>
+      <div className="flex items-center gap-2">
+        <select
+          value={draftType}
+          onChange={(e) => setDraftType(e.target.value as MarkerType)}
+          className="text-[10px] bg-background border border-border/30 rounded px-1 py-0.5 text-foreground outline-none"
+        >
+          {availableTypes.map((t) => (
+            <option key={t} value={t}>{config[t]?.label || t}</option>
+          ))}
+        </select>
+        <select
+          value={draftStage}
+          onChange={(e) => setDraftStage(Number(e.target.value))}
+          className="text-[10px] bg-background border border-border/30 rounded px-1 py-0.5 text-foreground outline-none"
+        >
+          {Array.from({ length: 6 }, (_, i) => (
+            <option key={i} value={i}>Stage {i + 1}</option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 }
