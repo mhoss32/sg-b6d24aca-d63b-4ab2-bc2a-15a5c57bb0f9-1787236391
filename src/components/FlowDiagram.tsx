@@ -213,7 +213,6 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
               key={stage.name}
               stage={stage}
               index={stageIndex}
-              markers={diagram.markers}
               stageMarkers={diagram.markers
                 .map((m, gi) => ({ ...m, globalIndex: gi }))
                 .filter((m) => m.stageIndex === stageIndex)}
