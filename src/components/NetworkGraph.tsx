@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
-import { productNodes, getConnections, type ProductNode, type NodeType, nodeTypeConfig } from "@/data/productData";
+import { productNodes, getConnections, type ProductNode, type NodeType } from "@/data/productData";
 
 interface LayoutNode extends ProductNode {
   x: number;
@@ -32,7 +32,13 @@ const PILLAR_USE_CASES: Record<string, string[]> = {
   predictive: ["uc-01", "uc-03", "uc-06", "uc-09", "uc-10", "uc-11"],
 };
 
-function computeLayout(w: number, h: number): LayoutNode[] {
+const PILLAR_LABELS: Record<string, string> = {
+  system: "System\nIntelligence",
+  change: "Change\nIntelligence",
+  predictive: "Predictive\nIntelligence",
+};
+
+function computeLayout(w: number, h: number, collapsed: Set<string>): LayoutNode[] {
   const atlasX = w / 2;
   const atlasY = h * 0.12;
 
@@ -41,9 +47,6 @@ function computeLayout(w: number, h: number): LayoutNode[] {
   const changeX = w * 0.50;
   const predictiveX = w * 0.80;
 
-  const useCaseStartY = h * 0.48;
-  const rowGap = h * 0.14;
-
   const positions: Record<string, { x: number; y: number }> = {
     atlas: { x: atlasX, y: atlasY },
     system: { x: systemX, y: pillarY },
@@ -51,7 +54,7 @@ function computeLayout(w: number, h: number): LayoutNode[] {
     predictive: { x: predictiveX, y: pillarY },
   };
 
-  // Position use cases in rows under each pillar
+  // Position use cases only if pillar is not collapsed
   const pillarCenters: Record<string, number> = {
     system: systemX,
     change: changeX,
@@ -59,10 +62,13 @@ function computeLayout(w: number, h: number): LayoutNode[] {
   };
 
   for (const [pillarId, ucIds] of Object.entries(PILLAR_USE_CASES)) {
+    if (collapsed.has(pillarId)) continue;
     const centerX = pillarCenters[pillarId];
     const total = ucIds.length;
     const perRow = 2;
     const rows = Math.ceil(total / perRow);
+    const useCaseStartY = h * 0.48;
+    const rowGap = h * 0.14;
 
     for (let i = 0; i < total; i++) {
       const row = Math.floor(i / perRow);
@@ -101,10 +107,11 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
   const imagesRef = useRef<Record<string, HTMLImageElement>>({});
   const [dims, setDims] = useState({ w: 0, h: 0 });
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [collapsedPillars, setCollapsedPillars] = useState<Set<string>>(new Set());
 
   const initLayout = useCallback((w: number, h: number) => {
-    nodesRef.current = computeLayout(w, h);
-  }, []);
+    nodesRef.current = computeLayout(w, h, collapsedPillars);
+  }, [collapsedPillars]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -165,6 +172,18 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
     };
   }, []);
 
+  const togglePillar = useCallback((pillarId: string) => {
+    setCollapsedPillars(prev => {
+      const next = new Set(prev);
+      if (next.has(pillarId)) {
+        next.delete(pillarId);
+      } else {
+        next.add(pillarId);
+      }
+      return next;
+    });
+  }, []);
+
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     const pos = getMouseWorldPos(e);
     // Check if clicking a node
@@ -174,6 +193,8 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
       if (dx * dx + dy * dy < node.radius * node.radius) {
         if (node.type === "useCase") {
           router.push(`/usecase/${node.id}`);
+        } else if (node.id === "system" || node.id === "change" || node.id === "predictive") {
+          togglePillar(node.id);
         } else {
           onSelectNode(node);
         }
@@ -182,7 +203,7 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
     }
     // Start panning
     panningRef.current = { active: true, lastX: pos.x, lastY: pos.y };
-  }, [getMouseWorldPos, onSelectNode, router]);
+  }, [getMouseWorldPos, onSelectNode, router, togglePillar]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!panningRef.current?.active) return;
@@ -218,6 +239,7 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
 
   const resetView = useCallback(() => {
     transformRef.current = { x: 0, y: 0, scale: 1 };
+    setCollapsedPillars(new Set());
     onSelectNode(null);
   }, [onSelectNode]);
 
@@ -241,8 +263,10 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
       ctx.translate(t.x, t.y);
       ctx.scale(t.scale, t.scale);
 
-      // Draw connections
+      // Draw connections (skip if target use case is hidden due to collapsed pillar)
+      const nodeIds = new Set(nodes.map(n => n.id));
       for (const conn of connections) {
+        if (!nodeIds.has(conn.source) || !nodeIds.has(conn.target)) continue;
         const a = nodes.find((x) => x.id === conn.source);
         const b = nodes.find((x) => x.id === conn.target);
         if (!a || !b) continue;
@@ -273,6 +297,8 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
       // Draw nodes
       for (const node of nodes) {
         const isSelected = node.id === selectedNodeId;
+        const isCollapsedPillar = node.id === "system" || node.id === "change" || node.id === "predictive";
+        const isCollapsed = isCollapsedPillar && collapsedPillars.has(node.id);
 
         // Glow ring
         ctx.beginPath();
@@ -304,20 +330,50 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
           const key = node.id === "system" ? "system" : node.id === "change" ? "change" : "predictive";
           const img = imagesRef.current[key];
           if (img) {
-            const iconSize = node.radius * 0.8;
+            const iconSize = node.radius * 0.65;
             ctx.save();
             ctx.beginPath();
             ctx.arc(node.x, node.y, node.radius - 3, 0, Math.PI * 2);
             ctx.clip();
-            ctx.drawImage(img, node.x - iconSize / 2, node.y - iconSize / 2, iconSize, iconSize);
+            ctx.drawImage(img, node.x - iconSize / 2, node.y - iconSize / 2 - 6, iconSize, iconSize);
             ctx.restore();
+          }
+
+          // Pillar label below icon
+          const labelText = PILLAR_LABELS[node.id] || "";
+          const labelLines = labelText.split("\n");
+          ctx.fillStyle = COLORS[node.type];
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
+          const labelFontSize = 8;
+          const labelLineHeight = 10;
+          const labelStartY = node.y + node.radius * 0.15;
+          for (let i = 0; i < labelLines.length; i++) {
+            ctx.font = `600 ${labelFontSize}px "IBM Plex Sans", sans-serif`;
+            ctx.fillText(labelLines[i], node.x, labelStartY + i * labelLineHeight);
+          }
+
+          // Collapse indicator
+          if (isCollapsed) {
+            ctx.beginPath();
+            ctx.arc(node.x, node.y + node.radius + 10, 8, 0, Math.PI * 2);
+            ctx.fillStyle = COLORS[node.type] + "30";
+            ctx.fill();
+            ctx.strokeStyle = COLORS[node.type] + "80";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.fillStyle = COLORS[node.type];
+            ctx.font = `bold 10px "IBM Plex Sans", sans-serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("+", node.x, node.y + node.radius + 10);
           }
         }
 
         // Label — smart fit inside bubble (skip pillars with icons)
         if (node.type !== "systemIntelligence" && node.type !== "changeIntelligence" && node.type !== "predictiveIntelligence") {
           const baseFontSize = node.type === "atlas" ? 13 : node.type === "useCase" ? 8 : 10;
-          const maxWidth = node.radius * 1.3; // 65% of diameter
+          const maxWidth = node.radius * 1.3;
           const maxLines = node.type === "useCase" ? 3 : 2;
 
           ctx.fillStyle = node.type === "useCase" ? "#94A3B8" : "#E2E8F0";
@@ -351,7 +407,6 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
             if (fontSize < 7) break;
           }
 
-          // If still too many lines, force aggressive truncate
           if (lines.length > maxLines) {
             fontSize = Math.max(fontSize, 7);
             ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
@@ -368,7 +423,6 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
               }
             }
             if (currentLine) lines.push(currentLine);
-            // Truncate if still too many
             if (lines.length > maxLines) {
               lines = lines.slice(0, maxLines);
               const last = lines[maxLines - 1];
@@ -395,7 +449,7 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
 
     animRef.current = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(animRef.current);
-  }, [dims, selectedNodeId]);
+  }, [dims, selectedNodeId, collapsedPillars, imagesLoaded]);
 
   return (
     <div ref={containerRef} className="relative w-full h-full overflow-hidden">
