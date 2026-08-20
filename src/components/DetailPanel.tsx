@@ -2,7 +2,7 @@
 
 import React from "react";
 import { X } from "lucide-react";
-import { type ProductNode, nodeTypeConfig } from "@/data/productData";
+import { type ProductNode, nodeTypeConfig, getNodeById } from "@/data/productData";
 
 interface DetailPanelProps {
   node: ProductNode | null;
@@ -70,7 +70,7 @@ export function DetailPanel({ node, onClose }: DetailPanelProps) {
           </h3>
           <div className="flex flex-wrap gap-2">
             {node.connections.map((connId) => {
-              const targetNode = (await import("@/data/productData")).getNodeById(connId);
+              const targetNode = getNodeById(connId);
               if (!targetNode) return null;
               const targetConfig = nodeTypeConfig[targetNode.type];
               return (
