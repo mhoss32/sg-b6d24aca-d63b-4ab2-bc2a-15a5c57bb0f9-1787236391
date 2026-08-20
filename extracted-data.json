@@ -1,0 +1,152 @@
+{
+  "uc-01": {
+    "personas": [],
+    "current": [
+      "Answering \"are we exposed?\" requires logging into ISPF on each LPAR, running GIMAPI or SMP/E queries, and cross-referencing results manually — typically a 2–3 day process across a large estate.",
+      "Blast radius analysis — understanding which applications and data stores are reachable from an exposed component — has no automated tooling. It requires the most experienced systems programmer or security engineer to trace dependencies from memory.",
+      "PTF prerequisite chain resolution is manual. Missing a co-requisite causes a failed apply; discovering the failure after a production change window is expensive.",
+      "Test validation before production apply requires a lab environment that takes days to provision and configure. Under time pressure, this step is skipped — production becomes the de facto test environment for emergency patches.",
+      "The DR environment is typically patched last or forgotten. Organizations frequently close the production exposure while leaving the failover exposure open.",
+      "Multi-LPAR sequencing for patches with shared dependencies (shared Db2 subsystem, shared MQ queue manager) is planned by memory and experience, not by analysis."
+    ],
+    "desired": [
+      "Within minutes of an advisory being published, Atlas confirms which LPARs are exposed, identifies the exact PTF gap, and surfaces the applications and downstream dependencies at risk.",
+      "Blast radius is a topology map, not a guess. Atlas traverses the dependency graph and names every reachable system and dataset — including those that are not themselves vulnerable but are accessible from the exposed component.",
+      "Atlas generates the sequenced remediation plan automatically: affected LPARs in apply order, PTF prerequisites resolved, test environment specification, test scenarios scoped to the affected application, DR environment remediation sequenced into the plan.",
+      "The DR exposure is flagged proactively. Atlas does not wait to be asked whether the DR environment is covered.",
+      "Every step of the remediation — plan, test results, production apply, validation — is captured in an auditable record without manual assembly.",
+      "The exposure window is measured in hours, not days. The entire cycle — detection, analysis, planning, validation, production apply — can be completed within a single change management window when the Atlas workflow is followed."
+    ]
+  },
+  "uc-02": {
+    "personas": [],
+    "current": [
+      "Systems programmers query SMP/E for PTF inventory and prerequisite chains using ISPF dialogs; no natural language interface.",
+      "Impact assessment requires manually cross-referencing PTF descriptions against the application topology — a process that relies on expert knowledge and is not documented anywhere.",
+      "Test environments are provisioned manually, which is slow, error-prone, and often skipped due to time pressure, leaving production as the de facto test environment.",
+      "Change records are assembled after the fact from memory and email threads, not from a continuous audit trail.",
+      "Emergency patches bypass normal process because there is no fast-track workflow that is also safe; teams are forced to choose between speed and rigor.",
+      "Rollback planning is informal. When a patch causes a problem, the remediation path is improvised."
+    ],
+    "desired": [
+      "A systems programmer can understand the full impact of any PTF batch in minutes, not hours.",
+      "A test plan is generated automatically, tied to the specific change, and executed against a provisioned test environment.",
+      "Patches are applied in the correct sequence the first time. Prerequisite chains are resolved by Atlas, not by the engineer.",
+      "Every change step is captured in a searchable audit trail with no manual assembly.",
+      "Emergency patches can be safely fast-tracked: full impact analysis and a function test cycle in one session, with a defensible decision record at the end."
+    ]
+  },
+  "uc-03": {
+    "personas": [],
+    "current": [
+      "Privileged access reports require manually querying RACF across each LPAR and consolidating results by hand. For a 6-LPAR production estate, this is a multi-day task.",
+      "Configuration compliance requires comparing the current state of PARMLIB members, RACF settings, and middleware parameters against the defined baseline — a process that relies on experienced engineers comparing exports in spreadsheets.",
+      "Change history requires reconciling system logs, change management tickets, and SMP/E records — which only intersect cleanly when change management discipline has been consistently maintained. Gaps in that discipline surface as audit findings.",
+      "Separation of duties analysis across 30+ users with elevated access is performed manually by the security team, typically under deadline pressure.",
+      "Undocumented changes — configuration modifications with no corresponding change record — are discovered during the audit, not before. There is no proactive detection mechanism.",
+      "Remediation of compliance gaps discovered during audit prep requires the same engineers who are already stretched assembling evidence. Remediations under time pressure are more likely to create new gaps."
+    ],
+    "desired": [
+      "Derek can ask Atlas \"what do we need for the SOX audit?\" and receive a complete, scoped evidence inventory within minutes — no manual cross-referencing required.",
+      "Privileged access reports, configuration compliance analysis, and 12-month change history are generated as structured, auditor-ready artifacts from Atlas's continuous environment record.",
+      "Undocumented changes are surfaced proactively — Atlas flags the 46 changes with no change record before the audit begins, not during it.",
+      "Configuration deviations from the defined baseline are quantified and classified — compliance percentage, specific deviations, severity, and recommended remediation for each.",
+      "Behavioral anomalies in the privileged access record (e.g., a dormant SPECIAL user who was active outside a change window) are surfaced automatically by Atlas, without requiring the engineer to know to look for them.",
+      "Compliance remediations are planned and validated by Atlas before they are applied — changes made to close audit findings do not inadvertently create new gaps."
+    ]
+  },
+  "uc-04": {
+    "personas": [],
+    "current": [],
+    "desired": []
+  },
+  "uc-05": {
+    "personas": [],
+    "current": [],
+    "desired": []
+  },
+  "uc-06": {
+    "personas": [],
+    "current": [],
+    "desired": []
+  },
+  "uc-07": {
+    "personas": [],
+    "current": [
+      "Impact analysis for application changes is informal — developers rely on tribal knowledge, ask Zach or Kathleen, or discover the impact in integration testing when it is already expensive to fix.",
+      "Test environments are provisioned manually by the infrastructure team. Wait times range from hours to days. Sandboxes that mirror the production topology are rare; most developers test against shared environments that may not reflect production behavior.",
+      "There is little or no test automation on z/OS. Test coverage is manual, inconsistent, and dependent on individual developer discipline.",
+      "Developers have no visibility into application performance metrics without going through the infrastructure team.",
+      "Deploying an application change to CICS or IMS requires multiple manual steps across multiple tools and teams — IBM Z Open Editor for code, a separate build process via DBB, a separate deployment tool, and a sysprog to configure the CICS or IMS definitions if they change.",
+      "Regression detection is ad hoc. If Deb's change breaks something in a shared CICS transaction chain, she is likely to find out through an integration test failure or a production incident — not through an automated regression run she controlled."
+    ],
+    "desired": [
+      "A developer can ask Atlas what her proposed change will touch — which programs, tables, transactions, and downstream applications — before writing a line of code.",
+      "A test plan is generated automatically from the impact analysis, scoped to the actual change, with environment specifications and test data requirements.",
+      "The test environment is provisioned in the background while the developer writes code. It is ready when she needs it.",
+      "Tests run in an isolated environment, not a shared one. Regressions are caught before the change leaves the developer's hands.",
+      "The developer can iterate — modify code, watch the test plan update, re-run tests — in a fast loop without filing tickets or waiting for infrastructure.",
+      "Deploying to CICS or IMS is Atlas-orchestrated. The developer initiates; Atlas handles the configuration steps."
+    ]
+  },
+  "uc-08": {
+    "personas": [],
+    "current": [],
+    "desired": []
+  },
+  "uc-09": {
+    "personas": [],
+    "current": [
+      "Environment comparison is manual: engineers export configuration parameters from ISPF or SMP/E and compare them in spreadsheets or scripts they maintain themselves. This is done infrequently, is error-prone, and misses non-obvious differences like PTF-driven behavior changes that do not appear in parameter files.",
+      "Unauthorized change detection relies on change management process compliance — if someone makes a change without a change record, the only detection mechanism is a human noticing a behavioral difference or an auditor flagging it. There is no automated detection against a configuration baseline.",
+      "QA environment drift from production is an endemic problem. Most \"test doesn't look like prod\" situations are resolved by guesswork and manual parameter comparison by the most experienced engineer available — often Zach, who has better things to do.",
+      "Post-change validation is informal. After a planned change, there is no systematic check that the environment reached the intended state and that no unintended side effects occurred.",
+      "Audit preparation for change control requires manually assembling evidence of what changed, when, and who authorized it. Undocumented changes produce audit findings."
+    ],
+    "desired": [
+      "Annette receives an alert when any production or non-production environment drifts materially from its baseline or from a peer environment — before a human notices a behavioral symptom.",
+      "When an unauthorized configuration change is detected, Atlas provides immediate evidence: what changed, what the previous value was, when it changed, and whether there is a change record. Annette can triage, decide, and act without escalating to Zach for the basic facts.",
+      "QA environments can be confirmed as production-equivalent on demand. The \"test doesn't look like prod\" conversation is replaced by a parity report that either confirms alignment or precisely quantifies the differences.",
+      "Every change — planned or unplanned — has a complete audit trail that closes without manual assembly.",
+      "Post-change drift validation is automatic: after any planned change, Atlas confirms the environment reached the intended state."
+    ]
+  },
+  "uc-10": {
+    "personas": [],
+    "current": [],
+    "desired": []
+  },
+  "uc-11": {
+    "personas": [],
+    "current": [
+      "Capacity planning for peak events relies on manual analysis of prior-year SMF data, spreadsheets, and the institutional memory of one or two experienced engineers. There is no systematic projection methodology.",
+      "Configuration sizing for peak load (Db2 buffer pools, CICS MXT, MQ queue depth, DASD allocation) is determined by experience and rule of thumb, not by modeled projection against actual transaction growth trends.",
+      "Performance testing before applying configuration changes requires a dedicated lab environment, is logistically difficult to schedule, and is often skipped.",
+      "Diagnosing a live performance degradation requires three or more specialist teams (CICS team, Db2 DBA, systems programmer) to each pull their own telemetry independently and then coordinate by conference call.",
+      "The link between a configuration change and a subsequent performance regression is usually discovered by accident or through exhaustive manual investigation — not through automated attribution.",
+      "Dark capacity (underutilized resources, over-provisioned LPARs) is invisible without dedicated analysis. Teams routinely procure capacity they already have."
+    ],
+    "desired": [
+      "Before a peak event, a performance engineer can ask Atlas to model the risk, project transaction volume against current configuration, and identify constraints — in one session, without pulling data from multiple tools.",
+      "Configuration changes are tested in an isolated environment at simulated load before production apply, with headroom validated at each threshold.",
+      "When a performance degradation is reported, root cause is identified within one conversation — with the responsible change event attributed, the fix generated, and the remediation validated before production.",
+      "Post-change performance regressions are surfaced by Atlas automatically, correlating system behavior changes to recent configuration history, without waiting for a user complaint.",
+      "Dark capacity is continuously visible, enabling procurement decisions to be based on actual utilization data rather than estimates."
+    ]
+  },
+  "uc-12": {
+    "personas": [],
+    "current": [],
+    "desired": []
+  },
+  "uc-13": {
+    "personas": [],
+    "current": [],
+    "desired": []
+  },
+  "uc-14": {
+    "personas": [],
+    "current": [],
+    "desired": []
+  }
+}
