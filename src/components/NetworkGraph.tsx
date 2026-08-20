@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { productNodes, getConnections, type ProductNode, type NodeType, nodeTypeConfig } from "@/data/productData";
 import { useRouter } from "next/navigation";
+import { productNodes, getConnections, type ProductNode, type NodeType, nodeTypeConfig } from "@/data/productData";
 
 interface LayoutNode extends ProductNode {
   x: number;
@@ -139,13 +139,17 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
       const dx = pos.x - node.x;
       const dy = pos.y - node.y;
       if (dx * dx + dy * dy < node.radius * node.radius) {
-        onSelectNode(node);
+        if (node.type === "useCase") {
+          router.push(`/usecase/${node.id}`);
+        } else {
+          onSelectNode(node);
+        }
         return;
       }
     }
     // Start panning
     panningRef.current = { active: true, lastX: pos.x, lastY: pos.y };
-  }, [getMouseWorldPos, onSelectNode]);
+  }, [getMouseWorldPos, onSelectNode, router]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!panningRef.current?.active) return;
