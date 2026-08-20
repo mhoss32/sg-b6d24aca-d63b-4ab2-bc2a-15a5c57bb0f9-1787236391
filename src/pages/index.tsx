@@ -1,12 +1,24 @@
-import React from 'react'
+"use client";
+
+import React, { useState } from "react";
+import { NetworkGraph } from "@/components/NetworkGraph";
+import { DetailPanel } from "@/components/DetailPanel";
+import { Legend } from "@/components/Legend";
+import { Header } from "@/components/Header";
+import { type ProductNode } from "@/data/productData";
 
 export default function Home() {
+  const [selectedNode, setSelectedNode] = useState<ProductNode | null>(null);
+
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-foreground">Hello World</h1>
-        <p className="text-lg text-muted-foreground">This is going to be your softgen app, start by describing your project.</p>
-      </div>
+    <main className="relative w-screen h-screen bg-background overflow-hidden">
+      <Header />
+      <Legend />
+      <NetworkGraph
+        onSelectNode={setSelectedNode}
+        selectedNodeId={selectedNode?.id ?? null}
+      />
+      <DetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />
     </main>
-  )
+  );
 }
