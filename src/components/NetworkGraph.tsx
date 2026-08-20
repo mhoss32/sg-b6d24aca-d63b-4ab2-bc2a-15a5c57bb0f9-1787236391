@@ -15,7 +15,7 @@ const NODE_RADIUS: Record<NodeType, number> = {
   systemIntelligence: 62,
   changeIntelligence: 62,
   predictiveIntelligence: 62,
-  useCase: 58,
+  useCase: 60,
 };
 
 const COLORS: Record<NodeType, string> = {
@@ -38,6 +38,37 @@ const PILLAR_LABELS: Record<string, string> = {
   predictive: "Predictive\nIntelligence",
 };
 
+const PILLAR_TO_TYPE: Record<string, NodeType> = {
+  system: "systemIntelligence",
+  change: "changeIntelligence",
+  predictive: "predictiveIntelligence",
+};
+
+function getUseCasePillars(ucId: string): string[] {
+  const pillars: string[] = [];
+  for (const [pillarId, ucIds] of Object.entries(PILLAR_USE_CASES)) {
+    if (ucIds.includes(ucId) && !pillars.includes(pillarId)) {
+      pillars.push(pillarId);
+    }
+  }
+  const node = productNodes.find((n) => n.id === ucId);
+  if (node) {
+    for (const conn of node.connections) {
+      if ((conn === "system" || conn === "change" || conn === "predictive") && !pillars.includes(conn)) {
+        pillars.push(conn);
+      }
+    }
+  }
+  return pillars;
+}
+
+function getUseCaseColor(ucId: string): string {
+  const pillars = getUseCasePillars(ucId);
+  if (pillars.length === 0) return "#E2E8F0";
+  const type = PILLAR_TO_TYPE[pillars[0]];
+  return type ? COLORS[type] : "#E2E8F0";
+}
+
 function computeLayout(w: number, h: number, collapsed: Set<string>): LayoutNode[] {
   const atlasX = w / 2;
   const atlasY = h * 0.12;
@@ -54,21 +85,43 @@ function computeLayout(w: number, h: number, collapsed: Set<string>): LayoutNode
     predictive: { x: predictiveX, y: pillarY },
   };
 
-  // Position use cases only if pillar is not collapsed
+  // Build assignments: for each use case, find its active pillars
+  // and assign to the first active one (reassigning from collapsed pillars)
+  const pillarAssignments: Record<string, string[]> = {
+    system: [],
+    change: [],
+    predictive: [],
+  };
+
+  for (const [pillarId, ucIds] of Object.entries(PILLAR_USE_CASES)) {
+    for (const ucId of ucIds) {
+      const ucPillars = getUseCasePillars(ucId);
+      const activePillars = ucPillars.filter((p) => !collapsed.has(p));
+
+      if (activePillars.length === 0) continue; // Hidden
+
+      const targetPillar = activePillars[0];
+      if (!pillarAssignments[targetPillar].includes(ucId)) {
+        pillarAssignments[targetPillar].push(ucId);
+      }
+    }
+  }
+
+  // Position use cases under their assigned active pillars
+  const useCaseStartY = h * 0.48;
+  const rowGap = h * 0.16;
   const pillarCenters: Record<string, number> = {
     system: systemX,
     change: changeX,
     predictive: predictiveX,
   };
 
-  for (const [pillarId, ucIds] of Object.entries(PILLAR_USE_CASES)) {
+  for (const [pillarId, ucIds] of Object.entries(pillarAssignments)) {
     if (collapsed.has(pillarId)) continue;
     const centerX = pillarCenters[pillarId];
     const total = ucIds.length;
     const perRow = 2;
     const rows = Math.ceil(total / perRow);
-    const useCaseStartY = h * 0.48;
-    const rowGap = h * 0.14;
 
     for (let i = 0; i < total; i++) {
       const row = Math.floor(i / perRow);
@@ -83,12 +136,19 @@ function computeLayout(w: number, h: number, collapsed: Set<string>): LayoutNode
     }
   }
 
-  return productNodes.map((n) => ({
-    ...n,
-    x: positions[n.id]?.x ?? w / 2,
-    y: positions[n.id]?.y ?? h / 2,
-    radius: NODE_RADIUS[n.type],
-  }));
+  return productNodes
+    .filter((n) => {
+      if (n.type !== "useCase") return true;
+      const ucPillars = getUseCasePillars(n.id);
+      const activePillars = ucPillars.filter((p) => !collapsed.has(p));
+      return activePillars.length > 0;
+    })
+    .map((n) => ({
+      ...n,
+      x: positions[n.id]?.x ?? w / 2,
+      y: positions[n.id]?.y ?? h / 2,
+      radius: NODE_RADIUS[n.type],
+    }));
 }
 
 interface NetworkGraphProps {
@@ -173,7 +233,7 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
   }, []);
 
   const togglePillar = useCallback((pillarId: string) => {
-    setCollapsedPillars(prev => {
+    setCollapsedPillars((prev) => {
       const next = new Set(prev);
       if (next.has(pillarId)) {
         next.delete(pillarId);
@@ -263,8 +323,8 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
       ctx.translate(t.x, t.y);
       ctx.scale(t.scale, t.scale);
 
-      // Draw connections (skip if target use case is hidden due to collapsed pillar)
-      const nodeIds = new Set(nodes.map(n => n.id));
+      // Draw connections
+      const nodeIds = new Set(nodes.map((n) => n.id));
       for (const conn of connections) {
         if (!nodeIds.has(conn.source) || !nodeIds.has(conn.target)) continue;
         const a = nodes.find((x) => x.id === conn.source);
@@ -272,6 +332,13 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
         if (!a || !b) continue;
 
         const isHighlighted = selectedNodeId && (conn.source === selectedNodeId || conn.target === selectedNodeId);
+
+        const isPillarToUseCase =
+          (a.type === "systemIntelligence" || a.type === "changeIntelligence" || a.type === "predictiveIntelligence") &&
+          b.type === "useCase";
+        const isUseCaseToPillar =
+          a.type === "useCase" &&
+          (b.type === "systemIntelligence" || b.type === "changeIntelligence" || b.type === "predictiveIntelligence");
 
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
@@ -282,6 +349,12 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
           ctx.lineWidth = 2.5;
           ctx.shadowColor = COLORS[a.type];
           ctx.shadowBlur = 12;
+        } else if (isPillarToUseCase || isUseCaseToPillar) {
+          const pillarNode = isPillarToUseCase ? a : b;
+          ctx.strokeStyle = COLORS[pillarNode.type] + "50";
+          ctx.lineWidth = 1.8;
+          ctx.shadowColor = COLORS[pillarNode.type];
+          ctx.shadowBlur = 8;
         } else {
           const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
           grad.addColorStop(0, COLORS[a.type] + "18");
@@ -300,13 +373,16 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
         const isCollapsedPillar = node.id === "system" || node.id === "change" || node.id === "predictive";
         const isCollapsed = isCollapsedPillar && collapsedPillars.has(node.id);
 
+        // Determine node color (use cases get pillar color)
+        const nodeColor = node.type === "useCase" ? getUseCaseColor(node.id) : COLORS[node.type];
+
         // Glow ring
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = COLORS[node.type] + (isSelected ? "FF" : "CC");
+        ctx.strokeStyle = nodeColor + (isSelected ? "FF" : "CC");
         ctx.lineWidth = isSelected ? 3 : 1.5;
-        ctx.shadowColor = COLORS[node.type];
-        ctx.shadowBlur = isSelected ? 30 : (node.type === "atlas" ? 20 : 14);
+        ctx.shadowColor = nodeColor;
+        ctx.shadowBlur = isSelected ? 30 : node.type === "atlas" ? 20 : 14;
         ctx.stroke();
         ctx.shadowBlur = 0;
 
@@ -320,34 +396,36 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius - 3, 0, Math.PI * 2);
         const grad = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, node.radius - 3);
-        grad.addColorStop(0, COLORS[node.type] + "14");
-        grad.addColorStop(1, COLORS[node.type] + "04");
+        grad.addColorStop(0, nodeColor + "14");
+        grad.addColorStop(1, nodeColor + "04");
         ctx.fillStyle = grad;
         ctx.fill();
 
-        // Draw pillar icons
+        // Draw pillar icons and labels
         if (node.type === "systemIntelligence" || node.type === "changeIntelligence" || node.type === "predictiveIntelligence") {
           const key = node.id === "system" ? "system" : node.id === "change" ? "change" : "predictive";
           const img = imagesRef.current[key];
           if (img) {
-            const iconSize = node.radius * 0.65;
+            const iconSize = node.radius * 0.50;
             ctx.save();
             ctx.beginPath();
             ctx.arc(node.x, node.y, node.radius - 3, 0, Math.PI * 2);
             ctx.clip();
-            ctx.drawImage(img, node.x - iconSize / 2, node.y - iconSize / 2 - 6, iconSize, iconSize);
+            // Shift icon up to make room for label below
+            ctx.drawImage(img, node.x - iconSize / 2, node.y - iconSize / 2 - 10, iconSize, iconSize);
             ctx.restore();
           }
 
-          // Pillar label below icon
+          // Pillar label below icon with no overlap
           const labelText = PILLAR_LABELS[node.id] || "";
           const labelLines = labelText.split("\n");
-          ctx.fillStyle = COLORS[node.type];
+          ctx.fillStyle = nodeColor;
           ctx.textAlign = "center";
           ctx.textBaseline = "top";
           const labelFontSize = 8;
           const labelLineHeight = 10;
-          const labelStartY = node.y + node.radius * 0.15;
+          // Position label well below the icon area
+          const labelStartY = node.y + node.radius * 0.22;
           for (let i = 0; i < labelLines.length; i++) {
             ctx.font = `600 ${labelFontSize}px "IBM Plex Sans", sans-serif`;
             ctx.fillText(labelLines[i], node.x, labelStartY + i * labelLineHeight);
@@ -357,12 +435,12 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
           if (isCollapsed) {
             ctx.beginPath();
             ctx.arc(node.x, node.y + node.radius + 10, 8, 0, Math.PI * 2);
-            ctx.fillStyle = COLORS[node.type] + "30";
+            ctx.fillStyle = nodeColor + "30";
             ctx.fill();
-            ctx.strokeStyle = COLORS[node.type] + "80";
+            ctx.strokeStyle = nodeColor + "80";
             ctx.lineWidth = 1;
             ctx.stroke();
-            ctx.fillStyle = COLORS[node.type];
+            ctx.fillStyle = nodeColor;
             ctx.font = `bold 10px "IBM Plex Sans", sans-serif`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
@@ -374,7 +452,7 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
         if (node.type !== "systemIntelligence" && node.type !== "changeIntelligence" && node.type !== "predictiveIntelligence") {
           const baseFontSize = node.type === "atlas" ? 13 : node.type === "useCase" ? 8 : 10;
           const maxWidth = node.radius * 1.3;
-          const maxLines = node.type === "useCase" ? 3 : 2;
+          const maxLines = node.type === "useCase" ? 4 : 2;
 
           ctx.fillStyle = node.type === "useCase" ? "#94A3B8" : "#E2E8F0";
           ctx.textAlign = "center";
@@ -385,7 +463,7 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
           let lines: string[] = [];
           const words = node.label.split(" ");
 
-          for (let attempt = 0; attempt < 8; attempt++) {
+          for (let attempt = 0; attempt < 10; attempt++) {
             ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
             lines = [];
             let currentLine = "";
@@ -404,11 +482,12 @@ export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps
 
             if (lines.length <= maxLines) break;
             fontSize -= 0.5;
-            if (fontSize < 7) break;
+            if (fontSize < 6.5) break;
           }
 
+          // If still too many lines, force aggressive truncate
           if (lines.length > maxLines) {
-            fontSize = Math.max(fontSize, 7);
+            fontSize = Math.max(fontSize, 6.5);
             ctx.font = `500 ${fontSize}px "IBM Plex Sans", sans-serif`;
             const targetCharsPerLine = Math.floor(maxWidth / (fontSize * 0.55));
             lines = [];
