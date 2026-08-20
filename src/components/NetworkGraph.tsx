@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { productNodes, getConnections, type ProductNode, type NodeType, nodeTypeConfig } from "@/data/productData";
+import { useRouter } from "next/navigation";
 
 interface LayoutNode extends ProductNode {
   x: number;
@@ -90,6 +91,7 @@ interface NetworkGraphProps {
 }
 
 export function NetworkGraph({ onSelectNode, selectedNodeId }: NetworkGraphProps) {
+  const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const nodesRef = useRef<LayoutNode[]>([]);
