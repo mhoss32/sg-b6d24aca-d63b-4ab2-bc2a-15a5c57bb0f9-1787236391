@@ -12,13 +12,16 @@ import {
   ChevronRight,
 } from "lucide-react";
 import type { FlowStage, FlowDiagram as FlowDiagramType } from "@/data/productData";
+import type { LucideIcon } from "lucide-react";
 
 export interface FlowDiagramProps {
   diagram: FlowDiagramType;
   variant: "asIs" | "toBe";
 }
 
-const markerConfig = {
+type MarkerStyle = { icon: LucideIcon; color: string; bg: string; border: string };
+
+const markerConfig: Record<string, Record<string, MarkerStyle>> = {
   asIs: {
     time: { icon: Clock, color: "text-amber", bg: "bg-amber/10", border: "border-amber/30" },
     pain: { icon: AlertTriangle, color: "text-red", bg: "bg-red/10", border: "border-red/30" },
@@ -93,7 +96,7 @@ function StageCard({
   stage: FlowStage;
   index: number;
   markers: FlowDiagramType["markers"];
-  config: typeof markerConfig.asIs;
+  config: Record<string, MarkerStyle>;
   isLast: boolean;
 }) {
   return (
@@ -124,6 +127,7 @@ function StageCard({
           <div className="flex flex-wrap gap-1.5">
             {markers.map((marker, mi) => {
               const mc = config[marker.type];
+              if (!mc) return null;
               const Icon = mc.icon;
               return (
                 <div
