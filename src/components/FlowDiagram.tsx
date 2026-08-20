@@ -202,7 +202,7 @@ function StageCard({
                   )}
                   title={marker.text}
                 >
-                  <Icon className="w-3 h-3 flex-shrink-0" />
+                  <Icon className={cn("w-3 h-3 flex-shrink-0", mc.color)} />
                   <span className="truncate max-w-[120px]">{marker.text}</span>
                 </div>
               );

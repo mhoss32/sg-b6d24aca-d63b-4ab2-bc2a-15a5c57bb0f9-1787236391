@@ -505,7 +505,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "time", text: "Under 2 engineer-days — most evidence generated in hours", stageIndex: 1 },
         { type: "gain", text: "46 undocumented changes in 12 months surfaced proactively", stageIndex: 3 },
         { type: "gain", text: "Behavioral anomaly detection finds patterns no human thought to look for", stageIndex: 3 },
-        { type: "skill", text: "Compliance professional can operate without deep z/OS expertise", stageIndex: 5 },
+        { type: "gain", text: "Compliance professional can operate without deep z/OS expertise", stageIndex: 5 },
       ],
     },
     capabilities: [
@@ -605,7 +605,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "time", text: "Under 15 minutes for complete dependency analysis", stageIndex: 1 },
         { type: "gain", text: "Cross-subsystem lateral connections visible for the first time", stageIndex: 1 },
         { type: "gain", text: "Reproducible — same query returns same structured result every time", stageIndex: 2 },
-        { type: "skill", text: "Developers and architects can self-serve without z/OS specialist involvement", stageIndex: 1 },
+        { type: "gain", text: "Developers and architects can self-serve without z/OS specialist involvement", stageIndex: 1 },
       ],
     },
     capabilities: [
@@ -654,7 +654,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "time", text: "Under 30 minutes for complete health assessment", stageIndex: 1 },
         { type: "gain", text: "Compound risks identified that no single tool can see", stageIndex: 1 },
         { type: "gain", text: "Health baseline enables trend comparison across events", stageIndex: 4 },
-        { type: "skill", text: "Any team member can request health check — not just Zach", stageIndex: 1 },
+        { type: "gain", text: "Any team member can request health check — not just Zach", stageIndex: 1 },
       ],
     },
     capabilities: [
@@ -705,7 +705,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "time", text: "Under 2 hours from assignment to first test run", stageIndex: 0 },
         { type: "gain", text: "Impact visible before coding — no surprises in production", stageIndex: 0 },
         { type: "gain", text: "Isolated environment — no contention with other developers", stageIndex: 3 },
-        { type: "skill", text: "Developers self-serve — sysprog freed from babysitting routine changes", stageIndex: 4 },
+        { type: "gain", text: "Developers self-serve — sysprog freed from babysitting routine changes", stageIndex: 4 },
       ],
     },
     capabilities: [
@@ -806,7 +806,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "time", text: "Same-day drift detection within one Atlas discovery cycle", stageIndex: 1 },
         { type: "gain", text: "Unauthorized changes flagged immediately with full evidence trail", stageIndex: 2 },
         { type: "gain", text: "QA parity confirmed on demand — no more 'test doesn't look like prod'", stageIndex: 0 },
-        { type: "skill", text: "L2 operator can triage without escalating to Zach for basic facts", stageIndex: 3 },
+        { type: "gain", text: "L2 operator can triage without escalating to Zach for basic facts", stageIndex: 3 },
       ],
     },
     capabilities: [
