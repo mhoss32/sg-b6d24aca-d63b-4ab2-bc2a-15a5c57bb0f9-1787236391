@@ -27,6 +27,12 @@ export interface FlowDiagram {
   markers: { type: "pain" | "gain" | "time" | "artefact" | "skill"; text: string; stageIndex: number }[];
 }
 
+export interface Capability {
+  name: string;
+  timeline: "GA" | "H1 2027" | "H2 2027";
+  description: string;
+}
+
 export interface UseCaseDetail {
   id: string;
   label: string;
@@ -34,6 +40,7 @@ export interface UseCaseDetail {
   personas: Persona[];
   asIs: FlowDiagram;
   toBe: FlowDiagram;
+  capabilities: Capability[];
 }
 
 export interface ProductNode {
@@ -393,6 +400,14 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "skill", text: "Atlas replaces expert memory with queryable topology model", stageIndex: 2 },
       ],
     },
+    capabilities: [
+      { name: "System Topology", timeline: "GA", description: "Dependency graph for blast radius analysis" },
+      { name: "Change Risk Assessment", timeline: "GA", description: "AI-powered impact and risk scoring" },
+      { name: "Config-as-Code", timeline: "GA", description: "Configuration baseline and comparison" },
+      { name: "Workflow Engine", timeline: "GA", description: "Orchestrated remediation execution" },
+      { name: "Health Assessment", timeline: "H2 2027", description: "Continuous security posture monitoring" },
+      { name: "Drift Detection", timeline: "H2 2027", description: "Detect unauthorized configuration changes" },
+    ],
   },
   "uc-02": {
     id: "uc-02",
@@ -439,6 +454,15 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "skill", text: "Mid-level engineers can execute with Atlas guidance — reduced expert dependency", stageIndex: 2 },
       ],
     },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Automated PTF and fix inventory" },
+      { name: "System Topology", timeline: "GA", description: "Cross-subsystem dependency mapping" },
+      { name: "Change Risk Assessment", timeline: "GA", description: "Prerequisite and compatibility analysis" },
+      { name: "Workflow Engine", timeline: "GA", description: "Orchestrated patch execution" },
+      { name: "Ansible Integration", timeline: "GA", description: "Automated PTF apply and validation" },
+      { name: "Test Plan Generation", timeline: "GA", description: "AI-generated test plans" },
+      { name: "Test Environment Provisioning", timeline: "GA", description: "On-demand isolated test environments" },
+    ],
   },
   "uc-03": {
     id: "uc-03",
@@ -484,6 +508,13 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "skill", text: "Compliance professional can operate without deep z/OS expertise", stageIndex: 5 },
       ],
     },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Complete environment inventory" },
+      { name: "Config-as-Code", timeline: "GA", description: "Configuration state recording and comparison" },
+      { name: "Policy-as-Code", timeline: "GA", description: "Compliance rules and automated checking" },
+      { name: "Health Assessment", timeline: "H2 2027", description: "Security posture scoring and gap analysis" },
+      { name: "Drift Detection", timeline: "H2 2027", description: "Unauthorized and undocumented change detection" },
+    ],
   },
   "uc-04": {
     id: "uc-04",
@@ -527,6 +558,13 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "skill", text: "Atlas replaces shadowing with queryable, always-current environment model", stageIndex: 1 },
       ],
     },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Environment inventory and overview" },
+      { name: "System Topology", timeline: "GA", description: "Visual dependency relationships" },
+      { name: "Config-as-Code", timeline: "GA", description: "Configuration knowledge base" },
+      { name: "Natural Language Query", timeline: "GA", description: "Ask questions in plain English" },
+      { name: "Workflow Engine", timeline: "GA", description: "Guided first change execution" },
+    ],
   },
   "uc-05": {
     id: "uc-05",
@@ -570,6 +608,12 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "skill", text: "Developers and architects can self-serve without z/OS specialist involvement", stageIndex: 1 },
       ],
     },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Automated application inventory" },
+      { name: "System Topology", timeline: "GA", description: "Cross-subsystem dependency graph" },
+      { name: "Natural Language Query", timeline: "GA", description: "Self-service dependency queries" },
+      { name: "Change Risk Assessment", timeline: "GA", description: "Blast radius quantification" },
+    ],
   },
   "uc-06": {
     id: "uc-06",
@@ -613,6 +657,13 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "skill", text: "Any team member can request health check — not just Zach", stageIndex: 1 },
       ],
     },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Environment inventory baseline" },
+      { name: "Config-as-Code", timeline: "GA", description: "Configuration state capture" },
+      { name: "Policy-as-Code", timeline: "GA", description: "Compliance rules engine" },
+      { name: "Health Assessment", timeline: "H2 2027", description: "Multi-pillar health scoring" },
+      { name: "Performance Prediction", timeline: "H2 2027", description: "Performance constraint analysis" },
+    ],
   },
   "uc-07": {
     id: "uc-07",
@@ -657,6 +708,14 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "skill", text: "Developers self-serve — sysprog freed from babysitting routine changes", stageIndex: 4 },
       ],
     },
+    capabilities: [
+      { name: "System Topology", timeline: "GA", description: "Real-time blast radius analysis" },
+      { name: "Change Risk Assessment", timeline: "GA", description: "Impact scoring before coding" },
+      { name: "Workflow Engine", timeline: "GA", description: "Change orchestration and tracking" },
+      { name: "Test Plan Generation", timeline: "GA", description: "AI-generated test plans" },
+      { name: "Test Environment Provisioning", timeline: "GA", description: "On-demand isolated environments" },
+      { name: "Developer Experience Integration", timeline: "H1 2027", description: "IDE and toolchain integration" },
+    ],
   },
   "uc-08": {
     id: "uc-08",
@@ -700,6 +759,13 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "skill", text: "Atlas applies compatibility knowledge automatically — no expert memorization required", stageIndex: 0 },
       ],
     },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Full environment inventory" },
+      { name: "System Topology", timeline: "GA", description: "Subsystem dependency mapping" },
+      { name: "Change Risk Assessment", timeline: "GA", description: "Compatibility and sequencing analysis" },
+      { name: "Workflow Engine", timeline: "GA", description: "Phased upgrade orchestration" },
+      { name: "Test Environment Provisioning", timeline: "GA", description: "Isolation testing environments" },
+    ],
   },
   "uc-09": {
     id: "uc-09",
@@ -743,6 +809,12 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "skill", text: "L2 operator can triage without escalating to Zach for basic facts", stageIndex: 3 },
       ],
     },
+    capabilities: [
+      { name: "Config-as-Code", timeline: "GA", description: "Configuration baseline and comparison" },
+      { name: "Policy-as-Code", timeline: "GA", description: "Drift rules and thresholds" },
+      { name: "Drift Detection", timeline: "H2 2027", description: "Automated drift monitoring and alerting" },
+      { name: "Health Assessment", timeline: "H2 2027", description: "Post-drift impact assessment" },
+    ],
   },
   "uc-10": {
     id: "uc-10",
@@ -786,6 +858,13 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "skill", text: "Atlas replaces expert memory with continuous automated comparison", stageIndex: 0 },
       ],
     },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "DR environment inventory" },
+      { name: "Config-as-Code", timeline: "GA", description: "Production vs DR comparison" },
+      { name: "Drift Detection", timeline: "H2 2027", description: "Continuous DR drift monitoring" },
+      { name: "Health Assessment", timeline: "H2 2027", description: "DR readiness scoring" },
+      { name: "DR Readiness", timeline: "H2 2027", description: "Failover simulation and validation" },
+    ],
   },
   "uc-11": {
     id: "uc-11",
@@ -829,6 +908,12 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "skill", text: "Atlas replaces multi-team investigation with unified cross-pillar analysis", stageIndex: 4 },
       ],
     },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Resource and workload inventory" },
+      { name: "Performance Prediction", timeline: "H2 2027", description: "Load projection and constraint forecasting" },
+      { name: "Capacity Planning", timeline: "H2 2027", description: "Dark capacity discovery and headroom analysis" },
+      { name: "Health Assessment", timeline: "H2 2027", description: "Performance health scoring" },
+    ],
   },
   "uc-12": {
     id: "uc-12",
@@ -872,6 +957,13 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "skill", text: "Atlas provides the topology awareness that makes modernization tractable", stageIndex: 2 },
       ],
     },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Application and code inventory" },
+      { name: "System Topology", timeline: "GA", description: "Code-level dependency mapping" },
+      { name: "Natural Language Query", timeline: "GA", description: "Query codebase in plain English" },
+      { name: "Code Analysis for Modernization", timeline: "H1 2027", description: "Technical debt and deprecated API detection" },
+      { name: "Change Risk Assessment", timeline: "GA", description: "Modernization impact scoring" },
+    ],
   },
   "uc-13": {
     id: "uc-13",
@@ -917,6 +1009,13 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "skill", text: "Atlas replaces multi-team manual project with unified automated workflow", stageIndex: 1 },
       ],
     },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Regulated data inventory across all stores" },
+      { name: "Config-as-Code", timeline: "GA", description: "Configuration state for compliance baseline" },
+      { name: "Policy-as-Code", timeline: "GA", description: "Regulatory rules and automated checking" },
+      { name: "Health Assessment", timeline: "H2 2027", description: "Encryption and access control gap analysis" },
+      { name: "Drift Detection", timeline: "H2 2027", description: "Post-remediation compliance monitoring" },
+    ],
   },
   "uc-14": {
     id: "uc-14",
@@ -960,6 +1059,13 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { type: "skill", text: "Atlas replaces after-the-fact record creation with continuous attribution", stageIndex: 0 },
       ],
     },
+    capabilities: [
+      { name: "Config-as-Code", timeline: "GA", description: "Configuration baseline for comparison" },
+      { name: "Policy-as-Code", timeline: "GA", description: "Governance rules and change windows" },
+      { name: "Workflow Engine", timeline: "GA", description: "Change orchestration and attribution" },
+      { name: "Change Risk Assessment", timeline: "GA", description: "Named change attribution and risk scoring" },
+      { name: "Drift Detection", timeline: "H2 2027", description: "Undocumented change detection" },
+    ],
   },
 };
 

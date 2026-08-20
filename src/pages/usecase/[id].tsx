@@ -1,11 +1,30 @@
 import React from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { ArrowLeft, Network, ExternalLink } from "lucide-react";
+import { ArrowLeft, Network, ChevronDown, Users, GitBranch, Layers } from "lucide-react";
 import { getNodeById, useCaseDetails, type ProductNode } from "@/data/productData";
 import { PersonaCard } from "@/components/PersonaCard";
 import { FlowDiagram } from "@/components/FlowDiagram";
 import { SEO } from "@/components/SEO";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+function TimelineBadge({ timeline }: { timeline: string }) {
+  const styles = {
+    GA: "bg-green/15 text-green border-green/30",
+    "H1 2027": "bg-amber/15 text-amber border-amber/30",
+    "H2 2027": "bg-purple/15 text-purple border-purple/30",
+  };
+  return (
+    <span className={cn("text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full border", styles[timeline as keyof typeof styles] || "bg-muted text-muted-foreground border-border/30")}>
+      {timeline}
+    </span>
+  );
+}
 
 export default function UseCaseDetailPage() {
   const router = useRouter();
@@ -55,7 +74,7 @@ export default function UseCaseDetailPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Use Case Header */}
         <section>
           <div className="flex items-center gap-3 mb-4">
@@ -75,42 +94,87 @@ export default function UseCaseDetailPage() {
           </p>
         </section>
 
-        {/* Personas */}
-        <section>
-          <h2 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-2">
-            <span className="w-8 h-8 rounded-lg bg-purple/10 text-purple flex items-center justify-center">
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-                />
-              </svg>
-            </span>
-            Personas
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {detail.personas.map((persona) => (
-              <PersonaCard key={persona.name} persona={persona} href={`/persona/${persona.name.toLowerCase()}`} />
-            ))}
-          </div>
-        </section>
+        <Accordion type="multiple" defaultValue={["personas", "flows"]} className="space-y-4">
+          {/* Personas */}
+          <AccordionItem value="personas" className="border border-border/20 rounded-2xl bg-card/20 px-6 py-2">
+            <AccordionTrigger className="hover:no-underline py-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-purple/10 text-purple flex items-center justify-center">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div className="text-left">
+                  <h2 className="text-lg font-semibold text-foreground">Personas</h2>
+                  <p className="text-xs text-muted-foreground font-normal">{detail.personas.length} involved — {detail.personas.filter(p => p.engagement === "Primary").length} primary</p>
+                </div>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 pb-4">
+                {detail.personas.map((persona) => (
+                  <PersonaCard key={persona.name} persona={persona} href={`/persona/${persona.name.toLowerCase()}`} />
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-        {/* As-Is Flow */}
-        <section className="rounded-2xl border border-border/20 bg-card/20 p-6 sm:p-8">
-          <FlowDiagram diagram={detail.asIs} variant="asIs" />
-        </section>
+          {/* As-Is / To-Be Flows */}
+          <AccordionItem value="flows" className="border border-border/20 rounded-2xl bg-card/20 px-6 py-2">
+            <AccordionTrigger className="hover:no-underline py-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-coral/10 text-coral flex items-center justify-center">
+                  <GitBranch className="w-4 h-4" />
+                </div>
+                <div className="text-left">
+                  <h2 className="text-lg font-semibold text-foreground">Current State & Desired Outcome</h2>
+                  <p className="text-xs text-muted-foreground font-normal">As-Is flow with pain points · To-Be flow with gains</p>
+                </div>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-6 pt-2 pb-4">
+                <section className="rounded-xl border border-border/20 bg-background/50 p-6">
+                  <FlowDiagram diagram={detail.asIs} variant="asIs" />
+                </section>
+                <section className="rounded-xl border border-border/20 bg-background/50 p-6">
+                  <FlowDiagram diagram={detail.toBe} variant="toBe" />
+                </section>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
-        {/* To-Be Flow */}
-        <section className="rounded-2xl border border-border/20 bg-card/20 p-6 sm:p-8">
-          <FlowDiagram diagram={detail.toBe} variant="toBe" />
-        </section>
+          {/* Capabilities Required */}
+          <AccordionItem value="capabilities" className="border border-border/20 rounded-2xl bg-card/20 px-6 py-2">
+            <AccordionTrigger className="hover:no-underline py-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-cyan/10 text-cyan flex items-center justify-center">
+                  <Layers className="w-4 h-4" />
+                </div>
+                <div className="text-left">
+                  <h2 className="text-lg font-semibold text-foreground">Capabilities Required</h2>
+                  <p className="text-xs text-muted-foreground font-normal">{detail.capabilities.length} Atlas capabilities · {detail.capabilities.filter(c => c.timeline === "GA").length} GA · {detail.capabilities.filter(c => c.timeline === "H1 2027").length} H1 2027 · {detail.capabilities.filter(c => c.timeline === "H2 2027").length} H2 2027</p>
+                </div>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-3 pt-2 pb-4">
+                {detail.capabilities.map((cap) => (
+                  <div
+                    key={cap.name}
+                    className="flex items-start justify-between gap-4 p-4 rounded-xl border border-border/20 bg-background/50 hover:border-cyan/20 transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium text-foreground">{cap.name}</h4>
+                        <TimelineBadge timeline={cap.timeline} />
+                      </div>
+                      <p className="text-sm text-muted-foreground">{cap.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         {/* Footer */}
         <footer className="border-t border-border/20 pt-8 pb-12">
@@ -130,4 +194,8 @@ export default function UseCaseDetailPage() {
       </main>
     </div>
   );
+}
+
+function cn(...classes: (string | false | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
 }
