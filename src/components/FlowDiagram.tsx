@@ -57,7 +57,7 @@ const toBeMarkerConfig: Record<string, MarkerStyle> = {
     color: "text-purple",
     bg: "bg-purple/10",
     border: "border-purple/30",
-    label: "New Capabilities",
+    label: "New User Capability",
   },
   skill: {
     icon: Bot,
