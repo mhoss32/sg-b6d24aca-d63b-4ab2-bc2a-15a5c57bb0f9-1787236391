@@ -450,7 +450,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       markers: [
         { type: "time", text: "Under 30 minutes for complete impact analysis", stageIndex: 1 },
         { type: "gain", text: "Prerequisite chains resolved automatically — no missed dependencies", stageIndex: 1 },
-        { type: "artefact", text: "Complete change record generated automatically with test evidence", stageIndex: 5 },
+        { type: "gain", text: "Complete change record generated automatically with test evidence", stageIndex: 5 },
         { type: "skill", text: "Mid-level engineers can execute with Atlas guidance — reduced expert dependency", stageIndex: 2 },
       ],
     },
