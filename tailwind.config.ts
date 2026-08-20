@@ -76,6 +76,26 @@ const config: Config = {
           light: "rgba(167, 139, 250, 0.15)",
           glow: "rgba(167, 139, 250, 0.4)",
         },
+        orange: {
+          DEFAULT: "#F97316",
+          light: "rgba(249, 115, 22, 0.15)",
+          glow: "rgba(249, 115, 22, 0.4)",
+        },
+        amber: {
+          DEFAULT: "#F59E0B",
+          light: "rgba(245, 158, 11, 0.15)",
+          glow: "rgba(245, 158, 11, 0.4)",
+        },
+        red: {
+          DEFAULT: "#EF4444",
+          light: "rgba(239, 68, 68, 0.15)",
+          glow: "rgba(239, 68, 68, 0.4)",
+        },
+        green: {
+          DEFAULT: "#22C55E",
+          light: "rgba(34, 197, 94, 0.15)",
+          glow: "rgba(34, 197, 94, 0.4)",
+        },
       },
       fontFamily: {
         sans: ["IBM Plex Sans", "system-ui", "sans-serif"],
