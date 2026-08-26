@@ -146,14 +146,14 @@ export default function UseCaseDetailPage() {
                   <GitBranch className="w-4 h-4" />
                 </div>
                 <div className="text-left">
-                  <h2 className="text-lg font-semibold text-foreground">Current State & Desired Outcome</h2>
+                  <h2 className="text-lg font-semibold text-foreground">As-Is & To-Be Analysis</h2>
                   <p className="text-xs text-muted-foreground font-normal">As-Is flow with pain point legends · To-Be flow with wow legends · Double-click markers to edit</p>
                 </div>
               </div>
             </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-6 pt-2 pb-4">
-                <section className="rounded-xl border border-border/20 bg-background/50 p-6">
+                <section className="rounded-xl border border-red-500/20 bg-red-950/10 p-6">
                   <FlowDiagram
                     diagram={detail.asIs}
                     variant="asIs"
@@ -161,7 +161,7 @@ export default function UseCaseDetailPage() {
                     onChange={(asIs) => setDetail({ ...detail, asIs })}
                   />
                 </section>
-                <section className="rounded-xl border border-border/20 bg-background/50 p-6">
+                <section className="rounded-xl border border-green-500/20 bg-green-950/10 p-6">
                   <FlowDiagram
                     diagram={detail.toBe}
                     variant="toBe"
