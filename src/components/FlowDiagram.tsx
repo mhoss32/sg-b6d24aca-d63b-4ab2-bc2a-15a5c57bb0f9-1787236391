@@ -233,10 +233,11 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
       <MarkerLegend variant={variant} />
 
       {/* External Integrations Selector — only for To-Be */}
-      {!isAsIs && diagram.externalTouchpoints && diagram.externalTouchpoints.length > 0 && (
+      {!isAsIs && (
         <ExternalProductSelector
           selectedProducts={selectedProducts}
           onToggleProduct={toggleProduct}
+          availableTouchpoints={diagram.externalTouchpoints || []}
         />
       )}
 
@@ -310,9 +311,11 @@ function truncateToFirstSentence(text: string): string {
 function ExternalProductSelector({
   selectedProducts,
   onToggleProduct,
+  availableTouchpoints,
 }: {
   selectedProducts: string[];
   onToggleProduct: (id: string) => void;
+  availableTouchpoints: ExternalTouchpoint[];
 }) {
   return (
     <div className="mb-4 p-3 rounded-lg border border-border/20 bg-background/50">
@@ -325,23 +328,30 @@ function ExternalProductSelector({
       <div className="flex flex-wrap gap-2">
         {externalProducts.map((product) => {
           const isSelected = selectedProducts.includes(product.id);
+          const hasTouchpoints = availableTouchpoints.some(
+            (tp) => tp.product.toLowerCase().replace(/\s+/g, "-") === product.id
+          );
           return (
             <label
               key={product.id}
               className={cn(
-                "inline-flex items-center gap-2 px-3 py-1.5 rounded-md border cursor-pointer transition-all",
-                isSelected
-                  ? "border-cyan-400/50 bg-cyan-400/10"
-                  : "border-border/30 bg-muted/20 hover:border-border/50"
+                "inline-flex items-center gap-2 px-3 py-1.5 rounded-md border transition-all",
+                hasTouchpoints
+                  ? isSelected
+                    ? "border-cyan-400/50 bg-cyan-400/10 cursor-pointer"
+                    : "border-border/30 bg-muted/20 hover:border-border/50 cursor-pointer"
+                  : "border-border/20 bg-muted/10 opacity-50 cursor-not-allowed"
               )}
+              title={hasTouchpoints ? product.description : `No ${product.label} touchpoints for this use case`}
             >
               <input
                 type="checkbox"
-                checked={isSelected}
-                onChange={() => onToggleProduct(product.id)}
-                className="w-3.5 h-3.5 rounded border-border/40 text-cyan-400 focus:ring-cyan-400/20"
+                checked={isSelected && hasTouchpoints}
+                disabled={!hasTouchpoints}
+                onChange={() => hasTouchpoints && onToggleProduct(product.id)}
+                className="w-3.5 h-3.5 rounded border-border/40 text-cyan-400 focus:ring-cyan-400/20 disabled:opacity-30"
               />
-              <span className={cn("text-xs font-medium", isSelected ? "text-cyan-400" : "text-foreground")}>
+              <span className={cn("text-xs font-medium", isSelected && hasTouchpoints ? "text-cyan-400" : "text-foreground")}>
                 {product.label}
               </span>
             </label>

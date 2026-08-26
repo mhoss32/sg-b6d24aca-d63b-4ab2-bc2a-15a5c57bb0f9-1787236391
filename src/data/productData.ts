@@ -67,6 +67,7 @@ export interface ExternalProduct {
 
 export const externalProducts: ExternalProduct[] = [
   { id: "bob-ppz", label: "Bob PPZ", description: "Code-level application change intelligence with ZUnderstand integration" },
+  { id: "concert4z", label: "Concert4Z", description: "Production observability, risk management, and ZEN runtime analytics" },
 ];
 
 export interface Capability {
@@ -501,6 +502,38 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
           ],
           stageIndex: 4,
         },
+        {
+          type: "handoff",
+          product: "Concert4Z",
+          title: "Concert4Z Handoff",
+          steps: [
+            { label: "Concert4Z produced", description: "Concert4Z's Risk Management module has identified a missing critical security PTF (FIXCAT gap) across one or more z/OS environments, flagged it as operational risk, and initiated a change ticket or Ansible remediation workflow." },
+            { label: "Concert4Z hands to Atlas", description: "The change ticket or remediation trigger passes to Atlas. Atlas takes the planned change and applies its change intelligence: querying all connected LPARs for the full exposure picture, traversing the blast radius across the application-to-infrastructure topology, resolving PTF prerequisites, and generating a sequenced remediation plan." },
+            { label: "Atlas returns to Concert4Z", description: "After Atlas completes the remediation, the validated, applied change is recorded in Atlas's change log. Atlas generates the audit trail and evidence package. Concert4Z's Risk Management module sees the operational risk as resolved." },
+          ],
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas traverses the dependency graph using ZUnderstand application discovery and topology data. Concert4Z's ZEN (Z Observability Connect runtime relationship data) enriches this traversal with runtime-observed application flows — which transactions actually called which programs during the observation period. This means the blast radius includes execution-path-level precision for active workloads, not just statically configured relationships. A program that is statically reachable but never actually invoked is distinguished from one that is in an active hot path.",
+          stageIndex: 2,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas is monitoring production LPARs and DR environments during and after the remediation window for exploitation activity and anomalous behavior. Concert4Z's Observe module provides the production anomaly detection and event correlation that Atlas's monitoring step draws on. If Concert4Z detects behavioral anomalies on a patched or unpatched LPAR during the remediation window, these signals enrich Atlas's monitoring surface. Atlas surfaces anomalies without being asked; Concert4Z's continuous production monitoring is the data source that makes this possible.",
+          stageIndex: 7,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas generates the complete audit trail — exposure assessment, blast radius, plan, test results, apply log, authorization chain. Concert4Z's change evidence integration means the closed vulnerability remediation record in Atlas flows into Concert4Z's operational context, so production operations teams have the full remediation history available during any subsequent incident investigation on the affected systems.",
+          stageIndex: 8,
+        },
       ],
     },
     capabilities: [
@@ -558,6 +591,58 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Alice", type: "gain", title: "New User Capability — mid-level engineers execute with Atlas guidance", description: "Step-by-step execution guidance reduces expert dependency.", stageIndex: 2 },
         { persona: "Stan", type: "skill", title: "Atlas AI & Automation — cross-subsystem impact visible before apply", description: "CICS regions, Db2 connections, and MQ channels stay stable during patch apply.", stageIndex: 1 },
       ],
+      externalTouchpoints: [
+        {
+          type: "enrichment",
+          product: "Bob PPZ",
+          title: "BOB PPZ Enrichment Touchpoint",
+          summary: "Atlas analyzes the cross-subsystem impact of the proposed PTF apply. When Bob PPZ is installed, the impact analysis is enriched with ZUnderstand's code-level metadata — precise program-to-program call relationships, data flow paths, and business service attribution. For subsystems with complex COBOL call chains, this means the impact analysis includes execution-path-level detail, not just topology-level relationships. Compound risks involving application code (e.g., a program with both a missing PTF dependency and a known data flow vulnerability) are surfaced with higher precision.",
+          stageIndex: 1,
+        },
+        {
+          type: "handoff",
+          product: "Bob PPZ",
+          title: "BOB PPZ Handoff",
+          steps: [
+            { label: "Atlas produced", description: "A provisioned test environment with the PTF staged for apply. Atlas executes the automated test plan." },
+            { label: "Atlas directs the user to Bob PPZ", description: "If a test failure is attributed to an application code dependency (not just a configuration issue), Atlas identifies the specific program and the nature of the incompatibility. Atlas presents the failure context — the specific program, the call path, the behavioral change the PTF introduced — and directs the user to Bob PPZ for the code-level fix." },
+            { label: "Bob PPZ returns to Atlas", description: "A fix artifact. Atlas re-runs the test against the corrected code, confirms pass, and proceeds with the patch apply." },
+          ],
+          stageIndex: 4,
+        },
+        {
+          type: "handoff",
+          product: "Concert4Z",
+          title: "Concert4Z Handoff",
+          steps: [
+            { label: "Concert4Z produced", description: "Concert4Z's Risk Management module has identified missing critical or HIPER PTFs across the z/OS estate. It has computed blast radius across z/OS environments, flagged the operational risk, and can auto-initiate a change ticket or invoke an Ansible agent workflow for a targeted, known fix." },
+            { label: "Concert4Z hands to Atlas", description: "The initiated change passes to Atlas. Atlas applies full change intelligence to the planned patch batch: querying all connected LPARs for current PTF state, resolving prerequisite chains, mapping the impact of the proposed patches across subsystems and applications, and generating a sequenced patch plan." },
+            { label: "Atlas returns to Concert4Z", description: "After Atlas completes the full patch cycle, the applied and validated change is recorded. Concert4Z's Risk Management module sees the operational risk as resolved and can use the Atlas change evidence in its operational record." },
+          ],
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas's impact analysis maps which subsystems, applications, and transactions are affected by the proposed patch batch. Concert4Z's production performance baselines (from SMF/CDP data via OMEGAMON Data Provider) provide Atlas with the behavioral ground truth for the current environment — what normal CPU consumption, I/O rates, and transaction response times look like before the patch. This baseline data improves the specificity of Atlas's pre/post behavioral comparison during validation.",
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas runs the automated test package in the provisioned test environment. Concert4Z's ZEN data enriches the test coverage picture by identifying which production transaction flows are most active — ensuring Atlas's validation prioritizes the test scenarios that cover the highest-traffic paths, not just the statically configured topology.",
+          stageIndex: 4,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas has generated the complete change record, attached the plan, test results, and execution log. In production, following patch apply, Concert4Z's Observe and Optimize modules monitor for post-patch behavioral regressions: CPU consumption changes, Db2 buffer pool behavior changes, CICS thread utilization changes. If Concert4Z detects a behavioral anomaly that correlates with the patch apply timestamp, it surfaces this as an operational finding. Atlas's change record provides Concert4Z with the exact change context for the correlation.",
+          stageIndex: 5,
+        },
+      ],
     },
     capabilities: [
       { name: "System Discovery", timeline: "GA", description: "Automated PTF and fix inventory" },
@@ -614,6 +699,29 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Derek", type: "gain", title: "New User Capability — compliance professional operates without deep z/OS expertise", description: "Atlas surfaces findings in plain language — no need for RACF expert to interpret.", stageIndex: 5 },
         { persona: "Quinn", type: "gain", title: "New User Capability — proactive remediation before audit window", description: "Gaps addressed on a continuous basis rather than under audit pressure.", stageIndex: 4 },
       ],
+      externalTouchpoints: [
+        {
+          type: "enrichment",
+          product: "Bob PPZ",
+          title: "BOB PPZ Enrichment Touchpoint",
+          summary: "Atlas inventories all regulated data across the entire z/OS estate. When Bob PPZ is installed, the inventory is enriched with ZUnderstand's code-level metadata — precise program-to-program call relationships, data flow paths, and business service attribution. This means the regulated data inventory includes execution-path-level detail, showing not just which datasets contain regulated data, but which programs access them, how data flows between them, and which business services are affected.",
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas surfaces undocumented changes and access anomalies through its Config-as-Code baseline comparison and RACF analysis. Concert4Z's Observe module provides a complementary signal: production behavioral anomalies that may correlate with unauthorized access events — unusual process activity, unexpected dataset access patterns, off-hours system events. These Concert4Z signals can direct Atlas's anomaly investigation to specific time windows and system components, making the undocumented change enumeration more targeted and complete.",
+          stageIndex: 3,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas monitors continuously for new compliance deviations between audit cycles. Concert4Z's continuous production monitoring provides a real-time signal layer that complements Atlas's configuration-based monitoring: where Atlas detects configuration drift, Concert4Z detects behavioral drift. The two signals together provide broader coverage — Atlas catches 'what changed in the configuration,' Concert4Z catches 'what started behaving differently in production,' and the combination narrows compliance gaps faster.",
+          stageIndex: 5,
+        },
+      ],
     },
     capabilities: [
       { name: "System Discovery", timeline: "GA", description: "Complete environment inventory" },
@@ -665,6 +773,29 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Chris", type: "gain", title: "New User Capability — proactive risk surfacing", description: "Shows what matters before new hire knows to ask — no need to know what to look for.", stageIndex: 2 },
         { persona: "Alice", type: "gain", title: "New User Capability — Atlas replaces shadowing", description: "Queryable, current environment model replaces informal shadowing.", stageIndex: 1 },
         { persona: "Zach", type: "skill", title: "Atlas AI & Automation — critical knowledge captured", description: "Reduces retirement impact by preserving expert knowledge in Atlas.", stageIndex: 2 },
+      ],
+      externalTouchpoints: [
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas provides a structured environment overview in the first week. Concert4Z's ZEN (Z Observability Connect runtime relationship data) enriches this overview with runtime-observed application flows — which transactions actually called which programs during the observation period. This means the environment overview includes execution-path-level precision for active workloads, not just statically configured relationships. A program that is statically reachable but never actually invoked is distinguished from one that is in an active hot path.",
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas is monitoring production LPARs and DR environments during and after the onboarding period for exploitation activity and anomalous behavior. Concert4Z's Observe module provides the production anomaly detection and event correlation that Atlas's monitoring step draws on. If Concert4Z detects behavioral anomalies on a patched or unpatched LPAR during the onboarding period, these signals enrich Atlas's monitoring surface. Atlas surfaces anomalies without being asked; Concert4Z's continuous production monitoring is the data source that makes this possible.",
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas generates the complete audit trail — exposure assessment, blast radius, plan, test results, apply log, authorization chain. Concert4Z's change evidence integration means the closed vulnerability remediation record in Atlas flows into Concert4Z's operational context, so production operations teams have the full remediation history available during any subsequent incident investigation on the affected systems.",
+          stageIndex: 2,
+        },
       ],
     },
     capabilities: [
@@ -718,6 +849,43 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Angie", type: "gain", title: "New User Capability — developers self-serve", description: "No z/OS specialist involvement needed for dependency queries.", stageIndex: 1 },
         { persona: "Greg", type: "gain", title: "New User Capability — infrastructure visibility enables architecture decisions", description: "Full stack visibility supports architecture and planning decisions.", stageIndex: 3 },
       ],
+      externalTouchpoints: [
+        {
+          type: "enrichment",
+          product: "Bob PPZ",
+          title: "BOB PPZ Enrichment Touchpoint",
+          summary: "Atlas traverses the dependency graph using ZUnderstand application discovery (packaged in Atlas). When Bob PPZ is also installed, the traversal is enriched with ZUnderstand's full code-level metadata — precise program-to-program call relationships, data flow paths, and business service attribution. For an estate with complex COBOL call chains, this means the dependency map includes execution-path-level detail, not just topology-level relationships.",
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas traverses the dependency graph using ZUnderstand static analysis and, when available, ZEN runtime data. ZEN is delivered through Concert4Z's observability platform — collecting OpenTelemetry trace spans from z/OS system software including CICS, IMS, Db2, and MQ. When Concert4Z is installed, Atlas can consume ZEN data to enrich the traversal with runtime-observed program flows, cross-component transaction flows, and active vs. dormant relationship identification.",
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "The dependency map Atlas produces includes connection types for each relationship. When ZEN data is available from Concert4Z, connection types are enriched with runtime evidence — 'statically configured AND runtime-observed' vs. 'statically configured only' — giving architects and developers a confidence indicator for each relationship in the map.",
+          stageIndex: 2,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Concert4Z's business service topology (derived from ZEN transaction flows and service impact modeling) provides the business service attribution that enriches Atlas's risk surface. When Atlas identifies a deprecated API on a connected component, Concert4Z's service model can surface which business services depend on that component — elevating the risk classification for deprecated constructs that sit on high-criticality business service paths.",
+          stageIndex: 3,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "When the dependency map is delivered for change planning, Concert4Z's incident history for the identified components provides operational risk context — whether the dependent systems have recent production incidents, which components have historically been unstable, and which paths have caused outages. This operational history enriches the architecture review artifact that Atlas produces.",
+          stageIndex: 4,
+        },
+      ],
     },
     capabilities: [
       { name: "System Discovery", timeline: "GA", description: "Automated application inventory" },
@@ -768,6 +936,40 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Derek", type: "gain", title: "New User Capability — structured artifact enables governance review", description: "Governance-ready health assessment generated automatically.", stageIndex: 3 },
         { persona: "Quinn", type: "gain", title: "New User Capability — health baseline enables trend comparison", description: "Compare health across events — track improvement or degradation over time.", stageIndex: 4 },
         { persona: "Quinn", type: "gain", title: "New User Capability — any team member can request health check", description: "Not just Zach — any authorized user can run a comprehensive health assessment.", stageIndex: 1 },
+      ],
+      externalTouchpoints: [
+        {
+          type: "handoff",
+          product: "Concert4Z",
+          title: "Concert4Z Handoff",
+          steps: [
+            { label: "Concert4Z produced", description: "Concert4Z's Risk Management module has detected one of several operational risk categories that warrant a pre-event health assessment: a certificate approaching expiry, a cluster of missing critical maintenance updates, or a capacity threshold being approached ahead of a peak event. Concert4Z's Risk Management can initiate a change ticket or flag the risk for review." },
+            { label: "Concert4Z hands to Atlas", description: "The operational risk flag triggers an Atlas health assessment workflow scoped to the affected component(s). Where Concert4Z's Risk Management identifies 'missing critical PTFs on LPAR PROD1,' Atlas scopes the full health check: PTF currency, configuration compliance, RACF posture, and compound risks across the middleware stack. Concert4Z's detection is specific; Atlas's assessment is comprehensive." },
+            { label: "Atlas returns to Concert4Z", description: "Atlas returns a structured health assessment artifact — findings ranked by severity, compound risks identified, remediation paths generated. Concert4Z's Risk Management module sees the operational risk addressed when Atlas's remediation is complete." },
+          ],
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas joins PTF currency, configuration compliance, security posture, and performance constraints across all scoped components. Concert4Z's production performance data (SMF/CDP via OMEGAMON Data Provider) provides the production behavioral baselines that enrich Atlas's performance constraint assessment: current utilization baselines, behavioral trend data, and ZEN service context that elevates health findings from technical severity to business impact.",
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas ranks findings by severity and identifies compound risks. Concert4Z's production anomaly history provides one additional dimension for ranking: findings that correlate with past production incidents are elevated in severity. A configuration deviation that has previously caused or contributed to a Concert4Z-detected production incident is higher priority than a deviation with no incident history — even if the technical severity is the same.",
+          stageIndex: 2,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "After assessment and remediation, Atlas registers the current state as the health baseline for ongoing drift monitoring. Concert4Z's production monitoring provides the behavioral baseline complement — Atlas captures the configuration baseline; Concert4Z captures the behavioral baseline. Together, they form a complete pre-event reference point: any subsequent drift (configuration or behavioral) is detected against both baselines.",
+          stageIndex: 4,
+        },
       ],
     },
     capabilities: [
@@ -841,6 +1043,47 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Kathleen", type: "skill", title: "Atlas AI & Automation — failure attribution identifies which dependency or change caused the failure", description: "Test results with failure attribution — Kathleen reviews a structured pass/fail report, not raw test output to interpret.", stageIndex: 4 },
         { persona: "Kathleen", type: "time", title: "Time Saving — hours of multi-tool, multi-team handoff → Atlas-orchestrated workflow", description: "Atlas-orchestrated deployment to CICS or IMS — developer initiates, Atlas handles the configuration steps, Zach authorizes changes that require it.", stageIndex: 5 },
         { persona: "Deb", type: "gain", title: "New User Capability — Deb has visibility into her own deployment without requiring a Zach intermediary", description: "Deployment is visible from Deb's perspective — she can track status without depending on a sysprog to relay progress.", stageIndex: 5 },
+      ],
+      externalTouchpoints: [
+        {
+          type: "enrichment",
+          product: "Bob PPZ",
+          title: "BOB PPZ Enrichment Touchpoint",
+          summary: "Atlas assesses the impact of the proposed change. When Bob PPZ is installed, the impact analysis is enriched with ZUnderstand's code-level metadata — precise program-to-program call relationships, data flow paths, and business service attribution. For an estate with complex COBOL call chains, this means the impact analysis includes execution-path-level detail, not just topology-level relationships. The developer sees not just which transactions are affected, but which specific programs, copybooks, and data flows are involved.",
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas's blast radius assessment uses ZEN runtime relationship data — which programs actually called which others during recent production execution — to distinguish active call paths from dormant static relationships. ZEN is delivered through Concert4Z's observability infrastructure (IBM Z Observability Connect). When Concert4Z is deployed, Atlas's blast radius for an application change is enriched with runtime-observed execution evidence, making the impact assessment more precise and reducing false-positive blast radius entries that inflate change scope unnecessarily.",
+          stageIndex: 0,
+        },
+        {
+          type: "handoff",
+          product: "Bob PPZ",
+          title: "BOB PPZ Handoff",
+          steps: [
+            { label: "Atlas produced", description: "A test failure attributed to an application code issue. Atlas has identified the specific program and the nature of the incompatibility." },
+            { label: "Atlas directs the user to Bob PPZ", description: "Atlas presents the failure context — the specific program, the call path, the behavioral change introduced — and directs the user to Bob PPZ for the code-level fix. Bob PPZ uses ZUnderstand to trace the execution path, understand the affected business logic, and generate the precise modification required." },
+            { label: "Bob PPZ returns to Atlas", description: "A fix artifact. Atlas re-runs the test against the corrected code, confirms pass, and the developer continues the validate-iterate loop." },
+          ],
+          stageIndex: 4,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas provisions an isolated test environment and runs the test package. The validation criteria — what 'normal' behavior looks like for the affected transactions — are informed by Concert4Z's production behavioral baselines. Where Concert4Z has established SMF-derived performance baselines for the affected CICS transactions, Atlas's post-change test evaluation can compare test results against production norms rather than against theoretical expectations. This produces a more defensible validation outcome.",
+          stageIndex: 4,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas's complete change evidence package — what was changed, what was tested, what the results were — is the primary artifact Concert4Z uses if a production anomaly appears after deployment. When Concert4Z detects an anomaly on a system that recently received a change, the Atlas change record (including blast radius, test results, and authorization chain) provides immediate context for the Concert4Z incident investigation.",
+          stageIndex: 5,
+        },
       ],
     },
     capabilities: [
@@ -921,6 +1164,58 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Zach", type: "time", title: "Time Saving — days retrospective documentation → automatic", description: "Complete upgrade record generated automatically — every phase, every authorization, every test result captured without retrospective assembly.", stageIndex: 6 },
         { persona: "Greg", type: "skill", title: "Atlas AI & Automation — baseline registration happens as part of upgrade close; no separate action required", description: "New infrastructure baseline registered in Atlas at close — post-upgrade drift is immediately detectable against the new reference state.", stageIndex: 6 },
       ],
+      externalTouchpoints: [
+        {
+          type: "enrichment",
+          product: "Bob PPZ",
+          title: "BOB PPZ Enrichment Touchpoint",
+          summary: "Atlas scopes the full compatibility impact of a platform upgrade. When Bob PPZ is installed, the compatibility assessment is enriched with ZUnderstand's code-level metadata — precise program-to-program call relationships, data flow paths, and business service attribution. For an estate with complex COBOL call chains, this means the compatibility assessment includes execution-path-level detail, not just topology-level relationships. Application-level compatibility risks are identified with higher precision.",
+          stageIndex: 0,
+        },
+        {
+          type: "handoff",
+          product: "Concert4Z",
+          title: "Concert4Z Handoff",
+          steps: [
+            { label: "Concert4Z produced", description: "Concert4Z's Risk Management module has identified that one or more components of the IBM Z software stack are at a level that creates unquantified operational risk: a z/OS version approaching end of support, a middleware version with known vulnerabilities in the FIXCAT, or a pattern of missing critical updates that collectively represent elevated risk." },
+            { label: "Concert4Z hands to Atlas", description: "Concert4Z raises the upgrade as a required change — either through a change ticket or an Ansible-initiated remediation workflow for targeted, known fixes. Atlas takes the planned upgrade and applies full change intelligence: scoping compatibility impact across all LPARs and applications, generating the sequenced upgrade plan, provisioning phase validation environments, and orchestrating test execution for each phase." },
+            { label: "Atlas returns to Concert4Z", description: "Atlas's completed upgrade record — all phases, all authorizations, all test results — is recorded in Atlas's change log. Concert4Z's Risk Management module sees the operational risk resolved and can consume the Atlas upgrade evidence for its operational record." },
+          ],
+          stageIndex: 0,
+        },
+        {
+          type: "handoff",
+          product: "Bob PPZ",
+          title: "BOB PPZ Handoff",
+          steps: [
+            { label: "Atlas produced", description: "A compatibility gap list that includes application-level breaking changes. Atlas has identified specific programs that depend on behaviors changing in the target version." },
+            { label: "Atlas directs the user to Bob PPZ", description: "Atlas presents the application-level compatibility gap — the specific program, the dependency on the changing behavior, and the nature of the required code change. The user is directed to Bob PPZ to implement the code change using ZUnderstand's deterministic code-level intelligence." },
+            { label: "Bob PPZ returns to Atlas", description: "The completed code change artifact. Atlas incorporates it into the upgrade plan, validates it in the provisioned test environment, and confirms it before the phase is promoted to production." },
+          ],
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas evaluates compatibility of all components against the target version. Concert4Z's ZEN data enriches the application-level compatibility assessment with runtime evidence of which application flows are actually active — ensuring that compatibility analysis prioritizes the programs and interfaces that are in active production use, not just those that are statically configured.",
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas has completed a phase of the upgrade and run regression tests. Atlas's behavioral monitoring is watching for post-phase behavior changes in the upgraded components. Concert4Z's Observe module provides the production behavioral baseline that Atlas's post-phase monitoring compares against. If an upgraded subsystem is running differently, Concert4Z's continuous monitoring detects the behavioral change and surfaces it to Atlas's phase validation step. This extends Atlas's regression detection beyond test-environment pass/fail to include production-behavioral equivalence.",
+          stageIndex: 5,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas generates the complete upgrade record and registers the new baseline. Concert4Z's post-upgrade production monitoring provides the behavioral baseline that complements Atlas's configuration baseline — the complete 'known good' state after the upgrade includes both the Atlas-registered configuration state and the Concert4Z-established behavioral baseline for the upgraded components.",
+          stageIndex: 6,
+        },
+      ],
     },
     capabilities: [
       { name: "System Discovery", timeline: "GA", description: "Full environment inventory" },
@@ -993,6 +1288,22 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Annette", type: "time", title: "Time Saving — hours assembling evidence → automatic continuous trail", description: "Incident audit trail generated automatically for every drift detection and resolution — Annette can close incidents with a complete, continuous record rather than assembling it manually.", stageIndex: 5 },
         { persona: "Derek", type: "gain", title: "Business Impact — audit findings for undocumented drift reduce materially as Atlas coverage grows", description: "Change record completeness improves for the Atlas estate — every Atlas-detected and Atlas-resolved drift item has a documented trail. Audit findings for undocumented changes reduce.", stageIndex: 5 },
       ],
+      externalTouchpoints: [
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas detects configuration drift by comparing current Config-as-Code state against a registered baseline. Concert4Z's Observe module detects behavioral drift — a subsystem running differently than its historical norm — which may precede or accompany configuration drift. These two detection signals are complementary: configuration drift without behavioral change is likely benign; behavioral drift without detected configuration change may indicate a change that bypassed the Config-as-Code model — higher severity, warrants deeper investigation. When Concert4Z surfaces a behavioral anomaly on a system, it provides Atlas with a targeted investigation prompt.",
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas presents drift findings classified by risk level. Concert4Z's incident history for the affected components enriches this risk classification — a configuration drift on a system that Concert4Z has previously flagged for operational incidents is elevated in risk compared to the same drift on a stable system with no incident history. Concert4Z's production risk profile adds an operational dimension to Atlas's technical risk ranking.",
+          stageIndex: 2,
+        },
+      ],
     },
     capabilities: [
       { name: "Config-as-Code", timeline: "GA", description: "Configuration baseline and comparison" },
@@ -1056,6 +1367,29 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Derek", type: "time", title: "Time Saving — days manual documentation → automatic evidence generation", description: "Complete DR readiness history generated from Atlas — continuous monitoring data, remediation records, simulation results, and test outcomes as structured evidence.", stageIndex: 4 },
         { persona: "Derek", type: "gain", title: "New User Capability — Derek independently produces DR compliance evidence from Atlas without requiring Greg or Zach to assemble it", description: "Regulatory compliance evidence (DORA, SOX DR requirements) produced directly from Atlas's DR monitoring and simulation records — no manual assembly from test reports and team notes.", stageIndex: 4 },
       ],
+      externalTouchpoints: [
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas produces a complete DR vs. production diff — every configuration, PTF, RACF, and subsystem difference enumerated with severity classification. Concert4Z's business service topology (derived from ZEN runtime transaction flows and service impact modeling) enriches the severity classification with business service context: a missing RACF group on a DR LPAR that serves a high-criticality payment service is a higher-severity finding than the same gap on a system serving a low-traffic internal batch process. Concert4Z's service impact model translates Atlas's technical diff items into business-service-level risk rankings, helping Greg prioritize DR remediations by business impact rather than purely technical severity.",
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas provisions an isolated DR environment and runs production-level transaction load to certify DR readiness. Concert4Z's production transaction volume data (SMF-derived via OMEGAMON Data Provider) provides the production load profile that Atlas uses for the simulation — ensuring the simulated load matches what production actually experiences, not a theoretical peak estimate.",
+          stageIndex: 3,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas generates complete DR readiness documentation for regulatory compliance purposes. Concert4Z's post-DR-test operational monitoring provides the production-behavior complement — after a DR test, Concert4Z can confirm that the DR environment's behavioral profile during the test matched production norms, providing an additional evidence dimension for DORA and SOX DR compliance documentation.",
+          stageIndex: 4,
+        },
+      ],
     },
     capabilities: [
       { name: "System Discovery", timeline: "GA", description: "DR environment inventory" },
@@ -1107,6 +1441,51 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Quinn", type: "skill", title: "Atlas AI & Automation — post-change regression detected same day", description: "Behavioral baseline comparison surfaces regressions within hours of a change, not days later.", stageIndex: 3 },
         { persona: "Annette", type: "gain", title: "New User Capability — unified cross-pillar analysis replaces multi-team investigation", description: "Annette can triage performance issues with Atlas's cross-subsystem correlation without escalating to Alex.", stageIndex: 4 },
         { persona: "Zach", type: "skill", title: "Atlas AI & Automation — dark capacity discovered and mapped", description: "Atlas identifies underutilized resources and over-provisioned LPARs — no wasted capacity procurement.", stageIndex: 1 },
+      ],
+      externalTouchpoints: [
+        {
+          type: "handoff",
+          product: "Concert4Z",
+          title: "Concert4Z Handoff",
+          steps: [
+            { label: "Concert4Z produced", description: "Concert4Z's Optimize module has detected a production performance degradation — a Db2 buffer pool approaching saturation, a CICS MXT being repeatedly hit under peak load, an MQ queue depth trending toward the limit — or has identified an approaching capacity constraint through its performance analytics. Concert4Z surfaces this as an operational finding with root-cause attribution and may recommend a configuration change or capacity increase." },
+            { label: "Concert4Z hands to Atlas", description: "Concert4Z's performance finding triggers an Atlas capacity planning workflow. Atlas takes the identified constraint and applies change intelligence: modelling the risk for the affected event, projecting transaction volume against current configuration, identifying the specific configuration change required, and generating a validated remediation plan." },
+            { label: "Atlas returns to Concert4Z", description: "After Atlas plans, provisions, tests, and validates the configuration change, the validated change is returned for production apply. Concert4Z's post-apply monitoring detects whether the change resolved the performance constraint or introduced a regression." },
+          ],
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas identifies root cause within one conversation for a reported performance degradation. Concert4Z's Optimize module has already done significant diagnostic work in production — SMF-derived performance analysis, WLM policy evaluation, cross-subsystem performance correlation. When Concert4Z hands off to Atlas, it passes its diagnostic findings as the starting context, reducing Atlas's root-cause investigation to confirmation and scope-expansion rather than starting from scratch.",
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas's capacity risk modelling projects transaction volume against current configuration and identifies constraints. The transaction volume data that Atlas projects from comes from Concert4Z's SMF/CDP pipeline — real production workload data, not theoretical estimates. This makes Atlas's peak event capacity model grounded in actual workload history rather than rule-of-thumb approximations.",
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas generates the production configuration change plan and Change Intelligence executes it. The management-readable capacity readiness summary that Atlas generates for Quinn's approval is enriched with Concert4Z's production performance evidence — the actual SMF data showing the constraint, the trend line, and the projected improvement — making Quinn's approval decision grounded in production data rather than Atlas's modelled projection alone.",
+          stageIndex: 3,
+        },
+        {
+          type: "handoff",
+          product: "Concert4Z",
+          title: "Concert4Z Handoff",
+          steps: [
+            { label: "Atlas produced", description: "Atlas has applied the validated configuration change and registered the new behavioral baseline. Atlas monitors for post-change performance regressions." },
+            { label: "Atlas hands to Concert4Z", description: "Concert4Z's Observe module provides the continuous production monitoring that surfaces post-change regressions. If the configuration change resolves the constraint but inadvertently creates a new one, Concert4Z detects the new behavioral anomaly and surfaces it. Atlas correlates the anomaly to the specific configuration change event, attributing the regression to the responsible change." },
+            { label: "Concert4Z returns to Atlas", description: "A post-apply regression finding from Concert4Z becomes the trigger for a new Atlas workflow — investigate the regression, adjust the configuration, re-validate." },
+          ],
+          stageIndex: 4,
+        },
       ],
     },
     capabilities: [
@@ -1176,6 +1555,47 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Kathleen", type: "time", title: "Time Saving — no manual test environment setup per phase; Atlas provisions and configures it", description: "Phase validation runs in an isolated environment provisioned by Atlas — consistent, production-representative conditions for every phase validation.", stageIndex: 3 },
         { persona: "Kathleen", type: "time", title: "Time Saving — hours of multi-team coordination → Atlas-orchestrated workflow", description: "Atlas-orchestrated phase promotion — developer initiates, Atlas handles configuration, Zach authorizes infrastructure gates. No multi-team handoff coordination required.", stageIndex: 4 },
         { persona: "Angie", type: "skill", title: "Atlas AI & Automation — architectural conformance check catches architectural drift before it accumulates across phases", description: "Phase promotion reviewed against architectural specification — Atlas checks whether the promoted code conforms to the intended architecture before production apply.", stageIndex: 4 },
+      ],
+      externalTouchpoints: [
+        {
+          type: "enrichment",
+          product: "Bob PPZ",
+          title: "BOB PPZ Enrichment Touchpoint",
+          summary: "Atlas produces a complete picture of any application's structure, technical debt, and dependency profile. When Bob PPZ is installed, the analysis is enriched with ZUnderstand's full code-level metadata — precise program-to-program call relationships, data flow paths, and business service attribution. This means the modernization analysis includes execution-path-level detail, showing not just which programs are deprecated, but which specific call chains, data flows, and business services are affected.",
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas produces the complete application structure, technical debt profile, and dependency map — using ZUnderstand static analysis and, when available, ZEN runtime call chain data. ZEN from Concert4Z's ZOC infrastructure provides the runtime-observed execution evidence that makes the modernization analysis more precise: active vs. dormant code paths, execution frequency, and cross-application runtime dependencies. Programs that appear in the static call graph but have never been observed in ZEN data may represent dead code — safe to remove rather than modernize.",
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Concert4Z's production incident history for the applications in the modernization scope provides real-world risk context for modernization prioritization. Applications that have caused or contributed to recent Concert4Z-detected production incidents are a higher modernization priority — their instability is confirmed by production evidence, not just technical debt assessment. This incident-informed prioritization makes the Atlas-generated modernization plan more credible to business stakeholders.",
+          stageIndex: 1,
+        },
+        {
+          type: "handoff",
+          product: "Bob PPZ",
+          title: "BOB PPZ Handoff",
+          steps: [
+            { label: "Atlas produced", description: "A modernization plan that includes application code changes. Atlas has identified specific programs that need to be modified, deprecated APIs that need to be replaced, and monolithic structures that need to be decomposed." },
+            { label: "Atlas directs the user to Bob PPZ", description: "Atlas presents the code-level modernization requirement — the specific program, the nature of the required change, and the dependency context. The user is directed to Bob PPZ to implement the code change using ZUnderstand's deterministic code-level intelligence." },
+            { label: "Bob PPZ returns to Atlas", description: "The completed code change artifact. Atlas incorporates it into the modernization plan, validates it in the provisioned test environment, and confirms it before the phase is promoted to production." },
+          ],
+          stageIndex: 2,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas orchestrates phase promotion and checks architectural conformance. After promotion, Concert4Z's monitoring of the modernized application in production provides the behavioral baseline comparison that confirms the phase worked as intended — response times, resource consumption, transaction throughput — against the pre-modernization baseline Concert4Z recorded. If a modernization phase inadvertently degrades production behavior, Concert4Z surfaces it, and Atlas's change record provides the attribution context for the Concert4Z incident investigation.",
+          stageIndex: 4,
+        },
       ],
     },
     capabilities: [
@@ -1249,6 +1669,33 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Sage", type: "skill", title: "Atlas AI & Automation — continuous scope monitoring surfaces new regulated data without a user query", description: "New regulated data detected as it is created — Atlas alerts before the new gap becomes a compliance problem. Compliance posture is maintained continuously, not recovered at each audit.", stageIndex: 5 },
         { persona: "Derek", type: "gain", title: "New User Capability — Derek monitors regulatory compliance posture continuously from Atlas without requiring Sage or Zach to assemble a status report", description: "Ongoing compliance state visible in Atlas — Derek knows the current regulatory posture at any point, not just after a manual assessment.", stageIndex: 5 },
       ],
+      externalTouchpoints: [
+        {
+          type: "handoff",
+          product: "Concert4Z",
+          title: "Concert4Z Handoff",
+          steps: [
+            { label: "Concert4Z produced", description: "Concert4Z's Observe module has detected an access anomaly: a user or process accessing regulated data in a pattern that deviates from their historical norm — off-hours access, unusual dataset access volume, a dormant privileged account becoming active. This anomaly is surfaced as a Concert4Z operational finding." },
+            { label: "Concert4Z hands to Atlas", description: "The access anomaly triggers an Atlas regulatory investigation. Atlas scopes the affected regulated data components — which datasets, tables, and programs are involved — and assesses whether the anomaly represents a compliance gap that requires formal regulatory remediation: RACF profile updates, access control tightening, audit trail configuration. Atlas transitions into a regulatory change response workflow from the Concert4Z-detected access finding." },
+            { label: "Atlas returns to Concert4Z", description: "After Atlas completes the regulatory remediation, the remediation record — what was changed, what controls are now in place, the compliance evidence — is recorded in Atlas's continuous record. Concert4Z's monitoring sees the access anomaly pattern resolved and can consume Atlas's remediation record as operational context for subsequent access monitoring." },
+          ],
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas maps access control gaps across RACF profiles, Db2 access controls, and application access in a unified assessment. Concert4Z's continuous access monitoring provides the behavioral dimension of this assessment — not just 'what are the RACF settings for this dataset' (configuration) but 'who has actually been accessing this dataset, when, and how often' (behavior). This behavioral access picture is the difference between a theoretical access control gap and an active access risk.",
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas monitors continuously for new regulated data, access control drift, and encryption configuration changes. Concert4Z's continuous access monitoring provides the behavioral complement — detecting when regulated data is being accessed in ways that Atlas's configuration monitoring cannot catch. A new application program that begins accessing a regulated dataset (behavioral access not matched by a configuration change) is detected by Concert4Z and surfaces as a new regulated scope item for Atlas to assess.",
+          stageIndex: 5,
+        },
+      ],
     },
     capabilities: [
       { name: "System Discovery", timeline: "GA", description: "Regulated data inventory across all stores" },
@@ -1320,6 +1767,40 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Zach", type: "gain", title: "New User Capability — Zach independently plans rollbacks from Atlas's captured pre-change state without reconstructing the previous configuration", description: "Every Atlas-executed change has its pre-change state captured — rollback planning starts from a known, documented state, not from reconstructed memory.", stageIndex: 4 },
         { persona: "Quinn", type: "time", title: "Time Saving — annual audit finding remediation effort drops proportionally with change record coverage improvement", description: "Change record coverage goes from ~60% to 100% for Atlas-executed changes — the audit finding for undocumented changes drops from 46 per year to under 5.", stageIndex: 5 },
         { persona: "Quinn", type: "skill", title: "Atlas AI & Automation — Atlas-to-ServiceNow integration closes the structural tool gap that was the root cause of undocumented changes", description: "ServiceNow integration (H2 2027): Atlas changes create ServiceNow records automatically — bi-directional, no manual step in either system.", stageIndex: 5 },
+      ],
+      externalTouchpoints: [
+        {
+          type: "handoff",
+          product: "Concert4Z",
+          title: "Concert4Z Handoff",
+          steps: [
+            { label: "Concert4Z produced", description: "Concert4Z has detected a production anomaly — a behavioral change on a system — and the incident investigation asks 'what changed on this system in the last 30 days?' This is precisely the question Atlas answers from its continuous change record." },
+            { label: "Concert4Z hands to Atlas", description: "Concert4Z's incident investigation surfaces a production anomaly with a timestamp and affected component. Atlas is queried for the change history of that component over the relevant time window. Atlas returns a structured change record: all Atlas-executed changes (fully documented), all out-of-Atlas changes detected through Config-as-Code baseline diff (with attribution status), and any undocumented changes flagged." },
+            { label: "Atlas returns to Concert4Z", description: "A structured change history that Concert4Z uses as the primary root cause analysis input — correlating the production anomaly timestamp against Atlas's change record to identify the likely responsible change." },
+          ],
+          stageIndex: 2,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas detects out-of-window changes through Config-as-Code baseline comparison. Concert4Z's Observe module detects behavioral out-of-window anomalies — production systems behaving differently than expected during non-change-window periods. The two signals are complementary: Atlas catches unauthorized configuration changes; Concert4Z catches behavioral consequences of those changes. Together, they provide bidirectional out-of-window change detection coverage.",
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "Atlas provides change attribution for all Atlas-executed changes automatically. For out-of-Atlas changes, Atlas provides the configuration delta and timestamp. Concert4Z's behavioral change attribution enriches the attribution picture — confirming that the configuration change Atlas detected actually had a behavioral consequence in production, which is the strongest evidence that the change was materially significant.",
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Concert4Z Enrichment Touchpoint",
+          summary: "For retroactive documentation of emergency changes, Concert4Z's incident record for the change period provides the operational context that makes the retroactive record defensible: 'this change was made during an active Concert4Z incident at 02:47; the anomaly was resolved at 03:15 following the configuration change.' Linking the retroactive change record to the Concert4Z incident record creates a complete, time-stamped narrative that auditors can follow.",
+          stageIndex: 4,
+        },
       ],
     },
     capabilities: [
