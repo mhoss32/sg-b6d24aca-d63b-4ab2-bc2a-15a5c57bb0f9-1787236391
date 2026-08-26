@@ -16,180 +16,279 @@ import {
 function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
   const date = new Date().toLocaleDateString();
   const time = new Date().toLocaleTimeString();
-  
-  const htmlContent = `
-<!DOCTYPE html>
+
+  const markerColors: Record<string, { bg: string; border: string; text: string }> = {
+    pain: { bg: "rgba(239,68,68,0.08)", border: "#ef4444", text: "#fca5a5" },
+    time: { bg: "rgba(245,158,11,0.08)", border: "#f59e0b", text: "#fcd34d" },
+    skill: { bg: "rgba(34,197,94,0.08)", border: "#22c55e", text: "#86efac" },
+    gain: { bg: "rgba(167,139,250,0.08)", border: "#a78bfa", text: "#c4b5fd" },
+  };
+
+  const timelineColors: Record<string, { bg: string; text: string }> = {
+    GA: { bg: "rgba(34,197,94,0.15)", text: "#22c55e" },
+    "H1 2027": { bg: "rgba(245,158,11,0.15)", text: "#f59e0b" },
+    "H2 2027": { bg: "rgba(167,139,250,0.15)", text: "#a78bfa" },
+  };
+
+  const gradientColors = ["#667eea", "#764ba2", "#f093fb", "#f5576c", "#4facfe", "#00f2fe", "#43e97b", "#38f9d7", "#fa709a", "#fee140", "#30cfd0", "#330867", "#a8edea", "#fed6e3"];
+
+  const escapeHTML = (str: string) => str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+  const renderFlow = (flow: typeof detail.asIs, isAsIs: boolean) => {
+    const sectionBorder = isAsIs ? "border-red-500/20" : "border-green-500/20";
+    const sectionBg = isAsIs ? "rgba(239,68,68,0.03)" : "rgba(34,197,94,0.03)";
+    const iconColor = isAsIs ? "#ef4444" : "#22c55e";
+    const iconBg = isAsIs ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)";
+    const subtitle = isAsIs ? "Current state — pain points highlighted" : "Desired outcome — gains highlighted";
+
+    return `
+    <div style="border: 1px solid ${isAsIs ? "rgba(239,68,68,0.2)" : "rgba(34,197,94,0.2)"}; border-radius: 16px; background: ${sectionBg}; padding: 24px; margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+        <div style="width: 40px; height: 40px; border-radius: 10px; background: ${iconBg}; display: flex; align-items: center; justify-content: center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            ${isAsIs
+              ? '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+              : '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'}
+          </svg>
+        </div>
+        <div>
+          <h3 style="font-size: 18px; font-weight: 600; color: #e2e8f0; margin: 0;">${flow.title}</h3>
+          <p style="font-size: 12px; color: #64748b; margin: 2px 0 0;">${subtitle}</p>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
+        ${Object.entries(markerColors).map(([key, colors]) => `
+          <div style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; background: ${colors.bg}; border: 1px solid ${colors.border}30;">
+            <div style="width: 8px; height: 8px; border-radius: 2px; background: ${colors.border};"></div>
+            <span style="font-size: 11px; font-weight: 500; color: ${colors.text}; text-transform: capitalize;">${key}</span>
+          </div>
+        `).join("")}
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+        ${flow.stages.map((stage, i) => {
+          const stageMarkers = flow.markers.filter((m) => m.stageIndex === i);
+          const stageExternal = flow.externalTouchpoints?.filter((tp) => tp.stageIndex === i) || [];
+          return `
+          <div style="position: relative;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+              <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #94a3b8; font-family: monospace;">${i + 1}</div>
+            </div>
+            <div style="border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: rgba(255,255,255,0.02); backdrop-filter: blur(8px); padding: 20px;">
+              <h4 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin-bottom: 6px;">${escapeHTML(stage.name)}</h4>
+              <p style="font-size: 12px; color: #64748b; margin-bottom: 12px; line-height: 1.5;">${escapeHTML(stage.description)}</p>
+
+              ${stageExternal.map((tp) => {
+                if (tp.type === "handoff") {
+                  return `
+                  <div style="margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(34,197,94,0.3); background: rgba(34,197,94,0.05); overflow: hidden;">
+                    <div style="padding: 10px 14px; background: rgba(34,197,94,0.1); border-bottom: 1px solid rgba(34,197,94,0.2);">
+                      <h5 style="font-size: 11px; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">${escapeHTML(tp.title)}</h5>
+                    </div>
+                    <div style="padding: 14px;">
+                      ${tp.steps.map((step, j) => `
+                        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                          <div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(34,197,94,0.2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #4ade80; flex-shrink: 0;">${j + 1}</div>
+                          <div>
+                            <div style="font-size: 12px; font-weight: 600; color: #86efac; margin-bottom: 2px;">${escapeHTML(step.label)}</div>
+                            <div style="font-size: 11px; color: #94a3b8; line-height: 1.5;">${escapeHTML(step.description)}</div>
+                          </div>
+                        </div>
+                      `).join("")}
+                    </div>
+                  </div>`;
+                } else {
+                  return `
+                  <div style="margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(6,182,212,0.3); background: rgba(6,182,212,0.05); overflow: hidden;">
+                    <div style="padding: 10px 14px; background: rgba(6,182,212,0.1); border-bottom: 1px solid rgba(6,182,212,0.2);">
+                      <h5 style="font-size: 11px; font-weight: 700; color: #22d3ee; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">${escapeHTML(tp.title)}</h5>
+                    </div>
+                    <div style="padding: 14px;">
+                      <p style="font-size: 11px; color: #94a3b8; line-height: 1.5;">${escapeHTML(tp.summary)}</p>
+                    </div>
+                  </div>`;
+                }
+              }).join("")}
+
+              ${stageMarkers.map((m) => {
+                const mc = markerColors[m.type] || markerColors.pain;
+                return `
+                <div style="padding: 10px 12px; border-radius: 8px; background: ${mc.bg}; border-left: 3px solid ${mc.border}; margin: 6px 0;">
+                  <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+                    <div style="width: 6px; height: 6px; border-radius: 1px; background: ${mc.border};"></div>
+                    <span style="font-size: 11px; font-weight: 600; color: ${mc.text};">${escapeHTML(m.title)}</span>
+                  </div>
+                  <p style="font-size: 11px; color: #94a3b8; line-height: 1.4; margin-left: 12px;">${escapeHTML(m.description)}</p>
+                </div>`;
+              }).join("")}
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+  };
+
+  const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${nodeLabel} — Atlas Use Case</title>
+  <title>${escapeHTML(nodeLabel)} — Atlas Use Case</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0A0A0F; color: #E2E8F0; line-height: 1.6; padding: 40px 20px; }
-    .container { max-width: 1200px; margin: 0 auto; }
-    header { margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
-    .badge-cyan { background: rgba(0,212,255,0.15); color: #00D4FF; border: 1px solid rgba(0,212,255,0.3); }
-    h1 { font-size: 36px; font-weight: 700; margin-bottom: 16px; color: #fff; }
+    body { font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: #0A0A0F; color: #E2E8F0; line-height: 1.6; }
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+    header { border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(10,10,15,0.85); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 50; }
+    .header-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+    .header-logo { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #e2e8f0; }
+    .header-logo svg { width: 20px; height: 20px; color: #00D4FF; }
+    main { padding: 32px 0 48px; }
+    .hero { margin-bottom: 32px; }
+    .badge { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .badge-dot { width: 16px; height: 16px; border-radius: 50%; background: #00D4FF; box-shadow: 0 0 12px rgba(0,212,255,0.5); }
+    .badge-text { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: #00D4FF; }
+    h1 { font-size: 36px; font-weight: 700; color: #fff; margin-bottom: 16px; line-height: 1.2; }
     .description { font-size: 18px; color: #94a3b8; max-width: 768px; line-height: 1.7; }
-    h2 { font-size: 24px; font-weight: 600; margin: 40px 0 20px; color: #fff; display: flex; align-items: center; gap: 12px; }
-    h3 { font-size: 18px; font-weight: 600; margin: 24px 0 12px; color: #cbd5e1; }
-    .section { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
-    .stage { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
-    .stage-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-    .stage-number { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #94a3b8; }
-    .stage-name { font-weight: 600; color: #e2e8f0; }
-    .stage-desc { font-size: 14px; color: #64748b; margin-left: 44px; }
-    .marker { padding: 12px 16px; border-radius: 8px; margin: 8px 0; font-size: 14px; }
-    .marker-pain { background: rgba(239,68,68,0.08); border-left: 3px solid #ef4444; }
-    .marker-time { background: rgba(245,158,11,0.08); border-left: 3px solid #f59e0b; }
-    .marker-skill { background: rgba(34,197,94,0.08); border-left: 3px solid #22c55e; }
-    .marker-gain { background: rgba(167,139,250,0.08); border-left: 3px solid #a78bfa; }
-    .marker-title { font-weight: 600; margin-bottom: 4px; }
-    .marker-desc { color: #94a3b8; }
-    .persona-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-    .persona-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; }
+    .accordion { border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; background: rgba(255,255,255,0.02); padding: 0 24px; margin-bottom: 16px; overflow: hidden; }
+    .accordion-header { display: flex; align-items: center; gap: 12px; padding: 20px 0; cursor: pointer; }
+    .accordion-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .accordion-icon.coral { background: rgba(255,107,107,0.1); color: #FF6B6B; }
+    .accordion-icon.purple { background: rgba(167,139,250,0.1); color: #A78BFA; }
+    .accordion-icon.cyan { background: rgba(0,212,255,0.1); color: #00D4FF; }
+    .accordion-title { font-size: 18px; font-weight: 600; color: #e2e8f0; }
+    .accordion-subtitle { font-size: 12px; color: #64748b; font-weight: 400; margin-top: 2px; }
+    .accordion-body { padding-bottom: 20px; }
+    .persona-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+    .persona-card { border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: rgba(255,255,255,0.02); padding: 20px; }
     .persona-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .persona-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-weight: 600; color: #fff; }
-    .persona-name { font-weight: 600; color: #e2e8f0; }
+    .persona-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #fff; font-size: 16px; }
+    .persona-name { font-weight: 600; color: #e2e8f0; font-size: 15px; }
     .persona-role { font-size: 13px; color: #64748b; }
-    .engagement-badge { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; margin-top: 8px; }
-    .engagement-primary { background: rgba(0,212,255,0.15); color: #00D4FF; }
-    .engagement-secondary { background: rgba(255,255,255,0.08); color: #94a3b8; }
-    .capability { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 16px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); margin-bottom: 12px; }
-    .timeline-badge { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
-    .timeline-ga { background: rgba(34,197,94,0.15); color: #22c55e; }
-    .timeline-h1 { background: rgba(245,158,11,0.15); color: #f59e0b; }
-    .timeline-h2 { background: rgba(167,139,250,0.15); color: #a78bfa; }
-    .footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; color: #64748b; font-size: 14px; }
-    .external-box { padding: 16px; border-radius: 12px; margin: 12px 0; }
-    .external-handoff { background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.2); }
-    .external-enrichment { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); }
-    .external-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
-    .external-handoff .external-title { color: #4ade80; }
-    .external-enrichment .external-title { color: #22d3ee; }
-    .handoff-step { display: flex; gap: 12px; margin-bottom: 16px; }
-    .step-number { width: 24px; height: 24px; border-radius: 50%; background: rgba(34,197,94,0.2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #4ade80; flex-shrink: 0; }
-    .step-label { font-weight: 600; font-size: 13px; color: #86efac; margin-bottom: 4px; }
-    .step-desc { font-size: 13px; color: #94a3b8; }
-    .meta { font-size: 12px; color: #475569; margin-top: 24px; }
+    .persona-desc { font-size: 13px; color: #94a3b8; line-height: 1.5; margin-bottom: 12px; }
+    .engagement-badge { display: inline-block; padding: 3px 12px; border-radius: 9999px; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; }
+    .engagement-primary { background: rgba(0,212,255,0.12); color: #00D4FF; border: 1px solid rgba(0,212,255,0.2); }
+    .engagement-secondary { background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
+    .capability { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); margin-bottom: 12px; }
+    .capability-name { font-weight: 500; color: #e2e8f0; font-size: 15px; }
+    .capability-desc { font-size: 13px; color: #94a3b8; margin-top: 4px; line-height: 1.5; }
+    .timeline-badge { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 10px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; }
+    footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 32px 0 48px; margin-top: 32px; }
+    .footer-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; color: #64748b; font-size: 14px; }
+    .meta { font-size: 12px; color: #475569; margin-top: 32px; text-align: center; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="badge badge-cyan">Use Case</div>
-      <h1>${nodeLabel}</h1>
-      <p class="description">${detail.description}</p>
-    </header>
-
-    <h2>As-Is Flow</h2>
-    <div class="section">
-      <h3>${detail.asIs.title}</h3>
-      ${detail.asIs.stages.map((stage, i) => {
-        const stageMarkers = detail.asIs.markers.filter(m => m.stageIndex === i);
-        return `
-        <div class="stage">
-          <div class="stage-header">
-            <div class="stage-number">${i + 1}</div>
-            <div class="stage-name">${stage.name}</div>
-          </div>
-          <div class="stage-desc">${stage.description}</div>
-          ${stageMarkers.map(m => `
-            <div class="marker marker-${m.type}">
-              <div class="marker-title">${m.title}</div>
-              <div class="marker-desc">${m.description}</div>
-            </div>
-          `).join('')}
-        </div>`;
-      }).join('')}
+  <header>
+    <div class="header-inner">
+      <div style="color: #94a3b8; font-size: 14px;">&larr; Back to Atlas</div>
+      <div class="header-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Atlas
+      </div>
+      <div style="font-size: 12px; color: #475569;">Exported ${date}</div>
     </div>
+  </header>
 
-    <h2>To-Be Flow</h2>
-    <div class="section">
-      <h3>${detail.toBe.title}</h3>
-      ${detail.toBe.stages.map((stage, i) => {
-        const stageMarkers = detail.toBe.markers.filter(m => m.stageIndex === i);
-        const stageExternal = detail.toBe.externalTouchpoints?.filter(tp => tp.stageIndex === i) || [];
-        return `
-        <div class="stage">
-          <div class="stage-header">
-            <div class="stage-number">${i + 1}</div>
-            <div class="stage-name">${stage.name}</div>
-          </div>
-          <div class="stage-desc">${stage.description}</div>
-          ${stageExternal.map(tp => {
-            if (tp.type === 'handoff') {
-              return `
-              <div class="external-box external-handoff">
-                <div class="external-title">${tp.title}</div>
-                ${tp.steps.map((step, j) => `
-                  <div class="handoff-step">
-                    <div class="step-number">${j + 1}</div>
-                    <div>
-                      <div class="step-label">${step.label}</div>
-                      <div class="step-desc">${step.description}</div>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>`;
-            } else {
-              return `
-              <div class="external-box external-enrichment">
-                <div class="external-title">${tp.title}</div>
-                <div class="step-desc">${tp.summary}</div>
-              </div>`;
-            }
-          }).join('')}
-          ${stageMarkers.map(m => `
-            <div class="marker marker-${m.type}">
-              <div class="marker-title">${m.title}</div>
-              <div class="marker-desc">${m.description}</div>
-            </div>
-          `).join('')}
-        </div>`;
-      }).join('')}
-    </div>
-
-    <h2>Personas</h2>
-    <div class="persona-grid">
-      ${detail.personas.map(p => `
-        <div class="persona-card">
-          <div class="persona-header">
-            <div class="persona-avatar">${p.name.charAt(0)}</div>
-            <div>
-              <div class="persona-name">${p.name}</div>
-              <div class="persona-role">${p.role}</div>
-            </div>
-          </div>
-          <div class="engagement-badge engagement-${p.engagement.toLowerCase()}">${p.engagement}</div>
+  <main>
+    <div class="container">
+      <section class="hero">
+        <div class="badge">
+          <div class="badge-dot"></div>
+          <span class="badge-text">Use Case</span>
         </div>
-      `).join('')}
-    </div>
+        <h1>${escapeHTML(nodeLabel)}</h1>
+        <p class="description">${escapeHTML(detail.description)}</p>
+      </section>
 
-    <h2>Capabilities Required</h2>
-    ${detail.capabilities.map(cap => `
-      <div class="capability">
-        <div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-            <span style="font-weight: 600; color: #e2e8f0;">${cap.name}</span>
-            <span class="timeline-badge timeline-${cap.timeline.toLowerCase().replace(' ', '-')}">${cap.timeline}</span>
+      <div class="accordion">
+        <div class="accordion-header">
+          <div class="accordion-icon coral">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg>
           </div>
-          <div style="font-size: 14px; color: #94a3b8;">${cap.description}</div>
+          <div>
+            <div class="accordion-title">As-Is &amp; To-Be Analysis</div>
+            <div class="accordion-subtitle">As-Is flow with pain point legends &middot; To-Be flow with wow legends</div>
+          </div>
+        </div>
+        <div class="accordion-body">
+          ${renderFlow(detail.asIs, true)}
+          ${renderFlow(detail.toBe, false)}
         </div>
       </div>
-    `).join('')}
 
-    <div class="meta">
-      <p>Exported from Atlas Platform on ${date} at ${time}</p>
-    </div>
+      <div class="accordion">
+        <div class="accordion-header">
+          <div class="accordion-icon purple">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div>
+            <div class="accordion-title">Personas</div>
+            <div class="accordion-subtitle">${detail.personas.length} involved &mdash; ${detail.personas.filter(p => p.engagement === "Primary").length} primary</div>
+          </div>
+        </div>
+        <div class="accordion-body">
+          <div class="persona-grid">
+            ${detail.personas.map((p, i) => {
+              const [c1, c2] = [gradientColors[i % gradientColors.length], gradientColors[(i + 1) % gradientColors.length]];
+              return `
+              <div class="persona-card">
+                <div class="persona-header">
+                  <div class="persona-avatar" style="background: linear-gradient(135deg, ${c1}, ${c2});">${p.name.charAt(0)}</div>
+                  <div>
+                    <div class="persona-name">${escapeHTML(p.name)}</div>
+                    <div class="persona-role">${escapeHTML(p.role)}</div>
+                  </div>
+                </div>
+                <p class="persona-desc">${escapeHTML(p.goals[0] || "")}</p>
+                <span class="engagement-badge ${p.engagement === "Primary" ? "engagement-primary" : "engagement-secondary"}">${p.engagement}</span>
+              </div>`;
+            }).join("")}
+          </div>
+        </div>
+      </div>
 
-    <div class="footer">
-      <span>IBM Atlas Platform</span>
-      <span>${new Date().getFullYear()}</span>
+      <div class="accordion">
+        <div class="accordion-header">
+          <div class="accordion-icon cyan">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          </div>
+          <div>
+            <div class="accordion-title">Capabilities Required</div>
+            <div class="accordion-subtitle">${detail.capabilities.length} Atlas capabilities &middot; ${detail.capabilities.filter(c => c.timeline === "GA").length} GA &middot; ${detail.capabilities.filter(c => c.timeline === "H1 2027").length} H1 2027 &middot; ${detail.capabilities.filter(c => c.timeline === "H2 2027").length} H2 2027</div>
+          </div>
+        </div>
+        <div class="accordion-body">
+          ${detail.capabilities.map((cap) => {
+            const tc = timelineColors[cap.timeline] || timelineColors.GA;
+            return `
+            <div class="capability">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span class="capability-name">${escapeHTML(cap.name)}</span>
+                  <span class="timeline-badge" style="background: ${tc.bg}; color: ${tc.text};">${cap.timeline}</span>
+                </div>
+                <p class="capability-desc">${escapeHTML(cap.description)}</p>
+              </div>
+            </div>`;
+          }).join("")}
+        </div>
+      </div>
+
+      <p class="meta">Exported from IBM Atlas Platform on ${date} at ${time}</p>
     </div>
-  </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <span>IBM Atlas Platform &mdash; ${new Date().getFullYear()}</span>
+      <span style="display: flex; align-items: center; gap: 6px; color: #00D4FF;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Explore Atlas
+      </span>
+    </div>
+  </footer>
 </body>
 </html>`;
 
