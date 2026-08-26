@@ -21,10 +21,18 @@ export interface FlowStage {
   description: string;
 }
 
+export interface FlowMarker {
+  persona: string;
+  type: "pain" | "time" | "skill" | "gain";
+  title: string;
+  description: string;
+  stageIndex: number;
+}
+
 export interface FlowDiagram {
   title: string;
   stages: FlowStage[];
-  markers: { type: "pain" | "time" | "skill" | "gain"; text: string; stageIndex: number }[];
+  markers: FlowMarker[];
 }
 
 export interface Capability {
@@ -378,27 +386,22 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Close", description: "Assemble the audit trail — what was applied, when, who authorized it, what validation was performed." },
       ],
       markers: [
-        { type: "pain", text: "Zach: Answering 'are we exposed?' requires logging into ISPF on each LPAR individually — typically a 2–3 day process", stageIndex: 0 },
-        { type: "pain", text: "Sage: Has no direct way to determine exposure without going through Zach first", stageIndex: 0 },
-        { type: "pain", text: "Sage: CISO and management expect an exposure brief she cannot produce without a multi-day investigation", stageIndex: 0 },
-        { type: "pain", text: "Zach: Manually cross-referencing results across LPARs relies entirely on expert memory", stageIndex: 1 },
-        { type: "time", text: "Lost Time — 4–8 hours of additional expert-only analysis", stageIndex: 1 },
-        { type: "pain", text: "Zach: No proactive signal before a CVE is publicly published", stageIndex: 1 },
-        { type: "pain", text: "Zach: Blast radius analysis has no automated tooling — requires the most experienced engineer to trace dependencies from memory", stageIndex: 2 },
-        { type: "time", text: "Lost Time — 1–3 days of senior engineer investigation time", stageIndex: 2 },
-        { type: "pain", text: "Sage: No unified, query-ready evidence source to defend certificate and compliance posture in audits", stageIndex: 2 },
-        { type: "pain", text: "Sage: Compound risk (e.g., missing PTF + unencrypted connection) is invisible to any single tool", stageIndex: 2 },
-        { type: "pain", text: "Zach: PTF prerequisite chain resolution is manual; a missed co-requisite causes a failed apply", stageIndex: 3 },
-        { type: "time", text: "Lost Time — 2–4 hours of SMP/E prerequisite chain tracing + potential production incident", stageIndex: 3 },
-        { type: "pain", text: "Zach: Multi-LPAR sequencing for patches with shared subsystem dependencies is planned from memory", stageIndex: 3 },
-        { type: "pain", text: "Zach: DR environments are frequently patched last or forgotten entirely", stageIndex: 3 },
-        { type: "pain", text: "Zach: Lab environments take days to provision; under time pressure this step is skipped", stageIndex: 4 },
-        { type: "time", text: "Lost Time — 2–5 days to provision lab, or the step is skipped entirely", stageIndex: 4 },
-        { type: "pain", text: "Alice: Remediation steps delegated by Zach lack the context needed to execute them safely", stageIndex: 4 },
-        { type: "pain", text: "Zach: Multi-LPAR apply sequenced from memory; shared dependencies create coordination risk", stageIndex: 5 },
-        { type: "pain", text: "Zach: The entire audit trail is assembled after the fact from memory, email threads, and change tickets", stageIndex: 6 },
-        { type: "time", text: "Lost Time — 2–4 hours of manual retrospective assembly", stageIndex: 6 },
-        { type: "pain", text: "Sage: No auditor-ready evidence package without the same manual investigation effort", stageIndex: 6 },
+        { persona: "Zach", type: "time", title: "Lost Time — 2–3 business days", description: "Answering 'are we exposed?' requires logging into ISPF on each LPAR individually and running SMP/E or GIMAPI queries — typically a 2–3 day process across a large estate.", stageIndex: 0 },
+        { persona: "Sage", type: "skill", title: "Skill Gap / Bottleneck — requires Zach's availability to produce any exposure answer", description: "Has no direct way to determine exposure without going through Zach first; dependent on a verbal summary rather than real data.", stageIndex: 0 },
+        { persona: "Sage", type: "pain", title: "Business Impact — security posture is undefended at the executive level during the exposure window", description: "CISO and management expect an exposure brief she cannot produce without a multi-day investigation.", stageIndex: 0 },
+        { persona: "Zach", type: "time", title: "Lost Time — 4–8 hours", description: "Manually cross-referencing results across LPARs relies entirely on expert memory and is not documented anywhere.", stageIndex: 1 },
+        { persona: "Zach", type: "pain", title: "Business Impact — detection window always lags the threat", description: "No proactive signal before a CVE is publicly published — exposure is discovered reactively, from the advisory.", stageIndex: 1 },
+        { persona: "Zach", type: "time", title: "Lost Time — 1–3 days", description: "Blast radius analysis has no automated tooling — it requires the most experienced engineer to trace dependencies from memory.", stageIndex: 2 },
+        { persona: "Sage", type: "pain", title: "Business Impact — audit exposure is compounded by inability to quantify blast radius", description: "No unified, query-ready evidence source to defend certificate and compliance posture in audits.", stageIndex: 2 },
+        { persona: "Sage", type: "pain", title: "Business Impact — unknown compound risks remain open", description: "Compound risk (e.g., missing PTF + unencrypted connection) is invisible to any single tool.", stageIndex: 2 },
+        { persona: "Zach", type: "time", title: "Lost Time — 2–4 hours + potential production incident", description: "PTF prerequisite chain resolution is manual; a missed co-requisite causes a failed apply discovered only during a production change window.", stageIndex: 3 },
+        { persona: "Zach", type: "pain", title: "Business Impact — incorrect sequencing can cause outages worse than the original vulnerability", description: "Multi-LPAR sequencing for patches with shared subsystem dependencies (shared Db2, shared MQ) is planned from memory.", stageIndex: 3 },
+        { persona: "Zach", type: "pain", title: "Business Impact — a live failover exposure remains open after production is remediated", description: "DR environments are frequently patched last or forgotten entirely.", stageIndex: 3 },
+        { persona: "Zach", type: "time", title: "Lost Time — 2–5 days, or step is skipped entirely", description: "Lab environments take days to provision; under time pressure this step is skipped — production becomes the de facto test environment for emergency patches.", stageIndex: 4 },
+        { persona: "Alice", type: "skill", title: "Skill Gap / Bottleneck — Alice cannot execute safely without Zach present", description: "Remediation steps delegated by Zach lack the context needed to execute them safely; every delegated task still requires Zach's availability.", stageIndex: 4 },
+        { persona: "Zach", type: "pain", title: "Business Impact — apply failures on one LPAR can have knock-on effects across the estate", description: "Multi-LPAR apply sequenced from memory; shared dependencies create coordination risk.", stageIndex: 5 },
+        { persona: "Zach", type: "time", title: "Lost Time — 2–4 hours", description: "The entire audit trail is assembled after the fact from memory, email threads, and change tickets.", stageIndex: 6 },
+        { persona: "Sage", type: "pain", title: "Business Impact — compliance evidence is incomplete and unreliable", description: "No auditor-ready evidence package without the same manual investigation effort.", stageIndex: 6 },
       ],
     },
     toBe: {
@@ -415,27 +418,24 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Close", description: "All LPARs and DR environments patched and validated. Atlas generates the complete remediation record." },
       ],
       markers: [
-        { type: "gain", text: "Zach: Atlas surfaces a FIXCAT security gap without a user query — shortening detection-to-response window", stageIndex: 0 },
-        { type: "gain", text: "Sage: Proactive alert means Sage can initiate a CISO brief immediately rather than waiting for Zach's investigation", stageIndex: 0 },
-        { type: "gain", text: "Zach: 'Are we exposed?' answered in seconds — Atlas queries all connected LPARs simultaneously", stageIndex: 1 },
-        { type: "time", text: "Time Saving — 2–3 business days → under 10 minutes", stageIndex: 1 },
-        { type: "gain", text: "Sage: Real exposure data rather than Zach's verbal summary — Sage can independently verify exposure scope", stageIndex: 1 },
-        { type: "gain", text: "Zach: Blast radius is a topology map, not a guess — names every reachable system", stageIndex: 2 },
-        { type: "time", text: "Time Saving — 1–3 days → under 30 minutes for executive-ready briefing", stageIndex: 2 },
-        { type: "gain", text: "Zach: Compound risk identification surfaces combinations invisible to any single tool", stageIndex: 2 },
-        { type: "gain", text: "Zach: Every PTF prerequisite resolved automatically — eliminating the leading cause of PTF-related production outages", stageIndex: 3 },
-        { type: "gain", text: "Zach: DR exposure flagged proactively while production is being remediated", stageIndex: 3 },
-        { type: "gain", text: "Zach: Test environment available; no manual provisioning lag before validation", stageIndex: 4 },
-        { type: "time", text: "Time Saving — 2–5 days → automated provisioning", stageIndex: 4 },
-        { type: "gain", text: "Alice: Step-by-step execution guidance generated for each delegated LPAR apply", stageIndex: 4 },
-        { type: "gain", text: "Alice: If a test fails, Atlas identifies the specific dependency and generates the required fix in real time", stageIndex: 4 },
-        { type: "gain", text: "Zach: Clear recommendation with supporting evidence — all in one place for the authorization decision", stageIndex: 5 },
-        { type: "gain", text: "Zach: Dependency-aware sequencing prevents knock-on failures during multi-LPAR apply", stageIndex: 6 },
-        { type: "gain", text: "Zach: Exploitation activity detected during remediation window surfaces immediately", stageIndex: 7 },
-        { type: "gain", text: "Sage: DR exposure remains tracked and flagged until DR remediation is confirmed complete", stageIndex: 7 },
-        { type: "gain", text: "Zach: Complete audit trail generated automatically — zero manual assembly", stageIndex: 8 },
-        { type: "time", text: "Time Saving — 2–4 hours manual assembly → automatic", stageIndex: 8 },
-        { type: "gain", text: "Sage: CISO-ready evidence package available immediately at close", stageIndex: 8 },
+        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — proactive monitoring surfaces risk before it is asked", description: "Atlas surfaces a FIXCAT security gap without a user query — shortening the detection-to-response window from 'whenever the advisory reaches the right person' to 'when Atlas's next PTF currency check runs.'", stageIndex: 0 },
+        { persona: "Sage", type: "gain", title: "New User Capability — Sage can act on a finding without depending on Zach", description: "Proactive alert means Sage can initiate a CISO brief immediately rather than waiting for Zach's investigation to complete.", stageIndex: 0 },
+        { persona: "Zach", type: "time", title: "Time Saving — 2–3 business days → under 10 minutes", description: "'Are we exposed?' answered in seconds — Atlas queries all connected LPARs simultaneously. No ISPF. No SMP/E dialogs.", stageIndex: 1 },
+        { persona: "Sage", type: "gain", title: "New User Capability — Sage gains direct access to exposure facts", description: "Real exposure data rather than Zach's verbal summary — Sage can independently verify exposure scope without going through Zach first.", stageIndex: 1 },
+        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — multi-source topology traversal from ZUnderstand, impossible manually", description: "Blast radius is a topology map, not a guess. Atlas traverses the dependency graph and names every reachable system — coverage confidence surfaced alongside the map.", stageIndex: 2 },
+        { persona: "Sage", type: "time", title: "Time Saving — 1–3 days → under 30 minutes", description: "Real blast radius map allows Sage to produce a CISO-ready exposure brief in minutes, not after a multi-day investigation.", stageIndex: 2 },
+        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — cross-source risk compounding only possible with Atlas's unified model", description: "Compound risk identification: Atlas surfaces combinations of findings (missing security PTF + unencrypted IPIC connection) that create compound risk invisible to any single tool.", stageIndex: 2 },
+        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — Atlas resolves co-requisite chains without Zach navigating SMP/E resolution rules", description: "Every PTF prerequisite resolved automatically — eliminating the leading cause of PTF-related production outages.", stageIndex: 3 },
+        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — Atlas flags this without being asked", description: "DR exposure flagged proactively while production is being remediated — the failure mode that leads to breaches.", stageIndex: 3 },
+        { persona: "Zach", type: "time", title: "Time Saving — 2–5 days → automated provisioning", description: "Test environment available; no manual provisioning lag before the validation step can begin.", stageIndex: 4 },
+        { persona: "Alice", type: "gain", title: "New User Capability — Alice independently executes delegated steps", description: "Step-by-step execution guidance generated for each delegated LPAR apply — Alice can execute safely without Zach in the room.", stageIndex: 4 },
+        { persona: "Alice", type: "gain", title: "Atlas AI & Automation — configuration update generated automatically from test failure", description: "If a test fails, Atlas identifies the specific dependency and generates the required fix (e.g., CSD update) in real time.", stageIndex: 4 },
+        { persona: "Zach", type: "time", title: "Time Saving — decision is made from a complete picture, not assembled from multiple sources", description: "Clear recommendation with supporting evidence — test results, prerequisite resolution, blast radius, DR status — all in one place for the authorization decision.", stageIndex: 5 },
+        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — shared dependency ordering computed and enforced automatically", description: "Dependency-aware sequencing prevents knock-on failures during multi-LPAR apply. Progress visible in real time.", stageIndex: 6 },
+        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — proactive behavioral monitoring during the exposure window", description: "Exploitation activity detected during remediation window surfaces immediately — Atlas surfaces anomalies without being asked.", stageIndex: 7 },
+        { persona: "Sage", type: "gain", title: "New User Capability — Sage has independent visibility into DR remediation status", description: "DR exposure remains tracked and flagged until DR remediation is confirmed complete — no silent failover risk.", stageIndex: 7 },
+        { persona: "Zach", type: "time", title: "Time Saving — 2–4 hours manual assembly → automatic", description: "Complete audit trail generated automatically — exposure assessment, blast radius, plan, test results, apply log, authorization chain. Zero manual assembly.", stageIndex: 8 },
+        { persona: "Sage", type: "gain", title: "New User Capability — Sage produces the evidence package without Zach's involvement", description: "CISO-ready evidence package available immediately at close — auditor-ready without further effort.", stageIndex: 8 },
       ],
     },
     capabilities: [
