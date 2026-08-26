@@ -7,7 +7,7 @@ import {
   User,
   Zap,
   Users,
-  Bot,
+  Handshake,
   ChevronRight,
   ChevronDown,
   X,
@@ -68,7 +68,7 @@ const toBeMarkerConfig: Record<string, MarkerStyle> = {
     label: "New User Capability",
   },
   skill: {
-    icon: Bot,
+    icon: Handshake,
     color: "text-green-400",
     bg: "bg-green-400/10",
     border: "border-green-400/30",
@@ -109,6 +109,7 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
   const [managingStage, setManagingStage] = useState<number | null>(null);
   const [expandedPersonas, setExpandedPersonas] = useState<Record<string, boolean>>({});
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [modalTouchpoint, setModalTouchpoint] = useState<ExternalTouchpoint | null>(null);
   const [draftPersona, setDraftPersona] = useState("Zach");
   const [draftTitle, setDraftTitle] = useState("");
   const [draftDescription, setDraftDescription] = useState("");
@@ -271,6 +272,7 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
                 onCancelEdit={cancelEdit}
                 onStartStageManage={startStageManage}
                 onAddMarker={addMarkerToStage}
+                onOpenModal={setModalTouchpoint}
                 draftPersona={draftPersona}
                 setDraftPersona={setDraftPersona}
                 draftTitle={draftTitle}
@@ -288,8 +290,21 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
           })}
         </div>
       </div>
+
+      {/* Modal Overlay */}
+      {modalTouchpoint && (
+        <ExternalTouchpointModal
+          touchpoint={modalTouchpoint}
+          onClose={() => setModalTouchpoint(null)}
+        />
+      )}
     </div>
   );
+}
+
+function truncateToFirstSentence(text: string): string {
+  const match = text.match(/^[^.!?]+[.!?]/);
+  return match ? match[0].trim() : text;
 }
 
 function ExternalProductSelector({
@@ -302,7 +317,7 @@ function ExternalProductSelector({
   return (
     <div className="mb-4 p-3 rounded-lg border border-border/20 bg-background/50">
       <div className="flex items-center gap-2 mb-2">
-        <Bot className="w-3.5 h-3.5 text-muted-foreground" />
+        <Handshake className="w-3.5 h-3.5 text-muted-foreground" />
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           External Integrations
         </span>
@@ -337,10 +352,19 @@ function ExternalProductSelector({
   );
 }
 
-function ExternalTouchpointRenderer({ touchpoint }: { touchpoint: ExternalTouchpoint }) {
+function ExternalTouchpointRenderer({
+  touchpoint,
+  onClick,
+}: {
+  touchpoint: ExternalTouchpoint;
+  onClick: () => void;
+}) {
   if (touchpoint.type === "handoff") {
     return (
-      <div className="mb-2 rounded-lg border border-green-400/30 bg-green-400/5 overflow-hidden">
+      <div
+        className="mb-2 rounded-lg border border-green-400/30 bg-green-400/5 overflow-hidden cursor-pointer hover:border-green-400/50 transition-colors"
+        onClick={onClick}
+      >
         <div className="px-3 py-2 bg-green-400/10 border-b border-green-400/20">
           <h5 className="text-xs font-semibold text-green-400 uppercase tracking-wider">
             {touchpoint.title}
@@ -363,7 +387,7 @@ function ExternalTouchpointRenderer({ touchpoint }: { touchpoint: ExternalTouchp
                     {step.label}
                   </span>
                   <p className="text-[10px] text-muted-foreground leading-relaxed">
-                    {step.description}
+                    {truncateToFirstSentence(step.description)}
                   </p>
                 </div>
               </div>
@@ -376,7 +400,10 @@ function ExternalTouchpointRenderer({ touchpoint }: { touchpoint: ExternalTouchp
 
   // Enrichment
   return (
-    <div className="mb-2 rounded-lg border border-cyan-400/30 bg-cyan-400/5 overflow-hidden">
+    <div
+      className="mb-2 rounded-lg border border-cyan-400/30 bg-cyan-400/5 overflow-hidden cursor-pointer hover:border-cyan-400/50 transition-colors"
+      onClick={onClick}
+    >
       <div className="px-3 py-2 bg-cyan-400/10 border-b border-cyan-400/20">
         <h5 className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">
           {touchpoint.title}
@@ -384,8 +411,72 @@ function ExternalTouchpointRenderer({ touchpoint }: { touchpoint: ExternalTouchp
       </div>
       <div className="p-3">
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          {touchpoint.summary}
+          {truncateToFirstSentence(touchpoint.summary)}
         </p>
+      </div>
+    </div>
+  );
+}
+
+function ExternalTouchpointModal({
+  touchpoint,
+  onClose,
+}: {
+  touchpoint: ExternalTouchpoint;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="relative max-w-lg w-full max-h-[80vh] overflow-y-auto rounded-xl border border-border/40 bg-card/95 backdrop-blur-md shadow-2xl p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-foreground">
+            {touchpoint.title}
+          </h3>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-md hover:bg-muted/50 transition-colors"
+          >
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+
+        {touchpoint.type === "handoff" ? (
+          <div className="space-y-4">
+            {touchpoint.steps.map((step, i) => (
+              <div key={i} className="relative">
+                <div className="flex items-start gap-3">
+                  <div className="flex flex-col items-center">
+                    <div className="w-7 h-7 rounded-full bg-green-400/20 flex items-center justify-center text-xs font-bold text-green-400 flex-shrink-0">
+                      {i + 1}
+                    </div>
+                    {i < touchpoint.steps.length - 1 && (
+                      <div className="w-0.5 h-full bg-green-400/30 mt-1" />
+                    )}
+                  </div>
+                  <div className="flex-1 pb-4">
+                    <span className="text-xs font-semibold text-green-300 block mb-1">
+                      {step.label}
+                    </span>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {touchpoint.summary}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -409,6 +500,7 @@ function StageCard({
   onCancelEdit,
   onStartStageManage,
   onAddMarker,
+  onOpenModal,
   draftPersona,
   setDraftPersona,
   draftTitle,
@@ -439,6 +531,7 @@ function StageCard({
   onCancelEdit: () => void;
   onStartStageManage: (stageIndex: number) => void;
   onAddMarker: (stageIndex: number) => void;
+  onOpenModal: (tp: ExternalTouchpoint) => void;
   draftPersona: string;
   setDraftPersona: (v: string) => void;
   draftTitle: string;
@@ -498,7 +591,7 @@ function StageCard({
         {externalTouchpoints.length > 0 && (
           <div className="mb-3 space-y-2">
             {externalTouchpoints.map((tp, i) => (
-              <ExternalTouchpointRenderer key={i} touchpoint={tp} />
+              <ExternalTouchpointRenderer key={i} touchpoint={tp} onClick={() => onOpenModal(tp)} />
             ))}
           </div>
         )}
