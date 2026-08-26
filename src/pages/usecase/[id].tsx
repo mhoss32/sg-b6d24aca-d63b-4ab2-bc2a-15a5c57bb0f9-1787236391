@@ -32,7 +32,28 @@ export default function UseCaseDetailPage() {
 
   const node = id && typeof id === "string" ? getNodeById(id) : null;
   const initialDetail = id && typeof id === "string" ? useCaseDetails[id] : null;
-  const [detail, setDetail] = useState<UseCaseDetail | null>(initialDetail);
+  const [detail, setDetail] = useState<UseCaseDetail | null>(null);
+
+  // Load from localStorage or fall back to default data
+  React.useEffect(() => {
+    if (!id || typeof id !== "string" || !initialDetail) return;
+    const saved = localStorage.getItem(`atlas-usecase-${id}`);
+    if (saved) {
+      try {
+        setDetail(JSON.parse(saved));
+      } catch {
+        setDetail(initialDetail);
+      }
+    } else {
+      setDetail(initialDetail);
+    }
+  }, [id, initialDetail]);
+
+  // Save to localStorage whenever detail changes
+  React.useEffect(() => {
+    if (!id || typeof id !== "string" || !detail) return;
+    localStorage.setItem(`atlas-usecase-${id}`, JSON.stringify(detail));
+  }, [id, detail]);
 
   // Update detail when initialDetail changes (router navigation)
   React.useEffect(() => {
