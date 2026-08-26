@@ -29,11 +29,45 @@ export interface FlowMarker {
   stageIndex: number;
 }
 
+export interface ExternalHandoffStep {
+  label: string;
+  description: string;
+}
+
+export interface ExternalHandoff {
+  type: "handoff";
+  product: string;
+  title: string;
+  steps: ExternalHandoffStep[];
+  stageIndex: number;
+}
+
+export interface ExternalEnrichment {
+  type: "enrichment";
+  product: string;
+  title: string;
+  summary: string;
+  stageIndex: number;
+}
+
+export type ExternalTouchpoint = ExternalHandoff | ExternalEnrichment;
+
 export interface FlowDiagram {
   title: string;
   stages: FlowStage[];
   markers: FlowMarker[];
+  externalTouchpoints?: ExternalTouchpoint[];
 }
+
+export interface ExternalProduct {
+  id: string;
+  label: string;
+  description: string;
+}
+
+export const externalProducts: ExternalProduct[] = [
+  { id: "bob-ppz", label: "Bob PPZ", description: "Code-level application change intelligence with ZUnderstand integration" },
+];
 
 export interface Capability {
   name: string;
@@ -418,24 +452,55 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Close", description: "All LPARs and DR environments patched and validated. Atlas generates the complete remediation record." },
       ],
       markers: [
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — proactive monitoring surfaces risk before it is asked", description: "Atlas surfaces a FIXCAT security gap without a user query — shortening the detection-to-response window from 'whenever the advisory reaches the right person' to 'when Atlas's next PTF currency check runs.'", stageIndex: 0 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — proactive monitoring surfaces risk before it is asked", description: "Atlas surfaces a FIXCAT security gap without a user query — shortening the detection-to-response window from 'whenever the advisory reaches the right person' to 'when Atlas's next PTF currency check runs.'", stageIndex: 0 },
         { persona: "Sage", type: "gain", title: "New User Capability — Sage can act on a finding without depending on Zach", description: "Proactive alert means Sage can initiate a CISO brief immediately rather than waiting for Zach's investigation to complete.", stageIndex: 0 },
         { persona: "Zach", type: "time", title: "Time Saving — 2–3 business days → under 10 minutes", description: "'Are we exposed?' answered in seconds — Atlas queries all connected LPARs simultaneously. No ISPF. No SMP/E dialogs.", stageIndex: 1 },
         { persona: "Sage", type: "gain", title: "New User Capability — Sage gains direct access to exposure facts", description: "Real exposure data rather than Zach's verbal summary — Sage can independently verify exposure scope without going through Zach first.", stageIndex: 1 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — multi-source topology traversal from ZUnderstand, impossible manually", description: "Blast radius is a topology map, not a guess. Atlas traverses the dependency graph and names every reachable system — coverage confidence surfaced alongside the map.", stageIndex: 2 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — multi-source topology traversal from ZUnderstand, impossible manually", description: "Blast radius is a topology map, not a guess. Atlas traverses the dependency graph and names every reachable system — coverage confidence surfaced alongside the map.", stageIndex: 2 },
         { persona: "Sage", type: "time", title: "Time Saving — 1–3 days → under 30 minutes", description: "Real blast radius map allows Sage to produce a CISO-ready exposure brief in minutes, not after a multi-day investigation.", stageIndex: 2 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — cross-source risk compounding only possible with Atlas's unified model", description: "Compound risk identification: Atlas surfaces combinations of findings (missing security PTF + unencrypted IPIC connection) that create compound risk invisible to any single tool.", stageIndex: 2 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — Atlas resolves co-requisite chains without Zach navigating SMP/E resolution rules", description: "Every PTF prerequisite resolved automatically — eliminating the leading cause of PTF-related production outages.", stageIndex: 3 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — Atlas flags this without being asked", description: "DR exposure flagged proactively while production is being remediated — the failure mode that leads to breaches.", stageIndex: 3 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — cross-source risk compounding only possible with Atlas's unified model", description: "Compound risk identification: Atlas surfaces combinations of findings (missing security PTF + unencrypted IPIC connection) that create compound risk invisible to any single tool.", stageIndex: 2 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — Atlas resolves co-requisite chains without Zach navigating SMP/E resolution rules", description: "Every PTF prerequisite resolved automatically — eliminating the leading cause of PTF-related production outages.", stageIndex: 3 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — Atlas flags this without being asked", description: "DR exposure flagged proactively while production is being remediated — the failure mode that leads to breaches.", stageIndex: 3 },
         { persona: "Zach", type: "time", title: "Time Saving — 2–5 days → automated provisioning", description: "Test environment available; no manual provisioning lag before the validation step can begin.", stageIndex: 4 },
         { persona: "Alice", type: "gain", title: "New User Capability — Alice independently executes delegated steps", description: "Step-by-step execution guidance generated for each delegated LPAR apply — Alice can execute safely without Zach in the room.", stageIndex: 4 },
-        { persona: "Alice", type: "gain", title: "Atlas AI & Automation — configuration update generated automatically from test failure", description: "If a test fails, Atlas identifies the specific dependency and generates the required fix (e.g., CSD update) in real time.", stageIndex: 4 },
+        { persona: "Alice", type: "skill", title: "Atlas AI & Automation — configuration update generated automatically from test failure", description: "If a test fails, Atlas identifies the specific dependency and generates the required fix (e.g., CSD update) in real time.", stageIndex: 4 },
         { persona: "Zach", type: "time", title: "Time Saving — decision is made from a complete picture, not assembled from multiple sources", description: "Clear recommendation with supporting evidence — test results, prerequisite resolution, blast radius, DR status — all in one place for the authorization decision.", stageIndex: 5 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — shared dependency ordering computed and enforced automatically", description: "Dependency-aware sequencing prevents knock-on failures during multi-LPAR apply. Progress visible in real time.", stageIndex: 6 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — proactive behavioral monitoring during the exposure window", description: "Exploitation activity detected during remediation window surfaces immediately — Atlas surfaces anomalies without being asked.", stageIndex: 7 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — shared dependency ordering computed and enforced automatically", description: "Dependency-aware sequencing prevents knock-on failures during multi-LPAR apply. Progress visible in real time.", stageIndex: 6 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — proactive behavioral monitoring during the exposure window", description: "Exploitation activity detected during remediation window surfaces immediately — Atlas surfaces anomalies without being asked.", stageIndex: 7 },
         { persona: "Sage", type: "gain", title: "New User Capability — Sage has independent visibility into DR remediation status", description: "DR exposure remains tracked and flagged until DR remediation is confirmed complete — no silent failover risk.", stageIndex: 7 },
         { persona: "Zach", type: "time", title: "Time Saving — 2–4 hours manual assembly → automatic", description: "Complete audit trail generated automatically — exposure assessment, blast radius, plan, test results, apply log, authorization chain. Zero manual assembly.", stageIndex: 8 },
         { persona: "Sage", type: "gain", title: "New User Capability — Sage produces the evidence package without Zach's involvement", description: "CISO-ready evidence package available immediately at close — auditor-ready without further effort.", stageIndex: 8 },
+      ],
+      externalTouchpoints: [
+        {
+          type: "enrichment",
+          product: "Bob PPZ",
+          title: "BOB PPZ Enrichment Touchpoint",
+          summary: "Atlas traverses the dependency graph using ZUnderstand application discovery (packaged in Atlas). When Bob PPZ is also installed, the traversal is enriched with ZUnderstand's full code-level metadata — precise program-to-program call relationships, data flow paths, and business service attribution. For an estate with complex COBOL call chains, this means the blast radius map includes execution-path-level detail, not just topology-level relationships. Compound risks involving application code (e.g., a program with both a missing PTF dependency and a known data flow vulnerability) are surfaced with higher precision.",
+          stageIndex: 2,
+        },
+        {
+          type: "handoff",
+          product: "Bob PPZ",
+          title: "BOB PPZ Handoff",
+          steps: [
+            { label: "Atlas produced", description: "Atlas has generated a sequenced remediation plan — PTF prerequisites resolved, apply order determined, DR remediation sequenced. During plan generation, Atlas may identify that applying a specific PTF requires a compensating application code change." },
+            { label: "Atlas directs the user to Bob PPZ", description: "Atlas presents the code-change requirement as a named item in the remediation plan — identifying the affected program(s), the nature of the required change, and the dependency context. The user is directed to Bob PPZ to implement the code change using ZUnderstand's deterministic code-level intelligence." },
+            { label: "Bob PPZ returns to Atlas", description: "The completed code change artifact. Atlas incorporates it into the overall remediation plan, validates it in the provisioned test environment (Step 5), and confirms it before production apply." },
+          ],
+          stageIndex: 3,
+        },
+        {
+          type: "handoff",
+          product: "Bob PPZ",
+          title: "BOB PPZ Handoff",
+          steps: [
+            { label: "Atlas produced", description: "A provisioned test environment with the PTF applied. Atlas executes the test plan and, if a test failure is attributed to an application code dependency (not just a configuration issue), Atlas identifies the specific program and the nature of the incompatibility." },
+            { label: "Atlas directs the user to Bob PPZ", description: "Atlas presents the failure context — the specific program, the call path, the behavioral change the PTF introduced — and directs the user to Bob PPZ for the code-level fix. Bob PPZ uses ZUnderstand to trace the execution path, understand the affected business logic, and generate the precise modification required." },
+            { label: "Bob PPZ returns to Atlas", description: "A fix artifact. Atlas re-runs the test against the corrected code, confirms pass, and proceeds with the remediation plan." },
+          ],
+          stageIndex: 4,
+        },
       ],
     },
     capabilities: [
@@ -488,10 +553,10 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       ],
       markers: [
         { persona: "Zach", type: "time", title: "Time Saving — under 30 minutes", description: "Complete impact analysis with prerequisite resolution in under 30 minutes.", stageIndex: 1 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — prerequisite chains resolved automatically", description: "No missed dependencies — Atlas resolves every co-requisite before apply.", stageIndex: 1 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — prerequisite chains resolved automatically", description: "No missed dependencies — Atlas resolves every co-requisite before apply.", stageIndex: 1 },
         { persona: "Quinn", type: "gain", title: "New User Capability — complete change record with test evidence", description: "Full audit trail and test evidence generated automatically at close.", stageIndex: 5 },
         { persona: "Alice", type: "gain", title: "New User Capability — mid-level engineers execute with Atlas guidance", description: "Step-by-step execution guidance reduces expert dependency.", stageIndex: 2 },
-        { persona: "Stan", type: "gain", title: "Atlas AI & Automation — cross-subsystem impact visible before apply", description: "CICS regions, Db2 connections, and MQ channels stay stable during patch apply.", stageIndex: 1 },
+        { persona: "Stan", type: "skill", title: "Atlas AI & Automation — cross-subsystem impact visible before apply", description: "CICS regions, Db2 connections, and MQ channels stay stable during patch apply.", stageIndex: 1 },
       ],
     },
     capabilities: [
@@ -544,8 +609,8 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       ],
       markers: [
         { persona: "Derek", type: "time", title: "Time Saving — 10–30 engineer-days → under 2 engineer-days", description: "Evidence generated in hours instead of weeks of manual collection.", stageIndex: 1 },
-        { persona: "Derek", type: "gain", title: "Atlas AI & Automation — 46 undocumented changes surfaced proactively in 12 months", description: "Continuous monitoring finds gaps before auditors do.", stageIndex: 3 },
-        { persona: "Sage", type: "gain", title: "Atlas AI & Automation — behavioral anomaly detection", description: "Finds patterns no human thought to look for across RACF, SMP/E, and configuration data.", stageIndex: 3 },
+        { persona: "Derek", type: "skill", title: "Atlas AI & Automation — 46 undocumented changes surfaced proactively in 12 months", description: "Continuous monitoring finds gaps before auditors do.", stageIndex: 3 },
+        { persona: "Sage", type: "skill", title: "Atlas AI & Automation — behavioral anomaly detection", description: "Finds patterns no human thought to look for across RACF, SMP/E, and configuration data.", stageIndex: 3 },
         { persona: "Derek", type: "gain", title: "New User Capability — compliance professional operates without deep z/OS expertise", description: "Atlas surfaces findings in plain language — no need for RACF expert to interpret.", stageIndex: 5 },
         { persona: "Quinn", type: "gain", title: "New User Capability — proactive remediation before audit window", description: "Gaps addressed on a continuous basis rather than under audit pressure.", stageIndex: 4 },
       ],
@@ -596,10 +661,10 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       ],
       markers: [
         { persona: "Chris", type: "time", title: "Time Saving — 3–6 months → under 4 weeks", description: "Structured Atlas onboarding gets new hires productive in under 4 weeks.", stageIndex: 0 },
-        { persona: "Chris", type: "gain", title: "Atlas AI & Automation — environment knowledge persists regardless of staff turnover", description: "Atlas captures and preserves institutional knowledge — not dependent on individuals.", stageIndex: 3 },
+        { persona: "Chris", type: "skill", title: "Atlas AI & Automation — environment knowledge persists regardless of staff turnover", description: "Atlas captures and preserves institutional knowledge — not dependent on individuals.", stageIndex: 3 },
         { persona: "Chris", type: "gain", title: "New User Capability — proactive risk surfacing", description: "Shows what matters before new hire knows to ask — no need to know what to look for.", stageIndex: 2 },
         { persona: "Alice", type: "gain", title: "New User Capability — Atlas replaces shadowing", description: "Queryable, current environment model replaces informal shadowing.", stageIndex: 1 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — critical knowledge captured", description: "Reduces retirement impact by preserving expert knowledge in Atlas.", stageIndex: 2 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — critical knowledge captured", description: "Reduces retirement impact by preserving expert knowledge in Atlas.", stageIndex: 2 },
       ],
     },
     capabilities: [
@@ -648,7 +713,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       ],
       markers: [
         { persona: "Angie", type: "time", title: "Time Saving — 1–3 days → under 15 minutes", description: "Complete cross-subsystem analysis in under 15 minutes.", stageIndex: 1 },
-        { persona: "Angie", type: "gain", title: "Atlas AI & Automation — cross-subsystem lateral connections visible", description: "Connections between subsystems visible for the first time — no more blind spots.", stageIndex: 1 },
+        { persona: "Angie", type: "skill", title: "Atlas AI & Automation — cross-subsystem lateral connections visible", description: "Connections between subsystems visible for the first time — no more blind spots.", stageIndex: 1 },
         { persona: "Kathleen", type: "gain", title: "New User Capability — reproducible results", description: "Same query returns same result every time — consistent and reliable.", stageIndex: 2 },
         { persona: "Angie", type: "gain", title: "New User Capability — developers self-serve", description: "No z/OS specialist involvement needed for dependency queries.", stageIndex: 1 },
         { persona: "Greg", type: "gain", title: "New User Capability — infrastructure visibility enables architecture decisions", description: "Full stack visibility supports architecture and planning decisions.", stageIndex: 3 },
@@ -699,7 +764,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       ],
       markers: [
         { persona: "Zach", type: "time", title: "Time Saving — 2–8 hours → under 30 minutes", description: "Complete multi-source assessment in under 30 minutes.", stageIndex: 1 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — compound risks identified", description: "Risks that no single tool can see are surfaced by Atlas's unified model.", stageIndex: 1 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — compound risks identified", description: "Risks that no single tool can see are surfaced by Atlas's unified model.", stageIndex: 1 },
         { persona: "Derek", type: "gain", title: "New User Capability — structured artifact enables governance review", description: "Governance-ready health assessment generated automatically.", stageIndex: 3 },
         { persona: "Quinn", type: "gain", title: "New User Capability — health baseline enables trend comparison", description: "Compare health across events — track improvement or degradation over time.", stageIndex: 4 },
         { persona: "Quinn", type: "gain", title: "New User Capability — any team member can request health check", description: "Not just Zach — any authorized user can run a comprehensive health assessment.", stageIndex: 1 },
@@ -764,16 +829,16 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       markers: [
         { persona: "Kathleen", type: "time", title: "Time Saving — half a day to 2 days → seconds", description: "Ask Atlas what the proposed change will touch — full answer across CICS, Db2, MQ, and z/OS Connect in seconds, before any code is written.", stageIndex: 0 },
         { persona: "Deb", type: "gain", title: "New User Capability — Deb independently understands change impact without requiring Kathleen or Zach", description: "Atlas provides the system context Deb does not yet carry — she understands the scope of her change before making it, not after breaking something.", stageIndex: 0 },
-        { persona: "Angie", type: "gain", title: "Atlas AI & Automation — impact analysis references both topology and architectural specification", description: "Architects can define the application specification and intended design that Atlas references for impact analysis — changes are validated against architectural intent.", stageIndex: 0 },
+        { persona: "Angie", type: "skill", title: "Atlas AI & Automation — impact analysis references both topology and architectural specification", description: "Architects can define the application specification and intended design that Atlas references for impact analysis — changes are validated against architectural intent.", stageIndex: 0 },
         { persona: "Deb", type: "time", title: "Time Saving — hours to 2 days → background provisioning", description: "Test environment provisioned in the background while Deb writes code — no ticket, no wait time, isolated environment ready when she needs it.", stageIndex: 1 },
         { persona: "Kathleen", type: "gain", title: "New User Capability — Kathleen independently gets a production-representative isolated environment without filing a ticket", description: "Isolated environment that mirrors production topology — no testing in a shared environment with other teams' changes.", stageIndex: 1 },
         { persona: "Deb", type: "gain", title: "New User Capability — Deb codes with full system context available on demand, independently", description: "Real-time topology context available while coding — any question about what a code path touches is answerable without interrupting a colleague.", stageIndex: 2 },
         { persona: "Kathleen", type: "time", title: "Time Saving — Kathleen's oversight effort on routine delegated changes reduces significantly", description: "Kathleen can delegate routine changes to Deb with confidence — Atlas provides the guardrails Kathleen would otherwise provide herself.", stageIndex: 2 },
         { persona: "Kathleen", type: "time", title: "Time Saving — 2–4 hours manual test plan → automatic", description: "Test plan generated automatically from the impact analysis — test scenarios scoped to the transactions and API paths the change actually touches.", stageIndex: 3 },
-        { persona: "Deb", type: "gain", title: "Atlas AI & Automation — test plan scope derived from topology traversal, not from developer knowledge", description: "Consistent, topology-derived test coverage — Deb's test plan is as thorough as Kathleen's, because it comes from the same model, not from developer experience level.", stageIndex: 3 },
+        { persona: "Deb", type: "skill", title: "Atlas AI & Automation — test plan scope derived from topology traversal, not from developer knowledge", description: "Consistent, topology-derived test coverage — Deb's test plan is as thorough as Kathleen's, because it comes from the same model, not from developer experience level.", stageIndex: 3 },
         { persona: "Deb", type: "time", title: "Time Saving — late regression discovery cost reduced by the shift from integration/production to developer loop", description: "Developer-controlled regression testing — regressions caught in Deb's own isolated environment before the change reaches integration testing or production.", stageIndex: 4 },
         { persona: "Deb", type: "gain", title: "New User Capability — Deb independently runs a full test-validate-iterate cycle without any infrastructure team involvement", description: "Iterate on code, watch the test plan update, re-run tests — a fast loop without filing tickets or waiting for infrastructure.", stageIndex: 4 },
-        { persona: "Kathleen", type: "gain", title: "Atlas AI & Automation — failure attribution identifies which dependency or change caused the failure", description: "Test results with failure attribution — Kathleen reviews a structured pass/fail report, not raw test output to interpret.", stageIndex: 4 },
+        { persona: "Kathleen", type: "skill", title: "Atlas AI & Automation — failure attribution identifies which dependency or change caused the failure", description: "Test results with failure attribution — Kathleen reviews a structured pass/fail report, not raw test output to interpret.", stageIndex: 4 },
         { persona: "Kathleen", type: "time", title: "Time Saving — hours of multi-tool, multi-team handoff → Atlas-orchestrated workflow", description: "Atlas-orchestrated deployment to CICS or IMS — developer initiates, Atlas handles the configuration steps, Zach authorizes changes that require it.", stageIndex: 5 },
         { persona: "Deb", type: "gain", title: "New User Capability — Deb has visibility into her own deployment without requiring a Zach intermediary", description: "Deployment is visible from Deb's perspective — she can track status without depending on a sysprog to relay progress.", stageIndex: 5 },
       ],
@@ -843,18 +908,18 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Zach", type: "time", title: "Time Saving — 2–4 weeks → minutes", description: "Full compatibility impact scoped in minutes — all LPARs, all subsystems, all applications, all compatibility notes for the target version. 300-application sweep without a single manual query.", stageIndex: 0 },
         { persona: "Greg", type: "time", title: "Time Saving — 1–2 weeks → minutes", description: "Infrastructure dependency picture for sysplex and LPAR sequencing requirements produced automatically from Atlas's topology model.", stageIndex: 0 },
         { persona: "Angie", type: "gain", title: "New User Capability — Angie independently identifies application-level compatibility risk without coordinating with every application owner", description: "Application-level compatibility findings surfaced directly — application teams notified of what they need to remediate before the upgrade begins.", stageIndex: 0 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — Atlas joins IBM compatibility notes with the live topology to produce a specific, grounded compatibility gap list", description: "Compatibility issues surfaced before the project starts, not during production cutover. The list of what needs remediation before the upgrade begins is complete from day one.", stageIndex: 1 },
-        { persona: "Greg", type: "gain", title: "Atlas AI & Automation — dependency-aware sequencing analysis produces the correct upgrade order, not an experience-based guess", description: "Sequencing risk identification — Atlas identifies which subsystems must be upgraded in a specific order to avoid compatibility failures, based on their dependency relationships.", stageIndex: 1 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — Atlas joins IBM compatibility notes with the live topology to produce a specific, grounded compatibility gap list", description: "Compatibility issues surfaced before the project starts, not during production cutover. The list of what needs remediation before the upgrade begins is complete from day one.", stageIndex: 1 },
+        { persona: "Greg", type: "skill", title: "Atlas AI & Automation — dependency-aware sequencing analysis produces the correct upgrade order, not an experience-based guess", description: "Sequencing risk identification — Atlas identifies which subsystems must be upgraded in a specific order to avoid compatibility failures, based on their dependency relationships.", stageIndex: 1 },
         { persona: "Zach", type: "time", title: "Time Saving — months → days", description: "Months of planning effort compressed into a structured Atlas-generated plan — phase boundaries, sequencing, environment specs, and test scenarios all generated from the topology.", stageIndex: 2 },
         { persona: "Alice", type: "gain", title: "New User Capability — Alice independently executes delegated upgrade phases from Atlas's structured plan", description: "Mid-level engineers can execute phases assigned in the Atlas plan — the dependency knowledge is embedded in the plan, not required from the executor.", stageIndex: 2 },
         { persona: "Zach", type: "time", title: "Time Saving — days per phase provisioning → automated", description: "Phase isolation maintained automatically — each phase validated in an isolated environment without manual provisioning.", stageIndex: 3 },
         { persona: "Alice", type: "gain", title: "New User Capability — Alice independently provisions phase environments", description: "Alice can independently prepare phase environments from Atlas's specification without requiring Zach for each provisioning step.", stageIndex: 3 },
         { persona: "Zach", type: "time", title: "Time Saving — days per phase manual coordination → Atlas-orchestrated execution", description: "Phase execution is Atlas-orchestrated across all tools — no manual coordination across SMP/E, subsystem configuration, and application deployment.", stageIndex: 4 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — reasoning visible at every step; no black-box execution", description: "Zach authorizes each production step — governance gate maintained with full visibility into what Atlas will execute before authorization.", stageIndex: 4 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — behavioral baseline comparison identifies post-upgrade regressions that would otherwise be invisible until production incidents", description: "Behavioral monitoring post-phase — Atlas identifies if a subsystem is running differently after the upgrade and surfaces the deviation before the next phase begins.", stageIndex: 5 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — reasoning visible at every step; no black-box execution", description: "Zach authorizes each production step — governance gate maintained with full visibility into what Atlas will execute before authorization.", stageIndex: 4 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — behavioral baseline comparison identifies post-upgrade regressions that would otherwise be invisible until production incidents", description: "Behavioral monitoring post-phase — Atlas identifies if a subsystem is running differently after the upgrade and surfaces the deviation before the next phase begins.", stageIndex: 5 },
         { persona: "Angie", type: "time", title: "Time Saving — ad hoc manual testing → systematic Atlas-generated test execution", description: "Application regression testing scoped to the phase's changes — Atlas runs the relevant test scenarios and surfaces failures before production.", stageIndex: 5 },
         { persona: "Zach", type: "time", title: "Time Saving — days retrospective documentation → automatic", description: "Complete upgrade record generated automatically — every phase, every authorization, every test result captured without retrospective assembly.", stageIndex: 6 },
-        { persona: "Greg", type: "gain", title: "Atlas AI & Automation — baseline registration happens as part of upgrade close; no separate action required", description: "New infrastructure baseline registered in Atlas at close — post-upgrade drift is immediately detectable against the new reference state.", stageIndex: 6 },
+        { persona: "Greg", type: "skill", title: "Atlas AI & Automation — baseline registration happens as part of upgrade close; no separate action required", description: "New infrastructure baseline registered in Atlas at close — post-upgrade drift is immediately detectable against the new reference state.", stageIndex: 6 },
       ],
     },
     capabilities: [
@@ -914,17 +979,17 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Audit", description: "Atlas generates a complete, continuous drift audit trail — every detection, investigation outcome, and remediation action captured automatically." },
       ],
       markers: [
-        { persona: "Annette", type: "gain", title: "Atlas AI & Automation — continuous baseline diff runs automatically; no manual comparison needed", description: "Drift alert received before a behavioral symptom appears — Atlas detects the configuration change, not the downstream consequence.", stageIndex: 0 },
-        { persona: "Annette", type: "gain", title: "Atlas AI & Automation — undocumented change detection is only possible through Atlas's combined Config-as-Code model and change record history", description: "Unauthorized change detection: Atlas compares current Config-as-Code state against the last registered baseline and identifies every configuration change with no corresponding record.", stageIndex: 0 },
+        { persona: "Annette", type: "skill", title: "Atlas AI & Automation — continuous baseline diff runs automatically; no manual comparison needed", description: "Drift alert received before a behavioral symptom appears — Atlas detects the configuration change, not the downstream consequence.", stageIndex: 0 },
+        { persona: "Annette", type: "skill", title: "Atlas AI & Automation — undocumented change detection is only possible through Atlas's combined Config-as-Code model and change record history", description: "Unauthorized change detection: Atlas compares current Config-as-Code state against the last registered baseline and identifies every configuration change with no corresponding record.", stageIndex: 0 },
         { persona: "Annette", type: "time", title: "Time Saving — hours to days reconstructing evidence → evidence provided immediately in the Atlas alert", description: "Undocumented change investigation starts with evidence, not guesswork — Atlas provides the configuration delta, timestamp, affected component, and user ID attribution immediately.", stageIndex: 1 },
         { persona: "Annette", type: "gain", title: "New User Capability — Annette independently investigates and makes accept/escalate decisions on drift findings without requiring Zach", description: "Annette can triage, decide, and act on drift findings without escalating to Zach for the basic facts.", stageIndex: 1 },
         { persona: "Annette", type: "gain", title: "New User Capability — Annette independently triages drift findings from Atlas's risk classification", description: "Findings classified by risk — Annette knows whether a Db2 ZPARM change is a compliance risk, a stability risk, or cosmetic drift without Zach's interpretation.", stageIndex: 2 },
-        { persona: "Greg", type: "gain", title: "Atlas AI & Automation — trend analysis from continuous monitoring data surfaces architectural governance insights", description: "Drift trend reports over time — Greg can measure whether environment parity is improving as a result of governance changes, with real data.", stageIndex: 2 },
+        { persona: "Greg", type: "skill", title: "Atlas AI & Automation — trend analysis from continuous monitoring data surfaces architectural governance insights", description: "Drift trend reports over time — Greg can measure whether environment parity is improving as a result of governance changes, with real data.", stageIndex: 2 },
         { persona: "Alex", type: "time", title: "Time Saving — half day manual comparison → seconds", description: "QA parity report on demand — 'is this environment production-equivalent for performance testing?' answered by Atlas in a single query, with specific differences listed.", stageIndex: 2 },
         { persona: "Annette", type: "gain", title: "New User Capability — Annette conducts drift investigations independently, escalating to Zach only when the finding requires z/OS-level expertise", description: "Every investigation starts with Atlas's structured evidence — Annette has a specific, verifiable starting point rather than a blank-page investigation.", stageIndex: 3 },
         { persona: "Zach", type: "time", title: "Time Saving — Zach's time on escalated investigations reduced because Atlas has already done the evidence assembly", description: "When Annette does escalate, the investigation is already structured — Zach reviews evidence, not repeating Annette's discovery work.", stageIndex: 3 },
         { persona: "Zach", type: "time", title: "Time Saving — hours to days → Atlas-generated targeted realignment plan", description: "Environment realignment plan generated by Atlas — targeted to only the parameters that differ and need correction. No manual parameter-by-parameter correction.", stageIndex: 4 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — post-remediation comparison runs automatically; no manual re-verification needed", description: "Post-remediation validation is automatic — Atlas confirms the environment reached the intended state and the drift is closed.", stageIndex: 4 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — post-remediation comparison runs automatically; no manual re-verification needed", description: "Post-remediation validation is automatic — Atlas confirms the environment reached the intended state and the drift is closed.", stageIndex: 4 },
         { persona: "Annette", type: "time", title: "Time Saving — hours assembling evidence → automatic continuous trail", description: "Incident audit trail generated automatically for every drift detection and resolution — Annette can close incidents with a complete, continuous record rather than assembling it manually.", stageIndex: 5 },
         { persona: "Derek", type: "gain", title: "Business Impact — audit findings for undocumented drift reduce materially as Atlas coverage grows", description: "Change record completeness improves for the Atlas estate — every Atlas-detected and Atlas-resolved drift item has a documented trail. Audit findings for undocumented changes reduce.", stageIndex: 5 },
       ],
@@ -981,12 +1046,12 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       ],
       markers: [
         { persona: "Greg", type: "time", title: "Time Saving — 2–4 weeks manual assessment → hours", description: "Complete DR vs. production diff produced on demand — every configuration, PTF, RACF, and subsystem difference enumerated with severity classification.", stageIndex: 0 },
-        { persona: "Greg", type: "gain", title: "Atlas AI & Automation — DR failure point prediction identifies specific items that would cause failover failure based on the observed diff", description: "High-severity gaps (missing RACF groups, insufficient buffer pools, missing critical PTFs) surfaced immediately and classified — Greg knows exactly what would cause a DR failure without running a test first.", stageIndex: 0 },
-        { persona: "Greg", type: "gain", title: "Atlas AI & Automation — continuous DR monitoring closes the gap between test cycles with real-time drift alerting", description: "High-severity DR drift surfaced as it appears — each significant production change triggers an immediate DR equivalence check, not a manual quarterly review.", stageIndex: 1 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — production change → DR equivalence check runs automatically", description: "When Zach applies a change to production, Atlas automatically checks whether the same change needs to be applied to DR and surfaces the gap — no separate manual tracking required.", stageIndex: 1 },
+        { persona: "Greg", type: "skill", title: "Atlas AI & Automation — DR failure point prediction identifies specific items that would cause failover failure based on the observed diff", description: "High-severity gaps (missing RACF groups, insufficient buffer pools, missing critical PTFs) surfaced immediately and classified — Greg knows exactly what would cause a DR failure without running a test first.", stageIndex: 0 },
+        { persona: "Greg", type: "skill", title: "Atlas AI & Automation — continuous DR monitoring closes the gap between test cycles with real-time drift alerting", description: "High-severity DR drift surfaced as it appears — each significant production change triggers an immediate DR equivalence check, not a manual quarterly review.", stageIndex: 1 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — production change → DR equivalence check runs automatically", description: "When Zach applies a change to production, Atlas automatically checks whether the same change needs to be applied to DR and surfaces the gap — no separate manual tracking required.", stageIndex: 1 },
         { persona: "Zach", type: "time", title: "Time Saving — days to weeks of manual remediation planning → Atlas-generated targeted plan", description: "DR remediation plan generated from the complete diff — every gap addressed, nothing left to memory or guesswork.", stageIndex: 2 },
-        { persona: "Greg", type: "gain", title: "Atlas AI & Automation — post-remediation equivalence check runs automatically; no manual re-assessment needed", description: "Post-remediation validation runs automatically — Atlas confirms the DR environment reached production equivalence before the test cycle begins.", stageIndex: 2 },
-        { persona: "Greg", type: "gain", title: "Atlas AI & Automation — isolation-based DR simulation at production load is only possible through Atlas's environment provisioning and test execution capabilities", description: "Simulated failover validation produces a certified pass result before the actual DR test — organizations enter the test with documented evidence it will work.", stageIndex: 3 },
+        { persona: "Greg", type: "skill", title: "Atlas AI & Automation — post-remediation equivalence check runs automatically; no manual re-assessment needed", description: "Post-remediation validation runs automatically — Atlas confirms the DR environment reached production equivalence before the test cycle begins.", stageIndex: 2 },
+        { persona: "Greg", type: "skill", title: "Atlas AI & Automation — isolation-based DR simulation at production load is only possible through Atlas's environment provisioning and test execution capabilities", description: "Simulated failover validation produces a certified pass result before the actual DR test — organizations enter the test with documented evidence it will work.", stageIndex: 3 },
         { persona: "Quinn", type: "gain", title: "New User Capability — Quinn makes the DR test authorization decision from a verified simulation result, independently", description: "Go/no-go decision for the DR test is made from Atlas's simulation pass/fail verdict — an objective, reproducible readiness signal rather than a team assessment.", stageIndex: 3 },
         { persona: "Derek", type: "time", title: "Time Saving — days manual documentation → automatic evidence generation", description: "Complete DR readiness history generated from Atlas — continuous monitoring data, remediation records, simulation results, and test outcomes as structured evidence.", stageIndex: 4 },
         { persona: "Derek", type: "gain", title: "New User Capability — Derek independently produces DR compliance evidence from Atlas without requiring Greg or Zach to assemble it", description: "Regulatory compliance evidence (DORA, SOX DR requirements) produced directly from Atlas's DR monitoring and simulation records — no manual assembly from test reports and team notes.", stageIndex: 4 },
@@ -1038,10 +1103,10 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       ],
       markers: [
         { persona: "Alex", type: "time", title: "Time Saving — 1–3 days → under 2 hours", description: "Root cause identified in under 2 hours with Atlas's unified cross-pillar analysis.", stageIndex: 4 },
-        { persona: "Alex", type: "gain", title: "Atlas AI & Automation — proactive constraint discovery before peak events", description: "Atlas models load projection and identifies constraints weeks before peak events — not discovered during the event.", stageIndex: 1 },
-        { persona: "Quinn", type: "gain", title: "Atlas AI & Automation — post-change regression detected same day", description: "Behavioral baseline comparison surfaces regressions within hours of a change, not days later.", stageIndex: 3 },
+        { persona: "Alex", type: "skill", title: "Atlas AI & Automation — proactive constraint discovery before peak events", description: "Atlas models load projection and identifies constraints weeks before peak events — not discovered during the event.", stageIndex: 1 },
+        { persona: "Quinn", type: "skill", title: "Atlas AI & Automation — post-change regression detected same day", description: "Behavioral baseline comparison surfaces regressions within hours of a change, not days later.", stageIndex: 3 },
         { persona: "Annette", type: "gain", title: "New User Capability — unified cross-pillar analysis replaces multi-team investigation", description: "Annette can triage performance issues with Atlas's cross-subsystem correlation without escalating to Alex.", stageIndex: 4 },
-        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — dark capacity discovered and mapped", description: "Atlas identifies underutilized resources and over-provisioned LPARs — no wasted capacity procurement.", stageIndex: 1 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — dark capacity discovered and mapped", description: "Atlas identifies underutilized resources and over-provisioned LPARs — no wasted capacity procurement.", stageIndex: 1 },
       ],
     },
     capabilities: [
@@ -1099,18 +1164,18 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       ],
       markers: [
         { persona: "Angie", type: "time", title: "Time Saving — weeks to months of manual research → minutes", description: "Complete application structure, technical debt profile, and dependency map produced in minutes — from Atlas's topology model and ZUnderstand's dynamic call chain analysis.", stageIndex: 0 },
-        { persona: "Kathleen", type: "gain", title: "Atlas AI & Automation — ZUnderstand dynamic call chain analysis is required for safe modernization scope; this is not achievable from static analysis alone", description: "Runtime call chain analysis from ZUnderstand shows which programs actually call which others at runtime — not just which are statically configured. Monolithic copybook decomposition planned from actual usage, not from topology assumptions.", stageIndex: 0 },
+        { persona: "Kathleen", type: "skill", title: "Atlas AI & Automation — ZUnderstand dynamic call chain analysis is required for safe modernization scope; this is not achievable from static analysis alone", description: "Runtime call chain analysis from ZUnderstand shows which programs actually call which others at runtime — not just which are statically configured. Monolithic copybook decomposition planned from actual usage, not from topology assumptions.", stageIndex: 0 },
         { persona: "Deb", type: "gain", title: "New User Capability — Deb independently understands coupling scope for her assigned phases using Atlas's analysis", description: "Atlas surfaces which fields in a shared copybook are actually used by which programs at runtime — Deb knows the safe decomposition boundary before making any changes.", stageIndex: 0 },
-        { persona: "Angie", type: "gain", title: "Atlas AI & Automation — Atlas generates a prioritized plan from technical debt analysis, coupling scores, and proactive deadline surfacing", description: "Prioritized modernization plan generated by Atlas — deprecated API deadlines, coupling risk scores, blast radius quantification — data-driven prioritization rather than expert estimation.", stageIndex: 1 },
+        { persona: "Angie", type: "skill", title: "Atlas AI & Automation — Atlas generates a prioritized plan from technical debt analysis, coupling scores, and proactive deadline surfacing", description: "Prioritized modernization plan generated by Atlas — deprecated API deadlines, coupling risk scores, blast radius quantification — data-driven prioritization rather than expert estimation.", stageIndex: 1 },
         { persona: "Greg", type: "gain", title: "New User Capability — Greg reviews infrastructure implications from Atlas's analysis without being consulted ad hoc for every decision", description: "Infrastructure implications of each modernization phase reviewed through Atlas — structural changes that affect CICS definitions, Db2 parameters, or IMS setup identified before the phase plan is finalized.", stageIndex: 1 },
-        { persona: "Kathleen", type: "gain", title: "Atlas AI & Automation — ZUnderstand dynamic call chain prevents the silent failures that static-only analysis cannot detect", description: "Full runtime call chain visible before making changes to tightly coupled code — the safety of a change can be confirmed before writing it.", stageIndex: 2 },
+        { persona: "Kathleen", type: "skill", title: "Atlas AI & Automation — ZUnderstand dynamic call chain prevents the silent failures that static-only analysis cannot detect", description: "Full runtime call chain visible before making changes to tightly coupled code — the safety of a change can be confirmed before writing it.", stageIndex: 2 },
         { persona: "Deb", type: "gain", title: "New User Capability — Deb independently executes lower-risk modernization phases from Atlas's structured phase specification", description: "Atlas provides the system context for Deb's phase — she works from Atlas's dependency analysis, not from her own incomplete knowledge.", stageIndex: 2 },
         { persona: "Zach", type: "time", title: "Time Saving — hours to days per phase of Zach manual configuration → authorization gates within Atlas", description: "Infrastructure configuration changes for modernization phases are Atlas-orchestrated — Zach authorizes rather than manually executing every configuration step.", stageIndex: 2 },
         { persona: "Kathleen", type: "time", title: "Time Saving — hours manual regression scoping → automatic", description: "Phase regression testing scoped automatically from the impact analysis — Atlas generates the test targets from the programs and call chains the phase changed.", stageIndex: 3 },
         { persona: "Deb", type: "gain", title: "New User Capability — Deb independently diagnoses phase test failures using Atlas's attribution", description: "Test failures attributed by Atlas to specific coupling points — Deb can diagnose and fix failures independently rather than escalating to Kathleen for every test failure.", stageIndex: 3 },
         { persona: "Kathleen", type: "time", title: "Time Saving — no manual test environment setup per phase; Atlas provisions and configures it", description: "Phase validation runs in an isolated environment provisioned by Atlas — consistent, production-representative conditions for every phase validation.", stageIndex: 3 },
         { persona: "Kathleen", type: "time", title: "Time Saving — hours of multi-team coordination → Atlas-orchestrated workflow", description: "Atlas-orchestrated phase promotion — developer initiates, Atlas handles configuration, Zach authorizes infrastructure gates. No multi-team handoff coordination required.", stageIndex: 4 },
-        { persona: "Angie", type: "gain", title: "Atlas AI & Automation — architectural conformance check catches architectural drift before it accumulates across phases", description: "Phase promotion reviewed against architectural specification — Atlas checks whether the promoted code conforms to the intended architecture before production apply.", stageIndex: 4 },
+        { persona: "Angie", type: "skill", title: "Atlas AI & Automation — architectural conformance check catches architectural drift before it accumulates across phases", description: "Phase promotion reviewed against architectural specification — Atlas checks whether the promoted code conforms to the intended architecture before production apply.", stageIndex: 4 },
       ],
     },
     capabilities: [
@@ -1172,16 +1237,16 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       markers: [
         { persona: "Sage", type: "time", title: "Time Saving — weeks of manual scope assembly → hours", description: "Atlas inventories all regulated data across the entire estate in hours — datasets, Db2 tables, IMS segments, VSAM files — without coordinating 4+ specialist teams.", stageIndex: 0 },
         { persona: "Derek", type: "gain", title: "Business Impact — regulatory deadline pressure is relieved by scope completeness from day one", description: "Complete scope delivered in hours rather than weeks — the regulatory response timeline begins with the full scope known, not with weeks of scope discovery that competes with the remediation deadline.", stageIndex: 0 },
-        { persona: "Sage", type: "gain", title: "Atlas AI & Automation — cross-tool access control analysis joins RACF, Db2, and application topology in one assessment", description: "Unified access control gap analysis across RACF profiles, Db2 access controls, and application access in a single Atlas session — cross-tool gaps visible for the first time.", stageIndex: 1 },
+        { persona: "Sage", type: "skill", title: "Atlas AI & Automation — cross-tool access control analysis joins RACF, Db2, and application topology in one assessment", description: "Unified access control gap analysis across RACF profiles, Db2 access controls, and application access in a single Atlas session — cross-tool gaps visible for the first time.", stageIndex: 1 },
         { persona: "Zach", type: "time", title: "Time Saving — days → hours", description: "Encryption gap picture produced by Atlas — DFSMS configuration, Db2 encryption status, and connection encryption state joined in one assessment without multi-tool investigation.", stageIndex: 1 },
-        { persona: "Sage", type: "gain", title: "Atlas AI & Automation — multi-workstream remediation plan generated and sequenced automatically; gaps at workstream boundaries are eliminated", description: "Full regulatory remediation workstream sequenced in a single Atlas session — RACF updates, encryption enablement, credential changes, audit trail configuration — all workstreams planned and tracked in Atlas.", stageIndex: 2 },
+        { persona: "Sage", type: "skill", title: "Atlas AI & Automation — multi-workstream remediation plan generated and sequenced automatically; gaps at workstream boundaries are eliminated", description: "Full regulatory remediation workstream sequenced in a single Atlas session — RACF updates, encryption enablement, credential changes, audit trail configuration — all workstreams planned and tracked in Atlas.", stageIndex: 2 },
         { persona: "Lupita", type: "time", title: "Time Saving — days to weeks of manual encryption workstream coordination → Atlas-orchestrated sequence", description: "Encryption workstream orchestrated by Atlas — key management, encryption configuration, and dataset rewriting steps sequenced in the correct order with dependencies resolved.", stageIndex: 2 },
         { persona: "Zach", type: "time", title: "Time Saving — Zach's execution time on routine compliance changes reduced to authorization gates", description: "Routine compliance remediations (RACF profile updates, encryption configuration) are Atlas-orchestrated — Zach authorizes rather than manually executing every change.", stageIndex: 2 },
-        { persona: "Sage", type: "gain", title: "Atlas AI & Automation — comprehensive post-remediation coverage check runs automatically after execution", description: "Post-remediation verification is systematic — Atlas confirms every regulated data item has the required controls applied, with no items assumed rather than verified.", stageIndex: 3 },
-        { persona: "Sage", type: "gain", title: "Atlas AI & Automation — ongoing monitoring replaces point-in-time compliance snapshot", description: "Continuous monitoring for new regulated data — Atlas alerts when new datasets, tables, or programs come into regulatory scope after the initial remediation. No silent compliance drift.", stageIndex: 3 },
+        { persona: "Sage", type: "skill", title: "Atlas AI & Automation — comprehensive post-remediation coverage check runs automatically after execution", description: "Post-remediation verification is systematic — Atlas confirms every regulated data item has the required controls applied, with no items assumed rather than verified.", stageIndex: 3 },
+        { persona: "Sage", type: "skill", title: "Atlas AI & Automation — ongoing monitoring replaces point-in-time compliance snapshot", description: "Continuous monitoring for new regulated data — Atlas alerts when new datasets, tables, or programs come into regulatory scope after the initial remediation. No silent compliance drift.", stageIndex: 3 },
         { persona: "Derek", type: "time", title: "Time Saving — days assembling evidence → generated from Atlas's continuous record", description: "Compliance evidence package generated from Atlas's verified compliant state — regulated data inventory, access control gap remediation record, encryption configuration evidence, audit trail status.", stageIndex: 4 },
-        { persona: "Derek", type: "gain", title: "Atlas AI & Automation — continuous compliance record eliminates the evidence quality limitation of point-in-time snapshot assembly", description: "Evidence is from Atlas's authoritative, continuous record — not a point-in-time snapshot assembled at submission time. Auditors receive continuous evidence of the compliant state.", stageIndex: 4 },
-        { persona: "Sage", type: "gain", title: "Atlas AI & Automation — continuous scope monitoring surfaces new regulated data without a user query", description: "New regulated data detected as it is created — Atlas alerts before the new gap becomes a compliance problem. Compliance posture is maintained continuously, not recovered at each audit.", stageIndex: 5 },
+        { persona: "Derek", type: "skill", title: "Atlas AI & Automation — continuous compliance record eliminates the evidence quality limitation of point-in-time snapshot assembly", description: "Evidence is from Atlas's authoritative, continuous record — not a point-in-time snapshot assembled at submission time. Auditors receive continuous evidence of the compliant state.", stageIndex: 4 },
+        { persona: "Sage", type: "skill", title: "Atlas AI & Automation — continuous scope monitoring surfaces new regulated data without a user query", description: "New regulated data detected as it is created — Atlas alerts before the new gap becomes a compliance problem. Compliance posture is maintained continuously, not recovered at each audit.", stageIndex: 5 },
         { persona: "Derek", type: "gain", title: "New User Capability — Derek monitors regulatory compliance posture continuously from Atlas without requiring Sage or Zach to assemble a status report", description: "Ongoing compliance state visible in Atlas — Derek knows the current regulatory posture at any point, not just after a manual assessment.", stageIndex: 5 },
       ],
     },
@@ -1242,19 +1307,19 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Enforce", description: "Every Atlas-executed change is automatically documented. Every undocumented out-of-Atlas change is surfaced within one discovery cycle. ServiceNow integration (H2 2027) closes the loop." },
       ],
       markers: [
-        { persona: "Quinn", type: "gain", title: "Atlas AI & Automation — continuous change window monitoring surfaces violations as they occur", description: "Out-of-window change alerts in real time — Atlas detects changes outside defined change windows and alerts Quinn immediately, not in the next post-mortem.", stageIndex: 0 },
-        { persona: "Annette", type: "gain", title: "Atlas AI & Automation — Config-as-Code diff against registered baseline is the mechanism no individual tool can replicate", description: "Undocumented changes detected automatically through Config-as-Code baseline diff — Annette receives a structured alert, not a behavioral symptom.", stageIndex: 0 },
+        { persona: "Quinn", type: "skill", title: "Atlas AI & Automation — continuous change window monitoring surfaces violations as they occur", description: "Out-of-window change alerts in real time — Atlas detects changes outside defined change windows and alerts Quinn immediately, not in the next post-mortem.", stageIndex: 0 },
+        { persona: "Annette", type: "skill", title: "Atlas AI & Automation — Config-as-Code diff against registered baseline is the mechanism no individual tool can replicate", description: "Undocumented changes detected automatically through Config-as-Code baseline diff — Annette receives a structured alert, not a behavioral symptom.", stageIndex: 0 },
         { persona: "Zach", type: "time", title: "Time Saving — 15–30 minutes per change of retrospective documentation → automatic at execution", description: "Change records created without a separate step — for every change Zach executes through Atlas, the change record is generated and populated automatically as part of the workflow.", stageIndex: 1 },
         { persona: "Annette", type: "gain", title: "New User Capability — Annette independently investigates undocumented changes using Atlas's attribution data without Zach's expert log interpretation", description: "Out-of-Atlas change investigation starts with Atlas's evidence — configuration delta, timestamp, affected component, and user ID — immediately available without log archaeology.", stageIndex: 1 },
         { persona: "Quinn", type: "time", title: "Time Saving — hours of multi-tool log review → a single Atlas query", description: "'What changed on PROD1 in the last 30 days?' answered from Atlas in a structured response — replaces multi-tool log review with a single conversation.", stageIndex: 2 },
         { persona: "Derek", type: "time", title: "Time Saving — days assembling change history evidence → generated from Atlas's continuous record", description: "Change traceability evidence for any time period generated from Atlas — all changes, with attribution status (documented / undocumented / out-of-window) — in the format auditors need.", stageIndex: 2 },
-        { persona: "Derek", type: "gain", title: "Atlas AI & Automation — undocumented change enumeration is only possible through Atlas's combined change log and Config-as-Code baseline diff", description: "'46 undocumented changes' — surfaced before the auditor sees them. A specific, verifiable count rather than a gap discovered in the audit room.", stageIndex: 2 },
+        { persona: "Derek", type: "skill", title: "Atlas AI & Automation — undocumented change enumeration is only possible through Atlas's combined change log and Config-as-Code baseline diff", description: "'46 undocumented changes' — surfaced before the auditor sees them. A specific, verifiable count rather than a gap discovered in the audit room.", stageIndex: 2 },
         { persona: "Annette", type: "time", title: "Time Saving — hours per incident of manual audit trail assembly → automatic continuous trail", description: "Incident audit trail generated automatically for every Atlas-managed change — Annette closes incidents with a complete, continuous record rather than assembling it under pressure.", stageIndex: 3 },
         { persona: "Zach", type: "time", title: "Time Saving — hours of post-mortem log review → single Atlas query", description: "When an incident post-mortem asks what changed, Zach queries Atlas — structured change history available without multi-tool log review.", stageIndex: 3 },
-        { persona: "Quinn", type: "gain", title: "Atlas AI & Automation — Atlas generates the retroactive change record template pre-populated from the detected change data", description: "Structured retroactive documentation workflow for emergency changes — consistent, template-driven, with Atlas linking the retroactive record to the detected change.", stageIndex: 4 },
+        { persona: "Quinn", type: "skill", title: "Atlas AI & Automation — Atlas generates the retroactive change record template pre-populated from the detected change data", description: "Structured retroactive documentation workflow for emergency changes — consistent, template-driven, with Atlas linking the retroactive record to the detected change.", stageIndex: 4 },
         { persona: "Zach", type: "gain", title: "New User Capability — Zach independently plans rollbacks from Atlas's captured pre-change state without reconstructing the previous configuration", description: "Every Atlas-executed change has its pre-change state captured — rollback planning starts from a known, documented state, not from reconstructed memory.", stageIndex: 4 },
         { persona: "Quinn", type: "time", title: "Time Saving — annual audit finding remediation effort drops proportionally with change record coverage improvement", description: "Change record coverage goes from ~60% to 100% for Atlas-executed changes — the audit finding for undocumented changes drops from 46 per year to under 5.", stageIndex: 5 },
-        { persona: "Quinn", type: "gain", title: "Atlas AI & Automation — Atlas-to-ServiceNow integration closes the structural tool gap that was the root cause of undocumented changes", description: "ServiceNow integration (H2 2027): Atlas changes create ServiceNow records automatically — bi-directional, no manual step in either system.", stageIndex: 5 },
+        { persona: "Quinn", type: "skill", title: "Atlas AI & Automation — Atlas-to-ServiceNow integration closes the structural tool gap that was the root cause of undocumented changes", description: "ServiceNow integration (H2 2027): Atlas changes create ServiceNow records automatically — bi-directional, no manual step in either system.", stageIndex: 5 },
       ],
     },
     capabilities: [
