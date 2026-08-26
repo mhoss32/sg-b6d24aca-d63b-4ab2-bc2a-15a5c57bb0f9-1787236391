@@ -17,11 +17,53 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
   const date = new Date().toLocaleDateString();
   const time = new Date().toLocaleTimeString();
 
-  const markerColors: Record<string, { bg: string; border: string; text: string; icon: string }> = {
-    pain: { bg: "rgba(239,68,68,0.08)", border: "#ef4444", text: "#fca5a5", icon: "triangle" },
-    time: { bg: "rgba(245,158,11,0.08)", border: "#f59e0b", text: "#fcd34d", icon: "clock" },
-    skill: { bg: "rgba(34,197,94,0.08)", border: "#22c55e", text: "#86efac", icon: "zap" },
-    gain: { bg: "rgba(167,139,250,0.08)", border: "#a78bfa", text: "#c4b5fd", icon: "user" },
+  // Exact colors from asIsMarkerConfig / toBeMarkerConfig in FlowDiagram.tsx
+  const asIsConfig: Record<string, { color: string; bg: string; border: string; label: string; iconSvg: string }> = {
+    pain: {
+      color: "#fb923c", // orange-400
+      bg: "rgba(251,146,60,0.1)",
+      border: "rgba(251,146,60,0.3)",
+      label: "Business Impact",
+      iconSvg: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    },
+    time: {
+      color: "#fbbf24", // amber-400
+      bg: "rgba(251,191,36,0.1)",
+      border: "rgba(251,191,36,0.3)",
+      label: "Lost Time",
+      iconSvg: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    },
+    skill: {
+      color: "#f87171", // red-400
+      bg: "rgba(248,113,113,0.1)",
+      border: "rgba(248,113,113,0.3)",
+      label: "Skill Gap / Bottleneck",
+      iconSvg: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    },
+  };
+
+  const toBeConfig: Record<string, { color: string; bg: string; border: string; label: string; iconSvg: string }> = {
+    time: {
+      color: "#22d3ee", // cyan-400
+      bg: "rgba(34,211,238,0.1)",
+      border: "rgba(34,211,238,0.3)",
+      label: "Time Saving",
+      iconSvg: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    },
+    gain: {
+      color: "#c084fc", // purple-400
+      bg: "rgba(192,132,252,0.1)",
+      border: "rgba(192,132,252,0.3)",
+      label: "New User Capability",
+      iconSvg: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    },
+    skill: {
+      color: "#4ade80", // green-400
+      bg: "rgba(74,222,128,0.1)",
+      border: "rgba(74,222,128,0.3)",
+      label: "Atlas AI & Automation",
+      iconSvg: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.43.28a2 2 0 0 0 1.68.05 1 1 0 0 1 1.4 1.4 5 5 0 0 1-1.06 5.85l-.84.85a3 3 0 0 1-3.88.27"/><path d="m18 15-2-2"/></svg>',
+    },
   };
 
   const timelineColors: Record<string, { bg: string; text: string }> = {
@@ -30,20 +72,20 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
     "H2 2027": { bg: "rgba(167,139,250,0.15)", text: "#a78bfa" },
   };
 
-  const gradientColors = [
-    "#667eea", "#764ba2", "#f093fb", "#f5576c", "#4facfe",
-    "#00f2fe", "#43e97b", "#38f9d7", "#fa709a", "#fee140",
-    "#30cfd0", "#330867", "#a8edea", "#fed6e3",
-  ];
-
   const escapeHTML = (str: string) =>
     str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
   const renderFlow = (flow: typeof detail.asIs, isAsIs: boolean) => {
+    const config = isAsIs ? asIsConfig : toBeConfig;
     const sectionBg = isAsIs ? "rgba(239,68,68,0.03)" : "rgba(34,197,94,0.03)";
     const sectionBorder = isAsIs ? "rgba(239,68,68,0.2)" : "rgba(34,197,94,0.2)";
-    const iconColor = isAsIs ? "#ef4444" : "#22c55e";
-    const iconBg = isAsIs ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)";
+    const headerIconColor = isAsIs ? "#ef4444" : "#22c55e";
+    const headerIconBg = isAsIs ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)";
+    const legendTitle = isAsIs ? "Pain Points" : "Wows!";
+    const legendTitleColor = isAsIs ? "#f87171" : "#4ade80";
+    const headerIconSvg = isAsIs
+      ? '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+      : '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>';
     const subtitle = isAsIs
       ? "Current state — pain points highlighted"
       : "Desired outcome — gains highlighted";
@@ -62,12 +104,8 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
     return `
     <div style="border: 1px solid ${sectionBorder}; border-radius: 16px; background: ${sectionBg}; padding: 24px; margin-bottom: 24px;">
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-        <div style="width: 40px; height: 40px; border-radius: 10px; background: ${iconBg}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            ${isAsIs
-              ? '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
-              : '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'}
-          </svg>
+        <div style="width: 40px; height: 40px; border-radius: 10px; background: ${headerIconBg}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${headerIconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${headerIconSvg}</svg>
         </div>
         <div>
           <h3 style="font-size: 18px; font-weight: 600; color: #e2e8f0; margin: 0;">${escapeHTML(flow.title)}</h3>
@@ -75,19 +113,21 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
         </div>
       </div>
 
-      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
-        ${Object.entries(markerColors).map(([key, colors]) => `
-          <div style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; background: ${colors.bg}; border: 1px solid ${colors.border}30;">
-            <div style="width: 8px; height: 8px; border-radius: 2px; background: ${colors.border};"></div>
-            <span style="font-size: 11px; font-weight: 500; color: ${colors.text}; text-transform: capitalize;">${key}</span>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 20px; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);">
+        <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: ${legendTitleColor};">${legendTitle}</span>
+        <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.1);"></div>
+        ${Object.entries(config).map(([key, style]) => `
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="width: 20px; height: 20px; border-radius: 4px; background: ${style.bg}; display: flex; align-items: center; justify-content: center;">${style.iconSvg}</div>
+            <span style="font-size: 11px; color: #94a3b8;">${style.label}</span>
           </div>
         `).join("")}
       </div>
 
       ${!isAsIs && flow.externalTouchpoints && flow.externalTouchpoints.length > 0 ? `
-      <div style="margin-bottom: 16px; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02);">
+      <div style="margin-bottom: 16px; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);">
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/><path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 16 6 6"/><circle cx="16" cy="9" r="2.9"/><circle cx="6" cy="5" r="3"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.43.28a2 2 0 0 0 1.68.05 1 1 0 0 1 1.4 1.4 5 5 0 0 1-1.06 5.85l-.84.85a3 3 0 0 1-3.88.27"/><path d="m18 15-2-2"/></svg>
           <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b;">External Integrations</span>
         </div>
         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
@@ -112,7 +152,7 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
               <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #94a3b8; font-family: 'IBM Plex Mono', monospace;">${i + 1}</div>
             </div>
-            <div style="border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: rgba(255,255,255,0.02); padding: 20px;">
+            <div style="border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: rgba(255,255,255,0.02); backdrop-filter: blur(8px); padding: 20px;">
               <h4 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin-bottom: 6px; line-height: 1.4;">${escapeHTML(stage.name)}</h4>
               <p style="font-size: 12px; color: #64748b; margin-bottom: 12px; line-height: 1.6;">${escapeHTML(stage.description)}</p>
 
@@ -120,7 +160,7 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
                 const pid = tp.product.toLowerCase().replace(/\\s+/g, "-");
                 if (tp.type === "handoff") {
                   return `
-                  <div class="ext-box ext-${pid}" style="margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(34,197,94,0.25); background: rgba(34,197,94,0.04); overflow: hidden; display: none;">
+                  <div class="ext-box ext-${pid}" style="margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(34,197,94,0.25); background: rgba(34,197,94,0.04); overflow: hidden; display: none; cursor: pointer;" onclick="openModal(this)">
                     <div style="padding: 10px 14px; background: rgba(34,197,94,0.08); border-bottom: 1px solid rgba(34,197,94,0.15);">
                       <h5 style="font-size: 11px; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">${escapeHTML(tp.title)}</h5>
                     </div>
@@ -130,7 +170,7 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
                           <div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(34,197,94,0.15); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #4ade80; flex-shrink: 0;">${j + 1}</div>
                           <div>
                             <div style="font-size: 11px; font-weight: 600; color: #86efac; margin-bottom: 2px;">${escapeHTML(step.label)}</div>
-                            <div style="font-size: 11px; color: #94a3b8; line-height: 1.5;">${escapeHTML(step.description)}</div>
+                            <div style="font-size: 11px; color: #94a3b8; line-height: 1.5;">${escapeHTML(step.description).replace(/^([^.!?]+[.!?])/g, "$1")}</div>
                           </div>
                         </div>
                       `).join("")}
@@ -138,12 +178,12 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
                   </div>`;
                 } else {
                   return `
-                  <div class="ext-box ext-${pid}" style="margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(6,182,212,0.25); background: rgba(6,182,212,0.04); overflow: hidden; display: none;">
+                  <div class="ext-box ext-${pid}" style="margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(6,182,212,0.25); background: rgba(6,182,212,0.04); overflow: hidden; display: none; cursor: pointer;" onclick="openModal(this)">
                     <div style="padding: 10px 14px; background: rgba(6,182,212,0.08); border-bottom: 1px solid rgba(6,182,212,0.15);">
                       <h5 style="font-size: 11px; font-weight: 700; color: #22d3ee; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">${escapeHTML(tp.title)}</h5>
                     </div>
                     <div style="padding: 14px;">
-                      <p style="font-size: 11px; color: #94a3b8; line-height: 1.5;">${escapeHTML(tp.summary)}</p>
+                      <p style="font-size: 11px; color: #94a3b8; line-height: 1.5;">${escapeHTML(tp.summary).replace(/^([^.!?]+[.!?])/g, "$1")}</p>
                     </div>
                   </div>`;
                 }
@@ -158,14 +198,16 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
                   </summary>
                   <div style="padding-left: 22px; padding-top: 4px;">
                     ${markers.map((m) => {
-                      const mc = markerColors[m.type] || markerColors.pain;
+                      const mc = config[m.type];
+                      if (!mc) return "";
                       return `
-                      <div style="padding: 10px 12px; border-radius: 8px; background: ${mc.bg}; border-left: 3px solid ${mc.border}; margin: 4px 0;">
-                        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
-                          <div style="width: 6px; height: 6px; border-radius: 1px; background: ${mc.border};"></div>
-                          <span style="font-size: 11px; font-weight: 600; color: ${mc.text};">${escapeHTML(m.title)}</span>
+                      <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 8px; background: ${mc.bg}; border: 1px solid ${mc.border}; margin: 4px 0;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                          ${mc.iconSvg}
+                          <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: ${mc.color};">${mc.label}</span>
                         </div>
-                        <p style="font-size: 11px; color: #94a3b8; line-height: 1.5; margin-left: 12px;">${escapeHTML(m.description)}</p>
+                        <span style="font-size: 11px; font-weight: 500; color: #e2e8f0; line-height: 1.4;">${escapeHTML(m.title)}</span>
+                        <span style="font-size: 10px; color: #94a3b8; line-height: 1.5;">${escapeHTML(m.description)}</span>
                       </div>`;
                     }).join("")}
                   </div>
@@ -199,7 +241,6 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
     .badge { display: inline-flex; align-items: center; gap: 8px; }
     .badge-dot { width: 16px; height: 16px; border-radius: 50%; background: #00D4FF; box-shadow: 0 0 12px rgba(0,212,255,0.5); }
     .badge-text { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: #00D4FF; }
-    .pillar-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: #00D4FF; padding: 4px 12px; border-radius: 9999px; border: 1px solid rgba(0,212,255,0.2); background: rgba(0,212,255,0.08); }
     h1 { font-size: 36px; font-weight: 700; color: #fff; margin-bottom: 16px; line-height: 1.2; }
     .description { font-size: 18px; color: #94a3b8; max-width: 768px; line-height: 1.7; }
     details.accordion { border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; background: rgba(255,255,255,0.02); margin-bottom: 16px; overflow: hidden; }
@@ -238,9 +279,20 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
     .meta { font-size: 12px; color: #475569; margin-top: 32px; text-align: center; }
     details > summary::-webkit-details-marker { display: none; }
     details > summary { list-style: none; }
+    .modal-overlay { display: none; position: fixed; inset: 0; z-index: 100; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.active { display: flex; }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
+    .modal-content { position: relative; max-width: 512px; width: 100%; max-height: 80vh; overflow-y: auto; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(15,15,25,0.95); backdrop-filter: blur(12px); padding: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+    .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: #64748b; cursor: pointer; padding: 4px; }
+    .modal-close:hover { color: #e2e8f0; }
   </style>
 </head>
 <body>
+  <div class="modal-overlay" id="modal">
+    <div class="modal-backdrop" onclick="closeModal()"></div>
+    <div class="modal-content" id="modal-content"></div>
+  </div>
+
   <header>
     <div class="header-inner">
       <div style="color: #94a3b8; font-size: 14px; display: flex; align-items: center; gap: 6px;">
@@ -373,6 +425,24 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
         });
       });
     })();
+
+    function openModal(el) {
+      var modal = document.getElementById('modal');
+      var content = document.getElementById('modal-content');
+      content.innerHTML = '<button class="modal-close" onclick="closeModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' + el.innerHTML;
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      var modal = document.getElementById('modal');
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
   </script>
 </body>
 </html>`;
