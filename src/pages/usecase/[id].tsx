@@ -17,11 +17,11 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
   const date = new Date().toLocaleDateString();
   const time = new Date().toLocaleTimeString();
 
-  const markerColors: Record<string, { bg: string; border: string; text: string }> = {
-    pain: { bg: "rgba(239,68,68,0.08)", border: "#ef4444", text: "#fca5a5" },
-    time: { bg: "rgba(245,158,11,0.08)", border: "#f59e0b", text: "#fcd34d" },
-    skill: { bg: "rgba(34,197,94,0.08)", border: "#22c55e", text: "#86efac" },
-    gain: { bg: "rgba(167,139,250,0.08)", border: "#a78bfa", text: "#c4b5fd" },
+  const markerColors: Record<string, { bg: string; border: string; text: string; icon: string }> = {
+    pain: { bg: "rgba(239,68,68,0.08)", border: "#ef4444", text: "#fca5a5", icon: "triangle" },
+    time: { bg: "rgba(245,158,11,0.08)", border: "#f59e0b", text: "#fcd34d", icon: "clock" },
+    skill: { bg: "rgba(34,197,94,0.08)", border: "#22c55e", text: "#86efac", icon: "zap" },
+    gain: { bg: "rgba(167,139,250,0.08)", border: "#a78bfa", text: "#c4b5fd", icon: "user" },
   };
 
   const timelineColors: Record<string, { bg: string; text: string }> = {
@@ -30,21 +30,39 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
     "H2 2027": { bg: "rgba(167,139,250,0.15)", text: "#a78bfa" },
   };
 
-  const gradientColors = ["#667eea", "#764ba2", "#f093fb", "#f5576c", "#4facfe", "#00f2fe", "#43e97b", "#38f9d7", "#fa709a", "#fee140", "#30cfd0", "#330867", "#a8edea", "#fed6e3"];
+  const gradientColors = [
+    "#667eea", "#764ba2", "#f093fb", "#f5576c", "#4facfe",
+    "#00f2fe", "#43e97b", "#38f9d7", "#fa709a", "#fee140",
+    "#30cfd0", "#330867", "#a8edea", "#fed6e3",
+  ];
 
-  const escapeHTML = (str: string) => str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const escapeHTML = (str: string) =>
+    str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
   const renderFlow = (flow: typeof detail.asIs, isAsIs: boolean) => {
-    const sectionBorder = isAsIs ? "border-red-500/20" : "border-green-500/20";
     const sectionBg = isAsIs ? "rgba(239,68,68,0.03)" : "rgba(34,197,94,0.03)";
+    const sectionBorder = isAsIs ? "rgba(239,68,68,0.2)" : "rgba(34,197,94,0.2)";
     const iconColor = isAsIs ? "#ef4444" : "#22c55e";
     const iconBg = isAsIs ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)";
-    const subtitle = isAsIs ? "Current state — pain points highlighted" : "Desired outcome — gains highlighted";
+    const subtitle = isAsIs
+      ? "Current state — pain points highlighted"
+      : "Desired outcome — gains highlighted";
+
+    // Group markers by persona per stage
+    const groupedByStage = flow.stages.map((_, stageIndex) => {
+      const stageMarkers = flow.markers.filter((m) => m.stageIndex === stageIndex);
+      const grouped: Record<string, typeof stageMarkers> = {};
+      stageMarkers.forEach((m) => {
+        if (!grouped[m.persona]) grouped[m.persona] = [];
+        grouped[m.persona].push(m);
+      });
+      return grouped;
+    });
 
     return `
-    <div style="border: 1px solid ${isAsIs ? "rgba(239,68,68,0.2)" : "rgba(34,197,94,0.2)"}; border-radius: 16px; background: ${sectionBg}; padding: 24px; margin-bottom: 24px;">
+    <div style="border: 1px solid ${sectionBorder}; border-radius: 16px; background: ${sectionBg}; padding: 24px; margin-bottom: 24px;">
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-        <div style="width: 40px; height: 40px; border-radius: 10px; background: ${iconBg}; display: flex; align-items: center; justify-content: center;">
+        <div style="width: 40px; height: 40px; border-radius: 10px; background: ${iconBg}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             ${isAsIs
               ? '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
@@ -52,7 +70,7 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
           </svg>
         </div>
         <div>
-          <h3 style="font-size: 18px; font-weight: 600; color: #e2e8f0; margin: 0;">${flow.title}</h3>
+          <h3 style="font-size: 18px; font-weight: 600; color: #e2e8f0; margin: 0;">${escapeHTML(flow.title)}</h3>
           <p style="font-size: 12px; color: #64748b; margin: 2px 0 0;">${subtitle}</p>
         </div>
       </div>
@@ -66,32 +84,52 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
         `).join("")}
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+      ${!isAsIs && flow.externalTouchpoints && flow.externalTouchpoints.length > 0 ? `
+      <div style="margin-bottom: 16px; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02);">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/><path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 16 6 6"/><circle cx="16" cy="9" r="2.9"/><circle cx="6" cy="5" r="3"/></svg>
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b;">External Integrations</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          ${["bob-ppz", "concert4z"].map((pid) => {
+            const hasTp = flow.externalTouchpoints?.some((tp) => tp.product.toLowerCase().replace(/\\s+/g, "-") === pid);
+            const label = pid === "bob-ppz" ? "Bob PPZ" : "Concert4Z";
+            return `
+            <label style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 6px; border: 1px solid ${hasTp ? "rgba(0,212,255,0.3)" : "rgba(255,255,255,0.1)"}; background: ${hasTp ? "rgba(0,212,255,0.05)" : "rgba(255,255,255,0.02)"}; cursor: ${hasTp ? "pointer" : "not-allowed"}; opacity: ${hasTp ? "1" : "0.4"};">
+              <input type="checkbox" ${hasTp ? "" : "disabled"} class="ext-toggle" data-product="${pid}" style="width: 14px; height: 14px; accent-color: #00D4FF;">
+              <span style="font-size: 11px; font-weight: 500; color: ${hasTp ? "#e2e8f0" : "#64748b"};">${label}</span>
+            </label>`;
+          }).join("")}
+        </div>
+      </div>` : ""}
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
         ${flow.stages.map((stage, i) => {
-          const stageMarkers = flow.markers.filter((m) => m.stageIndex === i);
           const stageExternal = flow.externalTouchpoints?.filter((tp) => tp.stageIndex === i) || [];
+          const grouped = groupedByStage[i];
           return `
           <div style="position: relative;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-              <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #94a3b8; font-family: monospace;">${i + 1}</div>
+              <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #94a3b8; font-family: 'IBM Plex Mono', monospace;">${i + 1}</div>
             </div>
-            <div style="border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: rgba(255,255,255,0.02); backdrop-filter: blur(8px); padding: 20px;">
-              <h4 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin-bottom: 6px;">${escapeHTML(stage.name)}</h4>
-              <p style="font-size: 12px; color: #64748b; margin-bottom: 12px; line-height: 1.5;">${escapeHTML(stage.description)}</p>
+            <div style="border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: rgba(255,255,255,0.02); padding: 20px;">
+              <h4 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin-bottom: 6px; line-height: 1.4;">${escapeHTML(stage.name)}</h4>
+              <p style="font-size: 12px; color: #64748b; margin-bottom: 12px; line-height: 1.6;">${escapeHTML(stage.description)}</p>
 
               ${stageExternal.map((tp) => {
+                const pid = tp.product.toLowerCase().replace(/\\s+/g, "-");
                 if (tp.type === "handoff") {
                   return `
-                  <div style="margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(34,197,94,0.3); background: rgba(34,197,94,0.05); overflow: hidden;">
-                    <div style="padding: 10px 14px; background: rgba(34,197,94,0.1); border-bottom: 1px solid rgba(34,197,94,0.2);">
+                  <div class="ext-box ext-${pid}" style="margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(34,197,94,0.25); background: rgba(34,197,94,0.04); overflow: hidden; display: none;">
+                    <div style="padding: 10px 14px; background: rgba(34,197,94,0.08); border-bottom: 1px solid rgba(34,197,94,0.15);">
                       <h5 style="font-size: 11px; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">${escapeHTML(tp.title)}</h5>
                     </div>
                     <div style="padding: 14px;">
                       ${tp.steps.map((step, j) => `
-                        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-                          <div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(34,197,94,0.2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #4ade80; flex-shrink: 0;">${j + 1}</div>
+                        <div style="display: flex; gap: 10px; ${j < tp.steps.length - 1 ? "margin-bottom: 12px;" : ""}">
+                          <div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(34,197,94,0.15); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #4ade80; flex-shrink: 0;">${j + 1}</div>
                           <div>
-                            <div style="font-size: 12px; font-weight: 600; color: #86efac; margin-bottom: 2px;">${escapeHTML(step.label)}</div>
+                            <div style="font-size: 11px; font-weight: 600; color: #86efac; margin-bottom: 2px;">${escapeHTML(step.label)}</div>
                             <div style="font-size: 11px; color: #94a3b8; line-height: 1.5;">${escapeHTML(step.description)}</div>
                           </div>
                         </div>
@@ -100,8 +138,8 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
                   </div>`;
                 } else {
                   return `
-                  <div style="margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(6,182,212,0.3); background: rgba(6,182,212,0.05); overflow: hidden;">
-                    <div style="padding: 10px 14px; background: rgba(6,182,212,0.1); border-bottom: 1px solid rgba(6,182,212,0.2);">
+                  <div class="ext-box ext-${pid}" style="margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(6,182,212,0.25); background: rgba(6,182,212,0.04); overflow: hidden; display: none;">
+                    <div style="padding: 10px 14px; background: rgba(6,182,212,0.08); border-bottom: 1px solid rgba(6,182,212,0.15);">
                       <h5 style="font-size: 11px; font-weight: 700; color: #22d3ee; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">${escapeHTML(tp.title)}</h5>
                     </div>
                     <div style="padding: 14px;">
@@ -111,17 +149,28 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
                 }
               }).join("")}
 
-              ${stageMarkers.map((m) => {
-                const mc = markerColors[m.type] || markerColors.pain;
-                return `
-                <div style="padding: 10px 12px; border-radius: 8px; background: ${mc.bg}; border-left: 3px solid ${mc.border}; margin: 6px 0;">
-                  <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
-                    <div style="width: 6px; height: 6px; border-radius: 1px; background: ${mc.border};"></div>
-                    <span style="font-size: 11px; font-weight: 600; color: ${mc.text};">${escapeHTML(m.title)}</span>
+              ${Object.entries(grouped).map(([persona, markers]) => `
+                <details style="margin-bottom: 6px;">
+                  <summary style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.03); cursor: pointer; font-size: 12px; font-weight: 600; color: #e2e8f0; list-style: none; user-select: none;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polyline points="9 18 15 12 9 6"/></svg>
+                    <span>${escapeHTML(persona)}</span>
+                    <span style="margin-left: auto; font-size: 10px; font-weight: 400; color: #64748b;">${markers.length} ${markers.length === 1 ? "item" : "items"}</span>
+                  </summary>
+                  <div style="padding-left: 22px; padding-top: 4px;">
+                    ${markers.map((m) => {
+                      const mc = markerColors[m.type] || markerColors.pain;
+                      return `
+                      <div style="padding: 10px 12px; border-radius: 8px; background: ${mc.bg}; border-left: 3px solid ${mc.border}; margin: 4px 0;">
+                        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+                          <div style="width: 6px; height: 6px; border-radius: 1px; background: ${mc.border};"></div>
+                          <span style="font-size: 11px; font-weight: 600; color: ${mc.text};">${escapeHTML(m.title)}</span>
+                        </div>
+                        <p style="font-size: 11px; color: #94a3b8; line-height: 1.5; margin-left: 12px;">${escapeHTML(m.description)}</p>
+                      </div>`;
+                    }).join("")}
                   </div>
-                  <p style="font-size: 11px; color: #94a3b8; line-height: 1.4; margin-left: 12px;">${escapeHTML(m.description)}</p>
-                </div>`;
-              }).join("")}
+                </details>
+              `).join("")}
             </div>
           </div>`;
         }).join("")}
@@ -142,47 +191,62 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
     .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
     header { border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(10,10,15,0.85); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 50; }
     .header-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
-    .header-logo { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #e2e8f0; }
-    .header-logo svg { width: 20px; height: 20px; color: #00D4FF; }
+    .header-logo { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #e2e8f0; font-size: 15px; }
+    .header-logo svg { width: 20px; height: 20px; color: #00D4FF; flex-shrink: 0; }
     main { padding: 32px 0 48px; }
     .hero { margin-bottom: 32px; }
-    .badge { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .badge-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+    .badge { display: inline-flex; align-items: center; gap: 8px; }
     .badge-dot { width: 16px; height: 16px; border-radius: 50%; background: #00D4FF; box-shadow: 0 0 12px rgba(0,212,255,0.5); }
     .badge-text { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: #00D4FF; }
+    .pillar-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: #00D4FF; padding: 4px 12px; border-radius: 9999px; border: 1px solid rgba(0,212,255,0.2); background: rgba(0,212,255,0.08); }
     h1 { font-size: 36px; font-weight: 700; color: #fff; margin-bottom: 16px; line-height: 1.2; }
     .description { font-size: 18px; color: #94a3b8; max-width: 768px; line-height: 1.7; }
-    .accordion { border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; background: rgba(255,255,255,0.02); padding: 0 24px; margin-bottom: 16px; overflow: hidden; }
-    .accordion-header { display: flex; align-items: center; gap: 12px; padding: 20px 0; cursor: pointer; }
+    details.accordion { border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; background: rgba(255,255,255,0.02); margin-bottom: 16px; overflow: hidden; }
+    details.accordion > summary { display: flex; align-items: center; gap: 12px; padding: 20px 24px; cursor: pointer; list-style: none; user-select: none; }
+    details.accordion > summary::-webkit-details-marker { display: none; }
+    details.accordion > summary svg.chevron { width: 16px; height: 16px; color: #64748b; flex-shrink: 0; transition: transform 0.2s; margin-left: auto; }
+    details.accordion[open] > summary svg.chevron { transform: rotate(180deg); }
     .accordion-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .accordion-icon.coral { background: rgba(255,107,107,0.1); color: #FF6B6B; }
     .accordion-icon.purple { background: rgba(167,139,250,0.1); color: #A78BFA; }
     .accordion-icon.cyan { background: rgba(0,212,255,0.1); color: #00D4FF; }
     .accordion-title { font-size: 18px; font-weight: 600; color: #e2e8f0; }
     .accordion-subtitle { font-size: 12px; color: #64748b; font-weight: 400; margin-top: 2px; }
-    .accordion-body { padding-bottom: 20px; }
+    .accordion-body { padding: 0 24px 20px; }
     .persona-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
-    .persona-card { border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: rgba(255,255,255,0.02); padding: 20px; }
-    .persona-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .persona-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #fff; font-size: 16px; }
-    .persona-name { font-weight: 600; color: #e2e8f0; font-size: 15px; }
-    .persona-role { font-size: 13px; color: #64748b; }
-    .persona-desc { font-size: 13px; color: #94a3b8; line-height: 1.5; margin-bottom: 12px; }
-    .engagement-badge { display: inline-block; padding: 3px 12px; border-radius: 9999px; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; }
-    .engagement-primary { background: rgba(0,212,255,0.12); color: #00D4FF; border: 1px solid rgba(0,212,255,0.2); }
-    .engagement-secondary { background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
-    .capability { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); margin-bottom: 12px; }
+    .persona-card { position: relative; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); padding: 20px; }
+    .persona-card.primary { border-color: rgba(0,212,255,0.25); box-shadow: 0 0 20px rgba(0,212,255,0.06); }
+    .persona-star { position: absolute; top: -10px; right: -10px; width: 20px; height: 20px; color: #00D4FF; }
+    .persona-header { display: flex; align-items: flex-start; gap: 16px; }
+    .persona-avatar { flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .persona-avatar svg { width: 28px; height: 28px; }
+    .persona-avatar.primary { background: rgba(0,212,255,0.12); color: #00D4FF; }
+    .persona-avatar.secondary { background: rgba(255,255,255,0.06); color: #64748b; }
+    .persona-name { font-size: 15px; font-weight: 600; color: #e2e8f0; margin-bottom: 2px; }
+    .persona-role { font-size: 13px; color: #64748b; margin-bottom: 12px; }
+    .engagement-badge { display: inline-block; padding: 3px 12px; border-radius: 9999px; font-size: 10px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; }
+    .engagement-primary { background: rgba(0,212,255,0.1); color: #00D4FF; border: 1px solid rgba(0,212,255,0.2); }
+    .engagement-secondary { background: rgba(255,255,255,0.04); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
+    .capability { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); margin-bottom: 12px; transition: border-color 0.2s; }
+    .capability:hover { border-color: rgba(0,212,255,0.2); }
     .capability-name { font-weight: 500; color: #e2e8f0; font-size: 15px; }
     .capability-desc { font-size: 13px; color: #94a3b8; margin-top: 4px; line-height: 1.5; }
     .timeline-badge { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 10px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; }
     footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 32px 0 48px; margin-top: 32px; }
     .footer-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; color: #64748b; font-size: 14px; }
     .meta { font-size: 12px; color: #475569; margin-top: 32px; text-align: center; }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary { list-style: none; }
   </style>
 </head>
 <body>
   <header>
     <div class="header-inner">
-      <div style="color: #94a3b8; font-size: 14px;">&larr; Back to Atlas</div>
+      <div style="color: #94a3b8; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        Back to Atlas
+      </div>
       <div class="header-logo">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         Atlas
@@ -194,32 +258,35 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
   <main>
     <div class="container">
       <section class="hero">
-        <div class="badge">
-          <div class="badge-dot"></div>
-          <span class="badge-text">Use Case</span>
+        <div class="badge-row">
+          <div class="badge">
+            <div class="badge-dot"></div>
+            <span class="badge-text">Use Case</span>
+          </div>
         </div>
         <h1>${escapeHTML(nodeLabel)}</h1>
         <p class="description">${escapeHTML(detail.description)}</p>
       </section>
 
-      <div class="accordion">
-        <div class="accordion-header">
+      <details class="accordion" open>
+        <summary>
           <div class="accordion-icon coral">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg>
           </div>
           <div>
             <div class="accordion-title">As-Is &amp; To-Be Analysis</div>
-            <div class="accordion-subtitle">As-Is flow with pain point legends &middot; To-Be flow with wow legends</div>
+            <div class="accordion-subtitle">As-Is flow with pain point legends &middot; To-Be flow with wow legends &middot; Double-click markers to edit</div>
           </div>
-        </div>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
         <div class="accordion-body">
           ${renderFlow(detail.asIs, true)}
           ${renderFlow(detail.toBe, false)}
         </div>
-      </div>
+      </details>
 
-      <div class="accordion">
-        <div class="accordion-header">
+      <details class="accordion" open>
+        <summary>
           <div class="accordion-icon purple">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
@@ -227,29 +294,33 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
             <div class="accordion-title">Personas</div>
             <div class="accordion-subtitle">${detail.personas.length} involved &mdash; ${detail.personas.filter(p => p.engagement === "Primary").length} primary</div>
           </div>
-        </div>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
         <div class="accordion-body">
           <div class="persona-grid">
             ${detail.personas.map((p, i) => {
-              const [c1, c2] = [gradientColors[i % gradientColors.length], gradientColors[(i + 1) % gradientColors.length]];
+              const isPrimary = p.engagement === "Primary";
               return `
-              <div class="persona-card">
+              <div class="persona-card ${isPrimary ? "primary" : ""}">
+                ${isPrimary ? `<svg class="persona-star" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>` : ""}
                 <div class="persona-header">
-                  <div class="persona-avatar" style="background: linear-gradient(135deg, ${c1}, ${c2});">${p.name.charAt(0)}</div>
+                  <div class="persona-avatar ${isPrimary ? "primary" : "secondary"}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
+                  </div>
                   <div>
                     <div class="persona-name">${escapeHTML(p.name)}</div>
                     <div class="persona-role">${escapeHTML(p.role)}</div>
+                    <span class="engagement-badge ${isPrimary ? "engagement-primary" : "engagement-secondary"}">${p.engagement}</span>
                   </div>
                 </div>
-                <span class="engagement-badge ${p.engagement === "Primary" ? "engagement-primary" : "engagement-secondary"}">${p.engagement}</span>
               </div>`;
             }).join("")}
           </div>
         </div>
-      </div>
+      </details>
 
-      <div class="accordion">
-        <div class="accordion-header">
+      <details class="accordion" open>
+        <summary>
           <div class="accordion-icon cyan">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
           </div>
@@ -257,14 +328,15 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
             <div class="accordion-title">Capabilities Required</div>
             <div class="accordion-subtitle">${detail.capabilities.length} Atlas capabilities &middot; ${detail.capabilities.filter(c => c.timeline === "GA").length} GA &middot; ${detail.capabilities.filter(c => c.timeline === "H1 2027").length} H1 2027 &middot; ${detail.capabilities.filter(c => c.timeline === "H2 2027").length} H2 2027</div>
           </div>
-        </div>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
         <div class="accordion-body">
           ${detail.capabilities.map((cap) => {
             const tc = timelineColors[cap.timeline] || timelineColors.GA;
             return `
             <div class="capability">
               <div>
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
                   <span class="capability-name">${escapeHTML(cap.name)}</span>
                   <span class="timeline-badge" style="background: ${tc.bg}; color: ${tc.text};">${cap.timeline}</span>
                 </div>
@@ -273,7 +345,7 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
             </div>`;
           }).join("")}
         </div>
-      </div>
+      </details>
 
       <p class="meta">Exported from IBM Atlas Platform on ${date} at ${time}</p>
     </div>
@@ -288,6 +360,20 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
       </span>
     </div>
   </footer>
+
+  <script>
+    (function() {
+      document.querySelectorAll('.ext-toggle').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+          var product = this.dataset.product;
+          var show = this.checked;
+          document.querySelectorAll('.ext-box.ext-' + product).forEach(function(box) {
+            box.style.display = show ? 'block' : 'none';
+          });
+        });
+      });
+    })();
+  </script>
 </body>
 </html>`;
 
