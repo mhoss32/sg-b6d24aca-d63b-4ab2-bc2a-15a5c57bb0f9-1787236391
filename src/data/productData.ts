@@ -469,11 +469,11 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Execute", description: "Production apply with informal rollback plan" },
       ],
       markers: [
-        { type: "time", text: "4–8 hours for manual impact analysis", stageIndex: 1 },
-        { type: "pain", text: "Annette: Test environments skipped — production becomes test environment", stageIndex: 4 },
-        { type: "pain", text: "Zach: Prerequisite chains resolved by expert memory — missed prerequisites cause outages", stageIndex: 2 },
-        { type: "pain", text: "Quinn: Rollback planning improvised when things go wrong", stageIndex: 5 },
-        { type: "skill", text: "Zach: Mid-level engineers cannot execute independently — high expert dependency", stageIndex: 2 },
+        { persona: "Zach", type: "time", title: "Lost Time — 4–8 hours", description: "Manual impact analysis across subsystems takes 4–8 hours of expert-only work.", stageIndex: 1 },
+        { persona: "Annette", type: "pain", title: "Business Impact — test environments skipped", description: "Production becomes the test environment when lab provisioning takes too long.", stageIndex: 4 },
+        { persona: "Zach", type: "pain", title: "Business Impact — prerequisite chains resolved by memory", description: "Missed prerequisites cause production outages during change windows.", stageIndex: 2 },
+        { persona: "Quinn", type: "pain", title: "Business Impact — rollback planning improvised", description: "When things go wrong, rollback plans are created on the spot rather than prepared in advance.", stageIndex: 5 },
+        { persona: "Zach", type: "skill", title: "Skill Gap / Bottleneck — mid-level engineers cannot execute independently", description: "Every patch application requires Zach's direct involvement — high expert dependency creates bottleneck.", stageIndex: 2 },
       ],
     },
     toBe: {
@@ -487,11 +487,11 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Execute", description: "Orchestrated apply with known-good rollback state" },
       ],
       markers: [
-        { type: "time", text: "Under 30 minutes for complete impact analysis", stageIndex: 1 },
-        { type: "gain", text: "Zach: Prerequisite chains resolved automatically — no missed dependencies", stageIndex: 1 },
-        { type: "gain", text: "Quinn: Complete change record with test evidence generated automatically", stageIndex: 5 },
-        { type: "gain", text: "Alice: Mid-level engineers can execute with Atlas guidance — reduced expert dependency", stageIndex: 2 },
-        { type: "gain", text: "Stan: Cross-subsystem impact visible before apply — CICS regions stay stable", stageIndex: 1 },
+        { persona: "Zach", type: "time", title: "Time Saving — under 30 minutes", description: "Complete impact analysis with prerequisite resolution in under 30 minutes.", stageIndex: 1 },
+        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — prerequisite chains resolved automatically", description: "No missed dependencies — Atlas resolves every co-requisite before apply.", stageIndex: 1 },
+        { persona: "Quinn", type: "gain", title: "New User Capability — complete change record with test evidence", description: "Full audit trail and test evidence generated automatically at close.", stageIndex: 5 },
+        { persona: "Alice", type: "gain", title: "New User Capability — mid-level engineers execute with Atlas guidance", description: "Step-by-step execution guidance reduces expert dependency.", stageIndex: 2 },
+        { persona: "Stan", type: "gain", title: "Atlas AI & Automation — cross-subsystem impact visible before apply", description: "CICS regions, Db2 connections, and MQ channels stay stable during patch apply.", stageIndex: 1 },
       ],
     },
     capabilities: [
