@@ -1020,11 +1020,11 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Diagnose", description: "Multi-team conference to trace root cause" },
       ],
       markers: [
-        { type: "time", text: "Alex: Root cause diagnosis takes 1–3 business days", stageIndex: 4 },
-        { type: "pain", text: "Alex: Capacity planning relies on institutional memory", stageIndex: 0 },
-        { type: "pain", text: "Quinn: Post-change performance regression discovered by accident", stageIndex: 3 },
-        { type: "pain", text: "Annette: Dark capacity invisible — teams procure what they have", stageIndex: 1 },
-        { type: "skill", text: "Zach: Diagnosis requires expert across multiple disciplines", stageIndex: 4 },
+        { persona: "Alex", type: "time", title: "Lost Time — 1–3 business days", description: "Root cause diagnosis takes 1–3 business days of multi-team investigation.", stageIndex: 4 },
+        { persona: "Alex", type: "pain", title: "Business Impact — capacity planning relies on institutional memory", description: "Capacity planning uses spreadsheets and SMF data manually — no systematic projection methodology.", stageIndex: 0 },
+        { persona: "Quinn", type: "pain", title: "Business Impact — post-change performance regression discovered by accident", description: "Post-change regressions are discovered through user complaints, not proactive monitoring.", stageIndex: 3 },
+        { persona: "Annette", type: "pain", title: "Business Impact — dark capacity invisible — teams procure what they have", description: "Underutilized resources are invisible without dedicated analysis — teams procure capacity they already have.", stageIndex: 1 },
+        { persona: "Zach", type: "skill", title: "Skill Gap / Bottleneck — diagnosis requires expert across multiple disciplines", description: "Performance diagnosis requires cross-subsystem expertise that only the most experienced engineers possess.", stageIndex: 4 },
       ],
     },
     toBe: {
@@ -1037,11 +1037,11 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Monitor", description: "Continuous threshold alerting before breach" },
       ],
       markers: [
-        { type: "time", text: "Alex: Root cause identified in under 2 hours", stageIndex: 4 },
-        { type: "gain", text: "Alex: Proactive constraint discovery before peak events", stageIndex: 1 },
-        { type: "gain", text: "Quinn: Post-change regression detected same day", stageIndex: 3 },
-        { type: "skill", text: "Annette: Unified cross-pillar analysis replaces multi-team investigation", stageIndex: 4 },
-        { type: "gain", text: "Zach: Dark capacity discovered and mapped — no wasted capacity", stageIndex: 1 },
+        { persona: "Alex", type: "time", title: "Time Saving — 1–3 days → under 2 hours", description: "Root cause identified in under 2 hours with Atlas's unified cross-pillar analysis.", stageIndex: 4 },
+        { persona: "Alex", type: "gain", title: "Atlas AI & Automation — proactive constraint discovery before peak events", description: "Atlas models load projection and identifies constraints weeks before peak events — not discovered during the event.", stageIndex: 1 },
+        { persona: "Quinn", type: "gain", title: "Atlas AI & Automation — post-change regression detected same day", description: "Behavioral baseline comparison surfaces regressions within hours of a change, not days later.", stageIndex: 3 },
+        { persona: "Annette", type: "gain", title: "New User Capability — unified cross-pillar analysis replaces multi-team investigation", description: "Annette can triage performance issues with Atlas's cross-subsystem correlation without escalating to Alex.", stageIndex: 4 },
+        { persona: "Zach", type: "gain", title: "Atlas AI & Automation — dark capacity discovered and mapped", description: "Atlas identifies underutilized resources and over-provisioned LPARs — no wasted capacity procurement.", stageIndex: 1 },
       ],
     },
     capabilities: [
