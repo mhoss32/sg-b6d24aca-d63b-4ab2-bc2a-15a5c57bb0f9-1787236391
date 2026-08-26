@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { ArrowLeft, Network, ChevronDown, Users, GitBranch, Layers } from "lucide-react";
+import { ArrowLeft, Network, ChevronDown, Users, GitBranch, Layers, Download } from "lucide-react";
 import { getNodeById, useCaseDetails, type ProductNode, type UseCaseDetail } from "@/data/productData";
 import { PersonaCard } from "@/components/PersonaCard";
 import { FlowDiagram } from "@/components/FlowDiagram";
@@ -12,6 +12,198 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+
+function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
+  const date = new Date().toLocaleDateString();
+  const time = new Date().toLocaleTimeString();
+  
+  const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${nodeLabel} — Atlas Use Case</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0A0A0F; color: #E2E8F0; line-height: 1.6; padding: 40px 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
+    .badge-cyan { background: rgba(0,212,255,0.15); color: #00D4FF; border: 1px solid rgba(0,212,255,0.3); }
+    h1 { font-size: 36px; font-weight: 700; margin-bottom: 16px; color: #fff; }
+    .description { font-size: 18px; color: #94a3b8; max-width: 768px; line-height: 1.7; }
+    h2 { font-size: 24px; font-weight: 600; margin: 40px 0 20px; color: #fff; display: flex; align-items: center; gap: 12px; }
+    h3 { font-size: 18px; font-weight: 600; margin: 24px 0 12px; color: #cbd5e1; }
+    .section { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+    .stage { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+    .stage-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .stage-number { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #94a3b8; }
+    .stage-name { font-weight: 600; color: #e2e8f0; }
+    .stage-desc { font-size: 14px; color: #64748b; margin-left: 44px; }
+    .marker { padding: 12px 16px; border-radius: 8px; margin: 8px 0; font-size: 14px; }
+    .marker-pain { background: rgba(239,68,68,0.08); border-left: 3px solid #ef4444; }
+    .marker-time { background: rgba(245,158,11,0.08); border-left: 3px solid #f59e0b; }
+    .marker-skill { background: rgba(34,197,94,0.08); border-left: 3px solid #22c55e; }
+    .marker-gain { background: rgba(167,139,250,0.08); border-left: 3px solid #a78bfa; }
+    .marker-title { font-weight: 600; margin-bottom: 4px; }
+    .marker-desc { color: #94a3b8; }
+    .persona-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .persona-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; }
+    .persona-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .persona-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-weight: 600; color: #fff; }
+    .persona-name { font-weight: 600; color: #e2e8f0; }
+    .persona-role { font-size: 13px; color: #64748b; }
+    .engagement-badge { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; margin-top: 8px; }
+    .engagement-primary { background: rgba(0,212,255,0.15); color: #00D4FF; }
+    .engagement-secondary { background: rgba(255,255,255,0.08); color: #94a3b8; }
+    .capability { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 16px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); margin-bottom: 12px; }
+    .timeline-badge { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+    .timeline-ga { background: rgba(34,197,94,0.15); color: #22c55e; }
+    .timeline-h1 { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .timeline-h2 { background: rgba(167,139,250,0.15); color: #a78bfa; }
+    .footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; color: #64748b; font-size: 14px; }
+    .external-box { padding: 16px; border-radius: 12px; margin: 12px 0; }
+    .external-handoff { background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.2); }
+    .external-enrichment { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); }
+    .external-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+    .external-handoff .external-title { color: #4ade80; }
+    .external-enrichment .external-title { color: #22d3ee; }
+    .handoff-step { display: flex; gap: 12px; margin-bottom: 16px; }
+    .step-number { width: 24px; height: 24px; border-radius: 50%; background: rgba(34,197,94,0.2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #4ade80; flex-shrink: 0; }
+    .step-label { font-weight: 600; font-size: 13px; color: #86efac; margin-bottom: 4px; }
+    .step-desc { font-size: 13px; color: #94a3b8; }
+    .meta { font-size: 12px; color: #475569; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge badge-cyan">Use Case</div>
+      <h1>${nodeLabel}</h1>
+      <p class="description">${detail.description}</p>
+    </header>
+
+    <h2>As-Is Flow</h2>
+    <div class="section">
+      <h3>${detail.asIs.title}</h3>
+      ${detail.asIs.stages.map((stage, i) => {
+        const stageMarkers = detail.asIs.markers.filter(m => m.stageIndex === i);
+        return `
+        <div class="stage">
+          <div class="stage-header">
+            <div class="stage-number">${i + 1}</div>
+            <div class="stage-name">${stage.name}</div>
+          </div>
+          <div class="stage-desc">${stage.description}</div>
+          ${stageMarkers.map(m => `
+            <div class="marker marker-${m.type}">
+              <div class="marker-title">${m.title}</div>
+              <div class="marker-desc">${m.description}</div>
+            </div>
+          `).join('')}
+        </div>`;
+      }).join('')}
+    </div>
+
+    <h2>To-Be Flow</h2>
+    <div class="section">
+      <h3>${detail.toBe.title}</h3>
+      ${detail.toBe.stages.map((stage, i) => {
+        const stageMarkers = detail.toBe.markers.filter(m => m.stageIndex === i);
+        const stageExternal = detail.toBe.externalTouchpoints?.filter(tp => tp.stageIndex === i) || [];
+        return `
+        <div class="stage">
+          <div class="stage-header">
+            <div class="stage-number">${i + 1}</div>
+            <div class="stage-name">${stage.name}</div>
+          </div>
+          <div class="stage-desc">${stage.description}</div>
+          ${stageExternal.map(tp => {
+            if (tp.type === 'handoff') {
+              return `
+              <div class="external-box external-handoff">
+                <div class="external-title">${tp.title}</div>
+                ${tp.steps.map((step, j) => `
+                  <div class="handoff-step">
+                    <div class="step-number">${j + 1}</div>
+                    <div>
+                      <div class="step-label">${step.label}</div>
+                      <div class="step-desc">${step.description}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>`;
+            } else {
+              return `
+              <div class="external-box external-enrichment">
+                <div class="external-title">${tp.title}</div>
+                <div class="step-desc">${tp.summary}</div>
+              </div>`;
+            }
+          }).join('')}
+          ${stageMarkers.map(m => `
+            <div class="marker marker-${m.type}">
+              <div class="marker-title">${m.title}</div>
+              <div class="marker-desc">${m.description}</div>
+            </div>
+          `).join('')}
+        </div>`;
+      }).join('')}
+    </div>
+
+    <h2>Personas</h2>
+    <div class="persona-grid">
+      ${detail.personas.map(p => `
+        <div class="persona-card">
+          <div class="persona-header">
+            <div class="persona-avatar">${p.name.charAt(0)}</div>
+            <div>
+              <div class="persona-name">${p.name}</div>
+              <div class="persona-role">${p.role}</div>
+            </div>
+          </div>
+          <div style="font-size: 14px; color: #94a3b8; margin-bottom: 8px;">${p.painPoint}</div>
+          <div class="engagement-badge engagement-${p.engagement.toLowerCase()}">${p.engagement}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <h2>Capabilities Required</h2>
+    ${detail.capabilities.map(cap => `
+      <div class="capability">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <span style="font-weight: 600; color: #e2e8f0;">${cap.name}</span>
+            <span class="timeline-badge timeline-${cap.timeline.toLowerCase().replace(' ', '-')}">${cap.timeline}</span>
+          </div>
+          <div style="font-size: 14px; color: #94a3b8;">${cap.description}</div>
+        </div>
+      </div>
+    `).join('')}
+
+    <div class="meta">
+      <p>Exported from Atlas Platform on ${date} at ${time}</p>
+    </div>
+
+    <div class="footer">
+      <span>IBM Atlas Platform</span>
+      <span>${new Date().getFullYear()}</span>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  const blob = new Blob([htmlContent], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${nodeLabel.toLowerCase().replace(/\s+/g, "-")}-atlas-usecase.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 function TimelineBadge({ timeline }: { timeline: string }) {
   const styles = {
@@ -107,6 +299,13 @@ export default function UseCaseDetailPage() {
             <Network className="w-5 h-5 text-cyan" />
             <span className="font-semibold text-foreground">Atlas</span>
           </div>
+          <button
+            onClick={() => detail && exportAsHTML(node.label, detail)}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-border/30 bg-muted/20 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-border/50 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export HTML
+          </button>
         </div>
       </header>
 
