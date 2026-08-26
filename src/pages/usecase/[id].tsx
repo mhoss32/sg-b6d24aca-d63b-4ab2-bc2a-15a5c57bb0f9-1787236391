@@ -241,7 +241,6 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
                     <div class="persona-role">${escapeHTML(p.role)}</div>
                   </div>
                 </div>
-                <p class="persona-desc">${escapeHTML(p.goals[0] || "")}</p>
                 <span class="engagement-badge ${p.engagement === "Primary" ? "engagement-primary" : "engagement-secondary"}">${p.engagement}</span>
               </div>`;
             }).join("")}
