@@ -163,7 +163,6 @@ function exportAsHTML(nodeLabel: string, detail: UseCaseDetail) {
               <div class="persona-role">${p.role}</div>
             </div>
           </div>
-          <div style="font-size: 14px; color: #94a3b8; margin-bottom: 8px;">${p.painPoint}</div>
           <div class="engagement-badge engagement-${p.engagement.toLowerCase()}">${p.engagement}</div>
         </div>
       `).join('')}
