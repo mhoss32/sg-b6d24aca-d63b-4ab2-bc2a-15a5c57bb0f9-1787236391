@@ -115,29 +115,7 @@ export default function UseCaseDetailPage() {
           </p>
         </section>
 
-        <Accordion type="multiple" defaultValue={["personas", "flows"]} className="space-y-4">
-          {/* Personas */}
-          <AccordionItem value="personas" className="border border-border/20 rounded-2xl bg-card/20 px-6 py-2">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-purple/10 text-purple flex items-center justify-center">
-                  <Users className="w-4 h-4" />
-                </div>
-                <div className="text-left">
-                  <h2 className="text-lg font-semibold text-foreground">Personas</h2>
-                  <p className="text-xs text-muted-foreground font-normal">{detail.personas.length} involved — {detail.personas.filter(p => p.engagement === "Primary").length} primary</p>
-                </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 pb-4">
-                {detail.personas.map((persona) => (
-                  <PersonaCard key={persona.name} persona={persona} href={`/persona/${persona.name.toLowerCase()}`} />
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
+        <Accordion type="multiple" defaultValue={["flows", "personas", "capabilities"]} className="space-y-4">
           {/* As-Is / To-Be Flows */}
           <AccordionItem value="flows" className="border border-border/20 rounded-2xl bg-card/20 px-6 py-2">
             <AccordionTrigger className="hover:no-underline py-4">
@@ -169,6 +147,28 @@ export default function UseCaseDetailPage() {
                     onChange={(toBe) => setDetail({ ...detail, toBe })}
                   />
                 </section>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Personas */}
+          <AccordionItem value="personas" className="border border-border/20 rounded-2xl bg-card/20 px-6 py-2">
+            <AccordionTrigger className="hover:no-underline py-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-purple/10 text-purple flex items-center justify-center">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div className="text-left">
+                  <h2 className="text-lg font-semibold text-foreground">Personas</h2>
+                  <p className="text-xs text-muted-foreground font-normal">{detail.personas.length} involved — {detail.personas.filter(p => p.engagement === "Primary").length} primary</p>
+                </div>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 pb-4">
+                {detail.personas.map((persona) => (
+                  <PersonaCard key={persona.name} persona={persona} href={`/persona/${persona.name.toLowerCase()}`} />
+                ))}
               </div>
             </AccordionContent>
           </AccordionItem>
