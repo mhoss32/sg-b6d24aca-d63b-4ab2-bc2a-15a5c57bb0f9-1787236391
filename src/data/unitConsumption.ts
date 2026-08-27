@@ -1406,8 +1406,8 @@ export const uc14UnitConsumption: UseCaseUnitConsumption = {
 };
 
 export function getUnitConsumption(useCaseId: string): UseCaseUnitConsumption | null {
-  const id = useCaseId.toLowerCase().replace(/^uc-0?/, "uc");
-  switch (id) {
+  const normalized = useCaseId.toLowerCase().replace(/[^a-z0-9]/g, "");
+  switch (normalized) {
     case "uc01": return uc01UnitConsumption;
     case "uc02": return uc02UnitConsumption;
     case "uc03": return uc03UnitConsumption;
