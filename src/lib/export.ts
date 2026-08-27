@@ -463,7 +463,7 @@ function renderPersonaUseCaseTile(id: string, uc: UseCaseDetail, engagement: str
     if (markers.length === 0) return "";
     return `
     <div style="margin-top: 12px;">
-      <details>
+      <details style="cursor: default;">
         <summary onclick="event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.03); cursor: pointer; font-size: 12px; font-weight: 600; color: ${labelColor}; list-style: none; user-select: none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${labelColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; transition: transform 0.2s;"><polyline points="9 18 15 12 9 6"/></svg>
           <span>${sectionLabel}</span>
@@ -690,6 +690,12 @@ export function exportSiteHTML() {
     .page-section.active { display: block; }
     details > summary::-webkit-details-marker { display: none; }
     details > summary { list-style: none; }
+    details > summary { display: flex; align-items: center; gap: 12px; padding: 20px 24px; cursor: pointer; list-style: none; user-select: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary svg { transition: transform 0.2s; }
+    details[open] > summary svg { transform: rotate(180deg); }
+    details svg[class*="chevron"] { transition: transform 0.2s !important; }
+    details[open] svg[class*="chevron"] { transform: rotate(180deg) !important; }
     @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; } }
   </style>
 </head>
