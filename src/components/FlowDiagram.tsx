@@ -335,15 +335,17 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange, useC
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-green-500/20">
-                      <th className="text-left py-2 pr-4 font-semibold text-green-300">Metric</th>
-                      <th className="text-left py-2 pr-4 font-semibold text-green-300">Value</th>
+                      <th className="text-left py-2 pr-4 font-semibold text-green-300">Step</th>
+                      <th className="text-left py-2 pr-4 font-semibold text-green-300">Activity</th>
+                      <th className="text-right py-2 font-semibold text-green-300">Units</th>
                     </tr>
                   </thead>
                   <tbody>
                     {unitConsumption.fullFlowSummary.map((row, i) => (
                       <tr key={i} className="border-b border-green-500/10 last:border-0">
-                        <td className="py-2 pr-4 text-muted-foreground">{row.metric}</td>
-                        <td className="py-2 text-green-300 font-medium">{row.value}</td>
+                        <td className="py-2 pr-4 text-muted-foreground">{row.step}</td>
+                        <td className="py-2 pr-4 text-muted-foreground">{row.activity}</td>
+                        <td className="py-2 text-right text-green-300 font-medium">{row.units}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -362,7 +364,7 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange, useC
                   <thead>
                     <tr className="border-b border-green-500/20">
                       <th className="text-left py-2 pr-4 font-semibold text-green-300">Scenario</th>
-                      <th className="text-left py-2 pr-4 font-semibold text-green-300">Impact</th>
+                      <th className="text-left py-2 pr-4 font-semibold text-green-300">Adjustment</th>
                       <th className="text-right py-2 font-semibold text-green-300">Est. Units</th>
                     </tr>
                   </thead>
@@ -370,7 +372,7 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange, useC
                     {unitConsumption.sensitivityAnalysis.map((row, i) => (
                       <tr key={i} className="border-b border-green-500/10 last:border-0">
                         <td className="py-2 pr-4 text-muted-foreground">{row.scenario}</td>
-                        <td className="py-2 pr-4 text-muted-foreground">{row.impact}</td>
+                        <td className="py-2 pr-4 text-muted-foreground">{row.adjustment}</td>
                         <td className="py-2 text-right text-green-300 font-medium">{row.estimatedUnits}</td>
                       </tr>
                     ))}
