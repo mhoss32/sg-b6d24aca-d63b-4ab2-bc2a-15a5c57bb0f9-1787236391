@@ -749,6 +749,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         document.getElementById('page-title').textContent = titleMap[pageId] || 'Return to Atlas';
         document.querySelector('.main').scrollTop = 0;
       }
+      window.showPage = showPage;
       showPage('home');
 
       document.querySelectorAll('.ext-toggle').forEach(function(cb) {
