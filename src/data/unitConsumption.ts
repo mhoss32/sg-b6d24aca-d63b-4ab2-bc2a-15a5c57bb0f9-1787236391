@@ -20,18 +20,25 @@ export interface FlowSummaryRow {
   units: string;
 }
 
-export interface SensitivityRow {
+export interface EstateSizeRow {
   scenario: string;
   adjustment: string;
-  estimatedUnits: string;
+  multiplierDisplay: string;
+  multiplierValue: number;
+}
+
+export interface AdditionalAdjustmentRow {
+  scenario: string;
+  adjustment: string;
+  unitDelta: number;
 }
 
 export interface UseCaseUnitConsumption {
   useCaseId: string;
   steps: StepConsumption[];
   fullFlowSummary: FlowSummaryRow[];
-  sensitivityAnalysis: SensitivityRow[];
-  totalNominal: string;
+  estateSize: EstateSizeRow[];
+  additionalAdjustments: AdditionalAdjustmentRow[];
 }
 
 export const uc01UnitConsumption: UseCaseUnitConsumption = {
@@ -127,34 +134,25 @@ export const uc01UnitConsumption: UseCaseUnitConsumption = {
     },
   ],
   fullFlowSummary: [
-    { step: "1 — Discovery", activity: "Discovery scan", units: "0.5" },
-    { step: "2 — Remediation", activity: "Discovery scan (continuous)", units: "0.05" },
-    { step: "3 — Remediation", activity: "Backlink to target environment", units: "0.05" },
-    { step: "4 — Remediation", activity: "Environmental metrics fetch", units: "0.2" },
-    { step: "5 — Remediation", activity: "Health & dependency check", units: "0.5" },
-    { step: "6 — Remediation", activity: "Remediation task auto-generation", units: "0.5" },
-    { step: "7 — Remediation", activity: "Remediation task auto-generation", units: "0.5" },
-    { step: "8 — Remediation", activity: "Backlink to target environment", units: "0.05" },
-    { step: "9 — Remediation", activity: "Auto remediation actions", units: "1.0" },
-    { step: "10 — Remediation", activity: "Result and metric fetch", units: "0.2" },
-    { step: "11 — Remediation", activity: "Auto-closure of remediation task", units: "0.2" },
-    { step: "12 — Remediation", activity: "Auto remediation actions", units: "1.0" },
-    { step: "13 — Remediation", activity: "Result and metric fetch", units: "0.2" },
-    { step: "14 — Remediation", activity: "Auto-closure of remediation task", units: "0.2" },
-    { step: "15 — Remediation", activity: "Health & dependency check", units: "0.5" },
-    { step: "16 — Remediation", activity: "Auto-closure of remediation task", units: "0.2" },
-    { step: "17 — Remediation", activity: "Remediation task auto-generation", units: "0.5" },
-    { step: "18 — Change Readiness", activity: "Remediation task auto-generation", units: "0.5" },
-    { step: "19 — Change Readiness", activity: "Auto-closure of remediation task", units: "0.2" },
+    { step: "1 — Detect", activity: "Advisory interpretation / proactive FIXCAT alert", units: "0" },
+    { step: "2 — Assess Exposure", activity: "Multi-LPAR exposure assessment", units: "2.5" },
+    { step: "3 — Blast Radius", activity: "Dependency traversal and topology map", units: "2.5" },
+    { step: "4 — Plan", activity: "Sequenced remediation plan", units: "2.5" },
+    { step: "5 — Provision + Test", activity: "Test environment provision + functional test suite", units: "3.1" },
+    { step: "6 — Decide", activity: "Results review, authorization prompt", units: "0" },
+    { step: "7 — Execute", activity: "Production apply orchestration + DR provision", units: "0.1" },
+    { step: "8 — Monitor", activity: "Continuous monitoring (+ optional alert artifact)", units: "0–0.5" },
+    { step: "9 — Close", activity: "Evidence package / audit trail", units: "4.0" },
   ],
-  sensitivityAnalysis: [
-    { scenario: "Small estate (≤5 LPARs, 1 affected)", adjustment: "Simpler exposure scan; no blast radius", estimatedUnits: "~8.0" },
-    { scenario: "Standard (10–20 LPARs, moderate blast radius)", adjustment: "Baseline above", estimatedUnits: "~14.7" },
-    { scenario: "Large estate (30+ LPARs, complex blast radius, multi-phase)", adjustment: "Additional assessment depth; multiple test environments", estimatedUnits: "~20–25" },
-    { scenario: "Step 2+3 combined as single assessment", adjustment: "One assessment instead of two", estimatedUnits: "−2.5 (= 12.2)" },
-    { scenario: "Exploitation alert triggered during monitoring", adjustment: "Add 0.5 conditional units", estimatedUnits: "~15.2–15.7" },
+  estateSize: [
+    { scenario: "Small estate (≤5 LPARs, 1 affected)", adjustment: "Simpler exposure scan; no blast radius", multiplierDisplay: "~0.5×", multiplierValue: 0.5 },
+    { scenario: "Standard (10–20 LPARs, moderate blast radius)", adjustment: "Baseline", multiplierDisplay: "1.0×", multiplierValue: 1.0 },
+    { scenario: "Large estate (30+ LPARs, complex blast radius, multi-phase)", adjustment: "Additional assessment depth; multiple test environments", multiplierDisplay: "~1.4–1.7×", multiplierValue: 1.7 },
   ],
-  totalNominal: "14.7–15.2",
+  additionalAdjustments: [
+    { scenario: "Step 2+3 combined as single assessment", adjustment: "One assessment instead of two", unitDelta: -2.5 },
+    { scenario: "Exploitation alert triggered during monitoring", adjustment: "Add 0.5 conditional units", unitDelta: 0.5 },
+  ],
 };
 
 export function getUnitConsumption(useCaseId: string): UseCaseUnitConsumption | null {
