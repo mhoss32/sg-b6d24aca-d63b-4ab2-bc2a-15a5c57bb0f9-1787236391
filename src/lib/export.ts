@@ -55,6 +55,26 @@ const timelineColors: Record<string, { bg: string; text: string }> = {
   "H2 2027": { bg: "rgba(167,139,250,0.15)", text: "#a78bfa" },
 };
 
+const PILLARS = [
+  { id: "system", name: "System Intelligence", shortName: "SI", color: "#00D4FF", bg: "rgba(0,212,255,0.1)", border: "rgba(0,212,255,0.3)" },
+  { id: "change", name: "Change Intelligence", shortName: "CI", color: "#FF6B6B", bg: "rgba(255,107,107,0.1)", border: "rgba(255,107,107,0.3)" },
+  { id: "predictive", name: "Predictive Intelligence", shortName: "PI", color: "#A78BFA", bg: "rgba(167,139,250,0.1)", border: "rgba(167,139,250,0.3)" },
+];
+
+const PILLAR_USE_CASES: Record<string, string[]> = {
+  system: ["uc-01", "uc-02", "uc-03", "uc-04", "uc-05", "uc-06", "uc-07", "uc-08", "uc-09", "uc-12", "uc-13"],
+  change: ["uc-01", "uc-02", "uc-07", "uc-08", "uc-10", "uc-11", "uc-12", "uc-13", "uc-14"],
+  predictive: ["uc-09", "uc-10", "uc-11"],
+};
+
+function getUseCasePillars(ucId: string): string[] {
+  const pillars: string[] = [];
+  for (const [pillarId, ucIds] of Object.entries(PILLAR_USE_CASES)) {
+    if (ucIds.includes(ucId)) pillars.push(pillarId);
+  }
+  return pillars;
+}
+
 const escapeHTML = (str: string) =>
   str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -114,7 +134,7 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
         </div>
         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
           ${["bob-ppz", "concert4z"].map((pid) => {
-            const hasTp = flow.externalTouchpoints?.some((tp) => tp.product.toLowerCase().replace(/\s+/g, "-") === pid);
+            const hasTp = flow.externalTouchpoints?.some((tp) => tp.product.toLowerCase().replace(/\\s+/g, "-") === pid);
             const label = pid === "bob-ppz" ? "Bob PPZ" : "Concert4Z";
             return `
             <label style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 6px; border: 1px solid ${hasTp ? "rgba(0,212,255,0.3)" : "rgba(255,255,255,0.1)"}; background: ${hasTp ? "rgba(0,212,255,0.05)" : "rgba(255,255,255,0.02)"}; cursor: ${hasTp ? "pointer" : "not-allowed"}; opacity: ${hasTp ? "1" : "0.4"};">
@@ -406,16 +426,7 @@ function renderPersonaPage(name: string, info: typeof personaData[string]): stri
           Primary Use Cases
         </h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
-          ${primary.map((uc) => `
-            <div onclick="showPage('uc-${uc.id}')" style="cursor: pointer; border-radius: 14px; border: 1px solid rgba(0,212,255,0.2); background: rgba(255,255,255,0.02); padding: 20px; transition: all 0.2s;">
-              <div style="display: flex; align-items: start; justify-content: space-between; margin-bottom: 8px;">
-                <span style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #00D4FF; padding: 2px 10px; border-radius: 9999px; background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.2);">Primary</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              </div>
-              <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin-bottom: 6px;">${escapeHTML(uc.label)}</h3>
-              <p style="font-size: 12px; color: #64748b; line-height: 1.5;">${escapeHTML(uc.description)}</p>
-            </div>
-          `).join("")}
+          ${primary.map((uc) => renderPersonaUseCaseTile(uc, "Primary", name)).join("")}
         </div>
       </div>` : ""}
 
@@ -428,41 +439,96 @@ function renderPersonaPage(name: string, info: typeof personaData[string]): stri
           Secondary Use Cases
         </h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
-          ${secondary.map((uc) => `
-            <div onclick="showPage('uc-${uc.id}')" style="cursor: pointer; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); padding: 20px; transition: all 0.2s;">
-              <div style="display: flex; align-items: start; justify-content: space-between; margin-bottom: 8px;">
-                <span style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; padding: 2px 10px; border-radius: 9999px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);">Secondary</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              </div>
-              <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin-bottom: 6px;">${escapeHTML(uc.label)}</h3>
-              <p style="font-size: 12px; color: #64748b; line-height: 1.5;">${escapeHTML(uc.description)}</p>
-            </div>
-          `).join("")}
+          ${secondary.map((uc) => renderPersonaUseCaseTile(uc, "Secondary", name)).join("")}
         </div>
       </div>` : ""}
     </div>
   </section>`;
 }
 
+function renderPersonaUseCaseTile(uc: UseCaseDetail, engagement: string, personaName: string): string {
+  const isPrimary = engagement === "Primary";
+  const detail = useCaseDetails[uc.id];
+  const asIsMarkers = detail?.asIs.markers.filter((m) => m.persona === personaName) || [];
+  const toBeMarkers = detail?.toBe.markers.filter((m) => m.persona === personaName) || [];
+
+  const markerConfig: Record<string, { bg: string; border: string; text: string; label: string; iconSvg: string }> = {
+    pain: { bg: "rgba(251,146,60,0.1)", border: "rgba(251,146,60,0.3)", text: "#fb923c", label: "Business Impact", iconSvg: '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' },
+    time: { bg: "rgba(251,191,36,0.1)", border: "rgba(251,191,36,0.3)", text: "#fbbf24", label: "Lost Time", iconSvg: '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' },
+    skill: { bg: "rgba(248,113,113,0.1)", border: "rgba(248,113,113,0.3)", text: "#f87171", label: "Skill Gap / Bottleneck", iconSvg: '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' },
+    gain: { bg: "rgba(192,132,252,0.1)", border: "rgba(192,132,252,0.3)", text: "#c084fc", label: "New User Capability", iconSvg: '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+  };
+
+  const renderMarkers = (markers: typeof asIsMarkers, sectionId: string, sectionLabel: string, labelColor: string) => {
+    if (markers.length === 0) return "";
+    return `
+    <div style="margin-top: 12px;">
+      <details>
+        <summary style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.03); cursor: pointer; font-size: 12px; font-weight: 600; color: ${labelColor}; list-style: none; user-select: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${labelColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; transition: transform 0.2s;"><polyline points="9 18 15 12 9 6"/></svg>
+          <span>${sectionLabel}</span>
+          <span style="margin-left: auto; font-size: 10px; font-weight: 400; color: #64748b;">${markers.length} ${markers.length === 1 ? "item" : "items"}</span>
+        </summary>
+        <div style="padding-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+          ${markers.map((m) => {
+            const mc = markerConfig[m.type] || markerConfig.pain;
+            return `
+            <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 8px; background: ${mc.bg}; border: 1px solid ${mc.border};">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                ${mc.iconSvg}
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: ${mc.text};">${mc.label}</span>
+              </div>
+              <span style="font-size: 11px; font-weight: 500; color: #e2e8f0; line-height: 1.4;">${escapeHTML(m.title)}</span>
+              <span style="font-size: 10px; color: #94a3b8; line-height: 1.5;">${escapeHTML(m.description)}</span>
+            </div>`;
+          }).join("")}
+        </div>
+      </details>
+    </div>`;
+  };
+
+  return `
+    <div onclick="showPage('uc-${uc.id}')" style="cursor: pointer; border-radius: 14px; border: 1px solid ${isPrimary ? "rgba(0,212,255,0.2)" : "rgba(255,255,255,0.08)"}; background: rgba(255,255,255,0.02); padding: 20px; transition: all 0.2s; position: relative;">
+      <div style="display: flex; align-items: start; justify-content: space-between; margin-bottom: 8px;">
+        <span style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: ${isPrimary ? "#00D4FF" : "#94a3b8"}; padding: 2px 10px; border-radius: 9999px; background: ${isPrimary ? "rgba(0,212,255,0.1)" : "rgba(255,255,255,0.04)"}; border: 1px solid ${isPrimary ? "rgba(0,212,255,0.2)" : "rgba(255,255,255,0.1)"};">${engagement}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </div>
+      <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin-bottom: 6px;">${escapeHTML(uc.label)}</h3>
+      <p style="font-size: 12px; color: #64748b; line-height: 1.5;">${escapeHTML(uc.description)}</p>
+      ${renderMarkers(asIsMarkers, `pain-${uc.id}`, "Pain Points", "#f87171")}
+      ${renderMarkers(toBeMarkers, `wow-${uc.id}`, "Wows!", "#4ade80")}
+    </div>`;
+}
+
 function renderHomePage(): string {
   const useCases = productNodes.filter((n) => n.type === "useCase");
-  const pillarConfig: Record<string, { name: string; color: string; shortName: string }> = {
-    system: { name: "System Intelligence", color: "#00D4FF", shortName: "SI" },
-    change: { name: "Change Intelligence", color: "#FF6B6B", shortName: "CI" },
-    predictive: { name: "Predictive Intelligence", color: "#A78BFA", shortName: "PI" },
-  };
-  const pillarUseCases: Record<string, string[]> = {
-    system: ["uc-01", "uc-02", "uc-03", "uc-04", "uc-05", "uc-06", "uc-07", "uc-08", "uc-09", "uc-12", "uc-13"],
-    change: ["uc-01", "uc-02", "uc-07", "uc-08", "uc-10", "uc-11", "uc-12", "uc-13", "uc-14"],
-    predictive: ["uc-09", "uc-10", "uc-11"],
-  };
-  const getUseCasePillars = (ucId: string): string[] => {
-    const pillars: string[] = [];
-    for (const [pillarId, ucIds] of Object.entries(pillarUseCases)) {
-      if (ucIds.includes(ucId)) pillars.push(pillarId);
+
+  // Compute layout: rows and column spans for each use case
+  const nextRow: Record<number, number> = {};
+  for (let i = 1; i <= 4; i++) nextRow[i] = 2;
+
+  const rows: Record<string, number> = {};
+  const spans: Record<string, { start: number; end: number }> = {};
+
+  for (const uc of useCases) {
+    const ucPillars = getUseCasePillars(uc.id);
+    const indices = ucPillars.map((p) => PILLARS.findIndex((pl) => pl.id === p)).filter((i) => i !== -1);
+    if (indices.length === 0) continue;
+    const minIdx = Math.min(...indices);
+    const maxIdx = Math.max(...indices);
+    const start = minIdx + 1;
+    const end = maxIdx + 2;
+    spans[uc.id] = { start, end };
+
+    let maxRow = 0;
+    for (let col = start; col < end; col++) {
+      maxRow = Math.max(maxRow, nextRow[col]);
     }
-    return pillars;
-  };
+    rows[uc.id] = maxRow;
+    for (let col = start; col < end; col++) {
+      nextRow[col] = maxRow + 1;
+    }
+  }
 
   return `
   <section id="home" class="page-section">
@@ -482,22 +548,41 @@ function renderHomePage(): string {
     </div>
 
     <div style="max-width: 1280px; margin: 0 auto; padding: 0 24px 32px;">
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
-        ${useCases.map((uc) => {
-          const ucPillars = getUseCasePillars(uc.id);
-          const primaryPillar = pillarConfig[ucPillars[0]];
-          const isMultiPillar = ucPillars.length > 1;
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(60px, auto); gap: 16px;">
+        ${PILLARS.map((pillar, i) => {
+          const visibleCount = useCases.filter((uc) => getUseCasePillars(uc.id).includes(pillar.id)).length;
           return `
-          <div onclick="showPage('uc-${uc.id}')" style="cursor: pointer; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); padding: 20px; transition: all 0.2s; position: relative; overflow: hidden; border-left: 3px solid ${primaryPillar?.color || "#E2E8F0"};">
-            ${isMultiPillar ? `<div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(to right, ${ucPillars.map(pid => pillarConfig[pid]?.color).join(", ")});"></div>` : ""}
+          <div style="grid-column: ${i + 1} / ${i + 2}; grid-row: 1 / 2;">
+            <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px; border-radius: 12px; border: 1px solid ${pillar.border}; background: ${pillar.bg};">
+              <div style="width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${pillar.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="12 2 15 9 22 9 17 14 18 21 12 17 6 21 7 14 2 9 9 9 12 2"/></svg>
+              </div>
+              <div style="text-align: center;">
+                <h2 style="font-size: 16px; font-weight: 600; color: ${pillar.color};">${pillar.name}</h2>
+                <p style="font-size: 11px; color: #64748b; margin-top: 4px;">${visibleCount} use cases</p>
+              </div>
+            </div>
+          </div>`;
+        }).join("")}
+
+        ${useCases.map((uc) => {
+          const span = spans[uc.id];
+          const row = rows[uc.id];
+          const ucPillars = getUseCasePillars(uc.id);
+          const primaryPillar = PILLARS.find((p) => p.id === ucPillars[0]);
+          const isMultiPillar = ucPillars.length > 1;
+          if (!span || !row) return "";
+          return `
+          <div onclick="showPage('uc-${uc.id}')" style="cursor: pointer; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); padding: 16px; transition: all 0.2s; position: relative; overflow: hidden; grid-column: ${span.start} / ${span.end}; grid-row: ${row} / ${row + 1}; border-left: 3px solid ${primaryPillar?.color || "#E2E8F0"}; box-shadow: 0 0 20px ${primaryPillar?.color || "#E2E8F0"}08;">
+            ${isMultiPillar ? `<div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(to right, ${ucPillars.map(pid => PILLARS.find(p => p.id === pid)?.color).join(", ")});"></div>` : ""}
             <div style="display: flex; align-items: start; gap: 12px;">
               <div style="width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; background: ${primaryPillar?.color}; box-shadow: 0 0 8px ${primaryPillar?.color}60;"></div>
               <div style="min-width: 0; flex: 1;">
-                <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; line-height: 1.4; margin-bottom: 6px;">${escapeHTML(uc.label)}</h3>
-                <p style="font-size: 12px; color: #64748b; line-height: 1.6; margin-bottom: 10px;">${escapeHTML(uc.description)}</p>
+                <h3 style="font-size: 13px; font-weight: 500; color: #e2e8f0; line-height: 1.4; margin-bottom: 6px;">${escapeHTML(uc.label)}</h3>
+                <p style="font-size: 11px; color: #64748b; line-height: 1.6; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${escapeHTML(uc.description)}</p>
                 <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                   ${ucPillars.map((pId) => {
-                    const p = pillarConfig[pId];
+                    const p = PILLARS.find((pl) => pl.id === pId);
                     if (!p) return "";
                     return `<span style="font-size: 10px; padding: 2px 8px; border-radius: 9999px; border: 1px solid ${p.color}40; background: ${p.color}10; color: ${p.color}; font-weight: 500;">${p.shortName}</span>`;
                   }).join("")}
@@ -509,7 +594,7 @@ function renderHomePage(): string {
       </div>
 
       <div style="margin-top: 32px; display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap;">
-        ${Object.values(pillarConfig).map((pillar) => `
+        ${PILLARS.map((pillar) => `
           <div style="display: flex; align-items: center; gap: 8px;">
             <div style="width: 10px; height: 10px; border-radius: 50%; background: ${pillar.color}; box-shadow: 0 0 6px ${pillar.color}60;"></div>
             <span style="font-size: 12px; color: #64748b;">${pillar.name}</span>
@@ -579,7 +664,6 @@ export function exportSiteHTML() {
     .accordion-icon.coral { background: rgba(255,107,107,0.1); color: #FF6B6B; }
     .accordion-icon.purple { background: rgba(167,139,250,0.1); color: #A78BFA; }
     .accordion-icon.cyan { background: rgba(0,212,255,0.1); color: #00D4FF; }
-    .persona-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
     .capability { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); margin-bottom: 12px; transition: border-color 0.2s; }
     .capability:hover { border-color: rgba(0,212,255,0.2); }
     .timeline-badge { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 10px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; }
@@ -628,9 +712,9 @@ export function exportSiteHTML() {
 
     <main class="main">
       <div class="topbar">
-        <div style="display: flex; align-items: center; gap: 6px; color: #94a3b8; font-size: 14px;">
+        <div onclick="showPage('home')" style="display: flex; align-items: center; gap: 6px; color: #94a3b8; font-size: 14px; cursor: pointer; transition: color 0.15s;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-          <span id="page-title">Atlas Home</span>
+          <span id="page-title">Back to Atlas</span>
         </div>
         <div style="font-size: 12px; color: #475569;">IBM Atlas Platform</div>
       </div>
@@ -681,10 +765,10 @@ export function exportSiteHTML() {
       }
       var nav = document.querySelector('.nav-item[data-page="' + pageId + '"]');
       if (nav) nav.classList.add('active');
-      var titleMap = { home: 'Atlas Home' };
+      var titleMap = { home: 'Back to Atlas' };
       ${Object.keys(useCaseDetails).map((id) => `titleMap['uc-${id}'] = '${escapeHTML(useCaseDetails[id].label)}';`).join("")}
       ${Object.entries(personaData).map(([key, info]) => `titleMap['persona-${key}'] = '${escapeHTML(info.name)}';`).join("")}
-      var title = titleMap[pageId] || 'Atlas';
+      var title = titleMap[pageId] || 'Back to Atlas';
       var titleEl = document.getElementById('page-title');
       if (titleEl) titleEl.textContent = title;
       document.title = title + ' — Atlas Platform';
