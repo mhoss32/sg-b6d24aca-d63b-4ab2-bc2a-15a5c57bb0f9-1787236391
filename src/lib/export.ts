@@ -1,4 +1,4 @@
-import { useCaseDetails, productNodes } from "@/data/productData";
+import { useCaseDetails, productNodes, personaData } from "@/data/productData";
 import type { UseCaseDetail, FlowDiagram, ExternalTouchpoint } from "@/data/productData";
 
 const asIsConfig: Record<string, { color: string; bg: string; border: string; label: string; iconSvg: string }> = {
@@ -264,7 +264,7 @@ function renderUseCasePage(id: string, detail: UseCaseDetail): string {
             ${detail.personas.map((p, i) => {
               const isPrimary = p.engagement === "Primary";
               return `
-              <div style="position: relative; border-radius: 14px; border: 1px solid ${isPrimary ? "rgba(0,212,255,0.25)" : "rgba(255,255,255,0.08)"}; background: rgba(255,255,255,0.02); padding: 20px; ${isPrimary ? "box-shadow: 0 0 20px rgba(0,212,255,0.06);" : ""}">
+              <div onclick="showPage('persona-${p.name.toLowerCase()}')" style="cursor: pointer; position: relative; border-radius: 14px; border: 1px solid ${isPrimary ? "rgba(0,212,255,0.25)" : "rgba(255,255,255,0.08)"}; background: rgba(255,255,255,0.02); padding: 20px; ${isPrimary ? "box-shadow: 0 0 20px rgba(0,212,255,0.06);" : ""} transition: border-color 0.2s;">
                 ${isPrimary ? `<svg style="position: absolute; top: -10px; right: -10px; width: 20px; height: 20px; color: #00D4FF;" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>` : ""}
                 <div style="display: flex; align-items: flex-start; gap: 16px;">
                   <div style="flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; ${isPrimary ? "background: rgba(0,212,255,0.12); color: #00D4FF;" : "background: rgba(255,255,255,0.06); color: #64748b;"}">
@@ -309,6 +309,137 @@ function renderUseCasePage(id: string, detail: UseCaseDetail): string {
           }).join("")}
         </div>
       </details>
+    </div>
+  </section>`;
+}
+
+function renderPersonaPage(name: string, info: typeof personaData[string]): string {
+  const { primary, secondary } = (() => {
+    const p: UseCaseDetail[] = [];
+    const s: UseCaseDetail[] = [];
+    for (const detail of Object.values(useCaseDetails)) {
+      const match = detail.personas.find((pp) => pp.name.toLowerCase() === name.toLowerCase());
+      if (match) {
+        if (match.engagement === "Primary") p.push(detail);
+        else s.push(detail);
+      }
+    }
+    return { primary: p, secondary: s };
+  })();
+
+  return `
+  <section id="persona-${name.toLowerCase()}" class="page-section" style="display: none;">
+    <div class="container" style="padding-top: 32px; padding-bottom: 48px;">
+      <section class="hero" style="margin-bottom: 32px;">
+        <div class="badge-row" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+          <div class="badge" style="display: inline-flex; align-items: center; gap: 8px;">
+            <div style="width: 16px; height: 16px; border-radius: 50%; background: #A78BFA; box-shadow: 0 0 12px rgba(167,139,250,0.5);"></div>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: #A78BFA;">Persona</span>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+          <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(167,139,250,0.12); color: #A78BFA; display: flex; align-items: center; justify-content: center;">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
+          </div>
+          <div>
+            <h1 style="font-size: 36px; font-weight: 700; color: #fff; line-height: 1.2;">${escapeHTML(info.name)}</h1>
+            <p style="font-size: 16px; color: #94a3b8;">${escapeHTML(info.role)}</p>
+          </div>
+        </div>
+        <p style="font-size: 18px; color: #94a3b8; max-width: 768px; line-height: 1.7;">${escapeHTML(info.summary)}</p>
+      </section>
+
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 32px;">
+        <div>
+          ${info.quote ? `
+          <div style="border-radius: 14px; border-left: 4px solid #00D4FF; background: rgba(0,212,255,0.05); padding: 20px; margin-bottom: 24px;">
+            <p style="font-style: italic; color: #e2e8f0; line-height: 1.6;">"${escapeHTML(info.quote)}"</p>
+          </div>` : ""}
+
+          ${info.painPoints && info.painPoints.length > 0 ? `
+          <div style="border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: rgba(255,255,255,0.02); padding: 20px; margin-bottom: 24px;">
+            <h3 style="font-size: 16px; font-weight: 600; color: #e2e8f0; margin-bottom: 12px;">Key Pain Points</h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              ${info.painPoints.map((point) => `
+                <li style="display: flex; align-items: start; gap: 8px; color: #94a3b8; margin-bottom: 8px; line-height: 1.5;">
+                  <span style="color: #00D4FF; margin-top: 2px; flex-shrink: 0;">•</span>
+                  <span>${escapeHTML(point)}</span>
+                </li>
+              `).join("")}
+            </ul>
+          </div>` : ""}
+        </div>
+
+        <div style="space-y: 6;">
+          <div style="border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: rgba(255,255,255,0.02); padding: 20px; margin-bottom: 16px;">
+            <h3 style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; margin-bottom: 16px;">Details</h3>
+            <div style="margin-bottom: 12px;">
+              <p style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Experience</p>
+              <p style="font-size: 13px; color: #e2e8f0;">${escapeHTML(info.experience)}</p>
+            </div>
+            <div style="margin-bottom: 12px;">
+              <p style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Primary Concerns</p>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                ${info.concerns.map((c) => `
+                  <span style="font-size: 11px; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); color: #94a3b8;">${escapeHTML(c)}</span>
+                `).join("")}
+              </div>
+            </div>
+            <div>
+              <p style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Use Cases</p>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 13px; font-weight: 500; color: #00D4FF;">${primary.length}</span>
+                <span style="font-size: 13px; color: #94a3b8;">Primary</span>
+                <span style="color: #475569;">·</span>
+                <span style="font-size: 13px; font-weight: 500; color: #A78BFA;">${secondary.length}</span>
+                <span style="font-size: 13px; color: #94a3b8;">Secondary</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      ${primary.length > 0 ? `
+      <div style="margin-bottom: 24px;">
+        <h2 style="font-size: 20px; font-weight: 600; color: #e2e8f0; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Primary Use Cases
+        </h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
+          ${primary.map((uc) => `
+            <div onclick="showPage('uc-${uc.id}')" style="cursor: pointer; border-radius: 14px; border: 1px solid rgba(0,212,255,0.2); background: rgba(255,255,255,0.02); padding: 20px; transition: all 0.2s;">
+              <div style="display: flex; align-items: start; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #00D4FF; padding: 2px 10px; border-radius: 9999px; background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.2);">Primary</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </div>
+              <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin-bottom: 6px;">${escapeHTML(uc.label)}</h3>
+              <p style="font-size: 12px; color: #64748b; line-height: 1.5;">${escapeHTML(uc.description)}</p>
+            </div>
+          `).join("")}
+        </div>
+      </div>` : ""}
+
+      ${secondary.length > 0 ? `
+      <div>
+        <h2 style="font-size: 20px; font-weight: 600; color: #e2e8f0; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <span style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #A78BFA; display: flex; align-items: center; justify-content: center;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #A78BFA;"></span>
+          </span>
+          Secondary Use Cases
+        </h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
+          ${secondary.map((uc) => `
+            <div onclick="showPage('uc-${uc.id}')" style="cursor: pointer; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); padding: 20px; transition: all 0.2s;">
+              <div style="display: flex; align-items: start; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; padding: 2px 10px; border-radius: 9999px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);">Secondary</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </div>
+              <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin-bottom: 6px;">${escapeHTML(uc.label)}</h3>
+              <p style="font-size: 12px; color: #64748b; line-height: 1.5;">${escapeHTML(uc.description)}</p>
+            </div>
+          `).join("")}
+        </div>
+      </div>` : ""}
     </div>
   </section>`;
 }
@@ -398,9 +529,17 @@ export function exportSiteHTML() {
     .map(([id, detail]) => renderUseCasePage(id, detail))
     .join("");
 
+  const personaSections = Object.entries(personaData)
+    .map(([name, info]) => renderPersonaPage(name, info))
+    .join("");
+
   const navItems = Object.keys(useCaseDetails).map((id) => {
     const detail = useCaseDetails[id];
     return `<button onclick="showPage('uc-${id}')" class="nav-item" data-page="uc-${id}" style="display: block; width: 100%; text-align: left; padding: 8px 16px; border-radius: 8px; border: none; background: transparent; color: #94a3b8; font-size: 13px; cursor: pointer; transition: all 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(detail.label.replace("UC-", "").replace(": ", " "))}</button>`;
+  }).join("");
+
+  const personaNavItems = Object.entries(personaData).map(([key, info]) => {
+    return `<button onclick="showPage('persona-${key}')" class="nav-item" data-page="persona-${key}" style="display: block; width: 100%; text-align: left; padding: 8px 16px; border-radius: 8px; border: none; background: transparent; color: #94a3b8; font-size: 13px; cursor: pointer; transition: all 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(info.name)}</button>`;
   }).join("");
 
   const htmlContent = `<!DOCTYPE html>
@@ -478,6 +617,10 @@ export function exportSiteHTML() {
       <div style="padding: 0 8px 12px;">
         ${navItems}
       </div>
+      <div class="sidebar-section">Personas</div>
+      <div style="padding: 0 8px 12px;">
+        ${personaNavItems}
+      </div>
       <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 11px; color: #475569;">
         Exported ${date}
       </div>
@@ -494,6 +637,7 @@ export function exportSiteHTML() {
 
       ${renderHomePage()}
       ${useCaseSections}
+      ${personaSections}
 
       <footer>
         <div class="footer-inner">
@@ -539,6 +683,7 @@ export function exportSiteHTML() {
       if (nav) nav.classList.add('active');
       var titleMap = { home: 'Atlas Home' };
       ${Object.keys(useCaseDetails).map((id) => `titleMap['uc-${id}'] = '${escapeHTML(useCaseDetails[id].label)}';`).join("")}
+      ${Object.entries(personaData).map(([key, info]) => `titleMap['persona-${key}'] = '${escapeHTML(info.name)}';`).join("")}
       var title = titleMap[pageId] || 'Atlas';
       var titleEl = document.getElementById('page-title');
       if (titleEl) titleEl.textContent = title;
