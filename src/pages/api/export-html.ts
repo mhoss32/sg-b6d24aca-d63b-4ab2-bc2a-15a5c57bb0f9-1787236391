@@ -117,6 +117,9 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
     return grouped;
   });
 
+  const uc = !isAsIs ? getUnitConsumption(ucId) : null;
+  const coinSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12"/><path d="M15 10H9.5a2.5 2.5 0 0 0 0 5h5a2.5 2.5 0 0 1 0 5H9"/></svg>';
+
   return `
     <div style="border: 1px solid ${sectionBorder}; border-radius: 16px; background: ${sectionBg}; padding: 24px; margin-bottom: 24px;">
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
@@ -165,6 +168,8 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
         ${flow.stages.map((stage, i) => {
           const stageExternal = flow.externalTouchpoints?.filter((tp) => tp.stageIndex === i) || [];
           const grouped = groupedByStage[i];
+          const stepConsumption = uc?.steps[i];
+          const stepTotal = stepConsumption ? stepConsumption.activities.reduce((s, a) => s + (parseFloat(a.units) || 0), 0) : 0;
           return `
           <div style="position: relative;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
@@ -175,6 +180,35 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
               <p style="font-size: 12px; color: #64748b; margin-bottom: 12px; line-height: 1.6;">${escapeHTML(stage.description)}</p>
 
               ${stageExternal.map((tp) => renderExternalTouchpoint(tp, ucId)).join("")}
+
+              ${stepConsumption ? `
+              <div class="uc-step-wrap uc-step-${ucId}-${i}" style="display: none; margin-bottom: 10px; border-radius: 10px; border: 1px solid rgba(74,222,128,0.2); background: rgba(74,222,128,0.05); overflow: hidden;">
+                <div style="padding: 10px 14px; background: rgba(74,222,128,0.08); border-bottom: 1px solid rgba(74,222,128,0.15); display: flex; align-items: center; gap: 6px;">
+                  ${coinSvg.replace('currentColor', '#4ade80')}
+                  <span style="font-size: 11px; font-weight: 600; color: #4ade80; text-transform: uppercase; letter-spacing: 0.05em;">Atlas Units</span>
+                  <span class="uc-step-total" data-base="${stepTotal.toFixed(1)}" style="margin-left: auto; font-size: 11px; font-weight: 600; color: #86efac;">${stepTotal.toFixed(1)} units</span>
+                </div>
+                <div style="padding: 12px 14px;">
+                  <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+                    <thead>
+                      <tr style="border-bottom: 1px solid rgba(74,222,128,0.15);">
+                        <th style="text-align: left; padding: 5px 6px 5px 0; color: #86efac; font-weight: 600;">Activity</th>
+                        <th style="text-align: left; padding: 5px 6px; color: #86efac; font-weight: 600;">Tokens/events</th>
+                        <th style="text-align: right; padding: 5px 0 5px 6px; color: #86efac; font-weight: 600;">Units</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${stepConsumption.activities.map((act) => `
+                        <tr style="border-bottom: 1px solid rgba(74,222,128,0.08); ${act.provisionedEnv ? 'background: rgba(34,211,238,0.08);' : ''}">
+                          <td style="padding: 5px 6px 5px 0; ${act.provisionedEnv ? 'color: #a5f3fc; font-weight: 500;' : 'color: #94a3b8;'}">${escapeHTML(act.activity)}</td>
+                          <td style="padding: 5px 6px; ${act.provisionedEnv ? 'color: #a5f3fc;' : 'color: #94a3b8;'}">${escapeHTML(act.tokens)}</td>
+                          <td class="uc-unit-cell" data-base="${act.units}" style="padding: 5px 0 5px 6px; text-align: right; ${act.provisionedEnv ? 'color: #67e8f9; font-weight: 500;' : 'color: #86efac; font-weight: 500;'}">${act.units}</td>
+                        </tr>
+                      `).join("")}
+                    </tbody>
+                  </table>
+                </div>
+              </div>` : ""}
 
               ${Object.entries(grouped).map(([persona, markers]) => `
                 <details style="margin-bottom: 6px;">
@@ -299,38 +333,6 @@ function renderUnitConsumption(ucId: string): string {
       </div>
     </div>` : "";
 
-  const stepsHtml = uc.steps.map((step, si) => {
-    const stepTotal = step.activities.reduce((s, a) => s + (parseFloat(a.units) || 0), 0);
-    return `
-    <div class="uc-step-wrap uc-step-${ucId}-${si}" style="display: none; margin-bottom: 10px; border-radius: 10px; border: 1px solid rgba(74,222,128,0.2); background: rgba(74,222,128,0.05); overflow: hidden;">
-      <div style="padding: 10px 14px; background: rgba(74,222,128,0.08); border-bottom: 1px solid rgba(74,222,128,0.15); display: flex; align-items: center; gap: 6px;">
-        ${coinSvg.replace('currentColor', '#4ade80')}
-        <span style="font-size: 11px; font-weight: 600; color: #4ade80; text-transform: uppercase; letter-spacing: 0.05em;">Atlas Units</span>
-        <span class="uc-step-total" data-base="${stepTotal.toFixed(1)}" style="margin-left: auto; font-size: 11px; font-weight: 600; color: #86efac;">${stepTotal.toFixed(1)} units</span>
-      </div>
-      <div style="padding: 12px 14px;">
-        <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
-          <thead>
-            <tr style="border-bottom: 1px solid rgba(74,222,128,0.15);">
-              <th style="text-align: left; padding: 5px 6px 5px 0; color: #86efac; font-weight: 600;">Activity</th>
-              <th style="text-align: left; padding: 5px 6px; color: #86efac; font-weight: 600;">Tokens/events</th>
-              <th style="text-align: right; padding: 5px 0 5px 6px; color: #86efac; font-weight: 600;">Units</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${step.activities.map((act) => `
-              <tr style="border-bottom: 1px solid rgba(74,222,128,0.08); ${act.provisionedEnv ? 'background: rgba(34,211,238,0.08);' : ''}">
-                <td style="padding: 5px 6px 5px 0; ${act.provisionedEnv ? 'color: #a5f3fc; font-weight: 500;' : 'color: #94a3b8;'}">${escapeHTML(act.activity)}</td>
-                <td style="padding: 5px 6px; ${act.provisionedEnv ? 'color: #a5f3fc;' : 'color: #94a3b8;'}">${escapeHTML(act.tokens)}</td>
-                <td class="uc-unit-cell" data-base="${act.units}" style="padding: 5px 0 5px 6px; text-align: right; ${act.provisionedEnv ? 'color: #67e8f9; font-weight: 500;' : 'color: #86efac; font-weight: 500;'}">${act.units}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-    </div>`;
-  }).join("");
-
   const summaryHtml = uc.fullFlowSummary.length > 0 ? `
     <div class="uc-panel uc-summary-${ucId}" style="display: none; margin-top: 16px; margin-bottom: 12px; border-radius: 10px; border: 1px solid rgba(74,222,128,0.2); background: rgba(74,222,128,0.05); overflow: hidden;">
       <div style="padding: 12px 16px; background: rgba(74,222,128,0.08); border-bottom: 1px solid rgba(74,222,128,0.15);">
@@ -369,7 +371,6 @@ function renderUnitConsumption(ucId: string): string {
         ${totalHtml}
         ${estateHtml}
         ${adjHtml}
-        ${stepsHtml}
         ${summaryHtml}
       </div>
     </div>`;
