@@ -551,12 +551,17 @@ function renderHomePage(): string {
     <div style="max-width: 1280px; margin: 0 auto; padding: 0 24px 32px;">
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(60px, auto); gap: 16px;">
         ${PILLARS.map((pillar, i) => {
-          const visibleCount = useCases.filter((uc) => getUseCasePillars(uc.id).includes(pillar.id)).length;
-          return `
+            const iconSvg = pillar.id === "system"
+              ? '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>'
+              : pillar.id === "change"
+              ? '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>'
+              : '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>';
+            const visibleCount = useCases.filter((uc) => getUseCasePillars(uc.id).includes(pillar.id)).length;
+            return `
           <div style="grid-column: ${i + 1} / ${i + 2}; grid-row: 1 / 2;">
-            <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px; border-radius: 12px; border: 1px solid ${pillar.border}; background: ${pillar.bg};">
+            <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px; border-radius: 12px; border: 1px solid ${pillar.border}; background: ${pillar.bg}; color: ${pillar.color};">
               <div style="width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${pillar.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="12 2 15 9 22 9 17 14 18 21 12 17 6 21 7 14 2 9 9 9 12 2"/></svg>
+                ${iconSvg}
               </div>
               <div style="text-align: center;">
                 <h2 style="font-size: 16px; font-weight: 600; color: ${pillar.color};">${pillar.name}</h2>
@@ -715,11 +720,11 @@ export function exportSiteHTML() {
 
     <main class="main">
       <div class="topbar">
+        <img src="data:image/png;base64,${IBM_LOGO_B64}" alt="IBM" style="height: 32px; width: auto; opacity: 0.6;">
         <div onclick="showPage('home')" style="display: flex; align-items: center; gap: 6px; color: #94a3b8; font-size: 14px; cursor: pointer; transition: color 0.15s;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
           <span id="page-title">Return to Atlas</span>
         </div>
-        <img src="data:image/png;base64,${IBM_LOGO_B64}" alt="IBM" style="height: 32px; width: auto; opacity: 0.6;">
       </div>
 
       ${renderHomePage()}
