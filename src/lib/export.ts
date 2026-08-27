@@ -717,7 +717,7 @@ export function exportSiteHTML() {
       <div class="topbar">
         <div onclick="showPage('home')" style="display: flex; align-items: center; gap: 6px; color: #94a3b8; font-size: 14px; cursor: pointer; transition: color 0.15s;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-          <span id="page-title">Back to Atlas</span>
+          <span id="page-title">Return to Atlas</span>
         </div>
         <img src="data:image/png;base64,${IBM_LOGO_B64}" alt="IBM" style="height: 32px; width: auto; opacity: 0.6;">
       </div>
@@ -768,10 +768,10 @@ export function exportSiteHTML() {
       }
       var nav = document.querySelector('.nav-item[data-page="' + pageId + '"]');
       if (nav) nav.classList.add('active');
-      var titleMap = { home: 'Back to Atlas' };
+      var titleMap = { home: 'Return to Atlas' };
       ${Object.keys(useCaseDetails).map((id) => `titleMap['uc-${id}'] = '${escapeHTML(useCaseDetails[id].label)}';`).join("")}
       ${Object.entries(personaData).map(([key, info]) => `titleMap['persona-${key}'] = '${escapeHTML(info.name)}';`).join("")}
-      var title = titleMap[pageId] || 'Back to Atlas';
+      var title = titleMap[pageId] || 'Return to Atlas';
       var titleEl = document.getElementById('page-title');
       if (titleEl) titleEl.textContent = title;
       document.title = title + ' — Atlas Platform';
