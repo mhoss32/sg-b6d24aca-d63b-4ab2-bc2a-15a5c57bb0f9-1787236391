@@ -297,6 +297,7 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange, useC
                 onChange={(e) => setShowUnitEstimates(e.target.checked)}
                 className="w-4 h-4 rounded border-border/40 text-green-400 focus:ring-green-400/20"
               />
+              <Coins className="w-3.5 h-3.5 text-green-400" />
               <span className="text-xs font-semibold text-green-400">Show Atlas token/unit consumption estimates</span>
             </label>
           </div>
@@ -520,10 +521,10 @@ function ExternalProductSelector({
   availableTouchpoints: ExternalTouchpoint[];
 }) {
   return (
-    <div className="mb-4 p-3 rounded-lg border border-border/20 bg-background/50">
+    <div className="mb-4 p-3 rounded-lg border border-blue-500/20 bg-blue-950/10">
       <div className="flex items-center gap-2 mb-2">
-        <Handshake className="w-3.5 h-3.5 text-muted-foreground" />
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <Handshake className="w-3.5 h-3.5 text-blue-400" />
+        <span className="text-xs font-semibold uppercase tracking-wider text-blue-400">
           External Integrations
         </span>
       </div>
@@ -574,11 +575,11 @@ function ExternalTouchpointRenderer({
   if (touchpoint.type === "handoff") {
     return (
       <div
-        className="mb-2 rounded-lg border border-green-400/30 bg-green-400/5 overflow-hidden cursor-pointer hover:border-green-400/50 transition-colors"
+        className="mb-2 rounded-lg border border-blue-500/30 bg-blue-400/5 overflow-hidden cursor-pointer hover:border-blue-400/50 transition-colors"
         onClick={onClick}
       >
-        <div className="px-3 py-2 bg-green-400/10 border-b border-green-400/20">
-          <h5 className="text-xs font-semibold text-green-400 uppercase tracking-wider">
+        <div className="px-3 py-2 bg-blue-500/10 border-b border-blue-500/20">
+          <h5 className="text-xs font-semibold text-blue-400 uppercase tracking-wider">
             {touchpoint.title}
           </h5>
         </div>
@@ -587,15 +588,15 @@ function ExternalTouchpointRenderer({
             <div key={i} className="relative">
               <div className="flex items-start gap-3">
                 <div className="flex flex-col items-center">
-                  <div className="w-6 h-6 rounded-full bg-green-400/20 flex items-center justify-center text-[10px] font-bold text-green-400 flex-shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-blue-400/20 flex items-center justify-center text-[10px] font-bold text-blue-400 flex-shrink-0">
                     {i + 1}
                   </div>
                   {i < touchpoint.steps.length - 1 && (
-                    <div className="w-0.5 h-full bg-green-400/30 mt-1" />
+                    <div className="w-0.5 h-full bg-blue-400/30 mt-1" />
                   )}
                 </div>
                 <div className="flex-1 pb-3">
-                  <span className="text-[11px] font-semibold text-green-300 block mb-0.5">
+                  <span className="text-[11px] font-semibold text-blue-300 block mb-0.5">
                     {step.label}
                   </span>
                   <p className="text-[10px] text-muted-foreground leading-relaxed">
@@ -665,15 +666,15 @@ function ExternalTouchpointModal({
               <div key={i} className="relative">
                 <div className="flex items-start gap-3">
                   <div className="flex flex-col items-center">
-                    <div className="w-7 h-7 rounded-full bg-green-400/20 flex items-center justify-center text-xs font-bold text-green-400 flex-shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-blue-400/20 flex items-center justify-center text-xs font-bold text-blue-400 flex-shrink-0">
                       {i + 1}
                     </div>
                     {i < touchpoint.steps.length - 1 && (
-                      <div className="w-0.5 h-full bg-green-400/30 mt-1" />
+                      <div className="w-0.5 h-full bg-blue-400/30 mt-1" />
                     )}
                   </div>
                   <div className="flex-1 pb-4">
-                    <span className="text-xs font-semibold text-green-300 block mb-1">
+                    <span className="text-xs font-semibold text-blue-300 block mb-1">
                       {step.label}
                     </span>
                     <p className="text-xs text-muted-foreground leading-relaxed">
@@ -836,7 +837,7 @@ function StageCard({
                 )}
                 <span className="text-xs font-semibold text-foreground">{persona}</span>
                 <span className="text-[10px] text-muted-foreground ml-auto">
-                  {markers.length} {markers.length === 1 ? "item" : "items"}
+                  {markers.length} {markers.length === 1 ? ("pain" in config ? "pain point" : "WOW!") : ("pain" in config ? "pain points" : "WOWs!")}
                 </span>
               </button>
 
