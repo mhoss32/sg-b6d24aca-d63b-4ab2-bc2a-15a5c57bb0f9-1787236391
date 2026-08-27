@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { ArrowLeft, Network, UserCircle, Star, ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowLeft, Network, UserCircle, Star, ArrowRight, ExternalLink, ChevronDown } from "lucide-react";
 import { personaData, getPersonaUseCases, useCaseDetails } from "@/data/productData";
 import { SEO } from "@/components/SEO";
 
@@ -132,7 +132,7 @@ export default function PersonaDetailPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {primary.map((uc) => (
-                <UseCaseTile key={uc.id} useCase={uc} engagement="Primary" />
+                <UseCaseTile key={uc.id} useCase={uc} engagement="Primary" personaName={persona.name} />
               ))}
             </div>
           </section>
@@ -149,7 +149,7 @@ export default function PersonaDetailPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {secondary.map((uc) => (
-                <UseCaseTile key={uc.id} useCase={uc} engagement="Secondary" />
+                <UseCaseTile key={uc.id} useCase={uc} engagement="Secondary" personaName={persona.name} />
               ))}
             </div>
           </section>
@@ -170,20 +170,24 @@ export default function PersonaDetailPage() {
   );
 }
 
-function UseCaseTile({ useCase, engagement }: { useCase: { id: string; label: string; description: string }; engagement: string }) {
+function UseCaseTile({ useCase, engagement, personaName }: { useCase: { id: string; label: string; description: string }; engagement: string; personaName: string }) {
   const isPrimary = engagement === "Primary";
-  const personaInUC = useCaseDetails[useCase.id]?.personas.find((p) => {
-    const currentPersona = Object.values(personaData).find((pd) =>
-      useCaseDetails[useCase.id]?.personas.some((up) => up.name === pd.name)
-    );
-    return false; // We'll find the role description differently
-  });
+  const detail = useCaseDetails[useCase.id];
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
-  // Find this persona's role in the use case
-  const personaRole = useCaseDetails[useCase.id]?.personas.find((p) => {
-    // Match by checking if this use case is in the persona's use cases
-    return true; // Simplified - we'll pass the role from parent in a real implementation
-  });
+  const asIsMarkers = detail?.asIs.markers.filter((m) => m.persona === personaName) || [];
+  const toBeMarkers = detail?.toBe.markers.filter((m) => m.persona === personaName) || [];
+
+  const markerConfig: Record<string, { bg: string; border: string; text: string; label: string }> = {
+    pain: { bg: "bg-orange-400/10", border: "border-orange-400/30", text: "text-orange-300", label: "Business Impact" },
+    time: { bg: "bg-amber-400/10", border: "border-amber-400/30", text: "text-amber-300", label: "Lost Time" },
+    skill: { bg: "bg-red-400/10", border: "border-red-400/30", text: "text-red-300", label: "Skill Gap / Bottleneck" },
+    gain: { bg: "bg-purple-400/10", border: "border-purple-400/30", text: "text-purple-300", label: "New User Capability" },
+  };
+
+  const toggleSection = (section: string) => {
+    setExpandedSection(expandedSection === section ? null : section);
+  };
 
   return (
     <Link href={`/usecase/${useCase.id}`} className="group block">
@@ -208,6 +212,87 @@ function UseCaseTile({ useCase, engagement }: { useCase: { id: string; label: st
         </div>
         <h3 className="font-semibold text-foreground mb-2 group-hover:text-cyan transition-colors">{useCase.label}</h3>
         <p className="text-sm text-muted-foreground line-clamp-3">{useCase.description}</p>
+
+        {/* Pain Points */}
+        {asIsMarkers.length > 0 && (
+          <div className="mt-4">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleSection(`pain-${useCase.id}`);
+              }}
+              className="flex items-center gap-2 w-full text-left py-1.5 px-2 rounded-md hover:bg-red-400/5 transition-colors"
+            >
+              <ChevronDown
+                className={cn(
+                  "w-3.5 h-3.5 text-red-400 transition-transform",
+                  expandedSection === `pain-${useCase.id}` ? "rotate-180" : ""
+                )}
+              />
+              <span className="text-xs font-semibold text-red-400">Pain Points</span>
+              <span className="text-[10px] text-muted-foreground ml-auto">{asIsMarkers.length} {asIsMarkers.length === 1 ? "item" : "items"}</span>
+            </button>
+            {expandedSection === `pain-${useCase.id}` && (
+              <div className="flex flex-col gap-1.5 mt-1 pl-6">
+                {asIsMarkers.map((m, i) => {
+                  const mc = markerConfig[m.type] || markerConfig.pain;
+                  return (
+                    <div key={i} className={cn("flex flex-col gap-1 p-2.5 rounded-lg border", mc.bg, mc.border)}>
+                      <div className="flex items-center gap-2">
+                        <div className={cn("w-1.5 h-1.5 rounded-sm", mc.text.replace("text-", "bg-"))} />
+                        <span className={cn("text-[10px] font-bold uppercase tracking-wider", mc.text)}>{mc.label}</span>
+                      </div>
+                      <span className="text-xs font-medium text-foreground leading-snug">{m.title}</span>
+                      <span className="text-[11px] text-muted-foreground leading-relaxed">{m.description}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Wows */}
+        {toBeMarkers.length > 0 && (
+          <div className="mt-3">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleSection(`wow-${useCase.id}`);
+              }}
+              className="flex items-center gap-2 w-full text-left py-1.5 px-2 rounded-md hover:bg-green-400/5 transition-colors"
+            >
+              <ChevronDown
+                className={cn(
+                  "w-3.5 h-3.5 text-green-400 transition-transform",
+                  expandedSection === `wow-${useCase.id}` ? "rotate-180" : ""
+                )}
+              />
+              <span className="text-xs font-semibold text-green-400">Wows!</span>
+              <span className="text-[10px] text-muted-foreground ml-auto">{toBeMarkers.length} {toBeMarkers.length === 1 ? "item" : "items"}</span>
+            </button>
+            {expandedSection === `wow-${useCase.id}` && (
+              <div className="flex flex-col gap-1.5 mt-1 pl-6">
+                {toBeMarkers.map((m, i) => {
+                  const mc = markerConfig[m.type] || markerConfig.gain;
+                  return (
+                    <div key={i} className={cn("flex flex-col gap-1 p-2.5 rounded-lg border", mc.bg, mc.border)}>
+                      <div className="flex items-center gap-2">
+                        <div className={cn("w-1.5 h-1.5 rounded-sm", mc.text.replace("text-", "bg-"))} />
+                        <span className={cn("text-[10px] font-bold uppercase tracking-wider", mc.text)}>{mc.label}</span>
+                      </div>
+                      <span className="text-xs font-medium text-foreground leading-snug">{m.title}</span>
+                      <span className="text-[11px] text-muted-foreground leading-relaxed">{m.description}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="mt-4 flex items-center gap-1 text-xs text-cyan opacity-0 group-hover:opacity-100 transition-opacity">
           <span>View use case</span>
           <ArrowRight className="w-3 h-3" />
