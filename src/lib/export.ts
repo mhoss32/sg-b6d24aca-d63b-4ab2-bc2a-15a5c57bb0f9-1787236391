@@ -335,13 +335,13 @@ function renderUseCasePage(id: string, detail: UseCaseDetail): string {
 
 function renderPersonaPage(name: string, info: typeof personaData[string]): string {
   const { primary, secondary } = (() => {
-    const p: UseCaseDetail[] = [];
-    const s: UseCaseDetail[] = [];
-    for (const detail of Object.values(useCaseDetails)) {
+    const p: { id: string; detail: UseCaseDetail }[] = [];
+    const s: { id: string; detail: UseCaseDetail }[] = [];
+    for (const [id, detail] of Object.entries(useCaseDetails)) {
       const match = detail.personas.find((pp) => pp.name.toLowerCase() === name.toLowerCase());
       if (match) {
-        if (match.engagement === "Primary") p.push(detail);
-        else s.push(detail);
+        if (match.engagement === "Primary") p.push({ id, detail });
+        else s.push({ id, detail });
       }
     }
     return { primary: p, secondary: s };
@@ -426,7 +426,7 @@ function renderPersonaPage(name: string, info: typeof personaData[string]): stri
           Primary Use Cases
         </h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
-          ${primary.map((uc) => renderPersonaUseCaseTile(uc, "Primary", name)).join("")}
+          ${primary.map(({ id, detail }) => renderPersonaUseCaseTile(id, detail, "Primary", name)).join("")}
         </div>
       </div>` : ""}
 
@@ -439,18 +439,18 @@ function renderPersonaPage(name: string, info: typeof personaData[string]): stri
           Secondary Use Cases
         </h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
-          ${secondary.map((uc) => renderPersonaUseCaseTile(uc, "Secondary", name)).join("")}
+          ${secondary.map(({ id, detail }) => renderPersonaUseCaseTile(id, detail, "Secondary", name)).join("")}
         </div>
       </div>` : ""}
     </div>
   </section>`;
 }
 
-function renderPersonaUseCaseTile(uc: UseCaseDetail, engagement: string, personaName: string): string {
+function renderPersonaUseCaseTile(id: string, uc: UseCaseDetail, engagement: string, personaName: string): string {
   const isPrimary = engagement === "Primary";
-  const detail = useCaseDetails[uc.id];
-  const asIsMarkers = detail?.asIs.markers.filter((m) => m.persona === personaName) || [];
-  const toBeMarkers = detail?.toBe.markers.filter((m) => m.persona === personaName) || [];
+  const detail = uc;
+  const asIsMarkers = detail.asIs.markers.filter((m) => m.persona === personaName) || [];
+  const toBeMarkers = detail.toBe.markers.filter((m) => m.persona === personaName) || [];
 
   const markerConfig: Record<string, { bg: string; border: string; text: string; label: string; iconSvg: string }> = {
     pain: { bg: "rgba(251,146,60,0.1)", border: "rgba(251,146,60,0.3)", text: "#fb923c", label: "Business Impact", iconSvg: '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' },
@@ -488,15 +488,15 @@ function renderPersonaUseCaseTile(uc: UseCaseDetail, engagement: string, persona
   };
 
   return `
-    <div onclick="showPage('uc-${uc.id}')" style="cursor: pointer; border-radius: 14px; border: 1px solid ${isPrimary ? "rgba(0,212,255,0.2)" : "rgba(255,255,255,0.08)"}; background: rgba(255,255,255,0.02); padding: 20px; transition: all 0.2s; position: relative;">
+    <div onclick="showPage('uc-${id}')" style="cursor: pointer; border-radius: 14px; border: 1px solid ${isPrimary ? "rgba(0,212,255,0.2)" : "rgba(255,255,255,0.08)"}; background: rgba(255,255,255,0.02); padding: 20px; transition: all 0.2s; position: relative;">
       <div style="display: flex; align-items: start; justify-content: space-between; margin-bottom: 8px;">
         <span style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: ${isPrimary ? "#00D4FF" : "#94a3b8"}; padding: 2px 10px; border-radius: 9999px; background: ${isPrimary ? "rgba(0,212,255,0.1)" : "rgba(255,255,255,0.04)"}; border: 1px solid ${isPrimary ? "rgba(0,212,255,0.2)" : "rgba(255,255,255,0.1)"};">${engagement}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       </div>
-      <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin-bottom: 6px;">${escapeHTML(uc.label)}</h3>
-      <p style="font-size: 12px; color: #64748b; line-height: 1.5;">${escapeHTML(uc.description)}</p>
-      ${renderMarkers(asIsMarkers, `pain-${uc.id}`, "Pain Points", "#f87171")}
-      ${renderMarkers(toBeMarkers, `wow-${uc.id}`, "Wows!", "#4ade80")}
+      <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin-bottom: 6px;">${escapeHTML(detail.label)}</h3>
+      <p style="font-size: 12px; color: #64748b; line-height: 1.5;">${escapeHTML(detail.description)}</p>
+      ${renderMarkers(asIsMarkers, `pain-${id}`, "Pain Points", "#f87171")}
+      ${renderMarkers(toBeMarkers, `wow-${id}`, "Wows!", "#4ade80")}
     </div>`;
 }
 
@@ -668,6 +668,8 @@ export function exportSiteHTML() {
     details.accordion > summary::-webkit-details-marker { display: none; }
     details.accordion > summary svg.chevron { transition: transform 0.2s; margin-left: auto; }
     details.accordion[open] > summary svg.chevron { transform: rotate(180deg); }
+    details > summary > svg:first-of-type { transition: transform 0.2s; flex-shrink: 0; }
+    details[open] > summary > svg:first-of-type { transform: rotate(180deg); }
     .accordion-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .accordion-icon.coral { background: rgba(255,107,107,0.1); color: #FF6B6B; }
     .accordion-icon.purple { background: rgba(167,139,250,0.1); color: #A78BFA; }
