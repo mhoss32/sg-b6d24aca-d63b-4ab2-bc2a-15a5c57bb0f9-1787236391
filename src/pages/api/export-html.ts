@@ -471,12 +471,6 @@ function renderPersonaUseCaseTile(id: string, uc: UseCaseDetail, engagement: str
     skill: { bg: "rgba(248,113,113,0.1)", border: "rgba(248,113,113,0.3)", text: "#f87171", label: "Skill Gap / Bottleneck", iconSvg: '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' },
   };
 
-  const toBeMarkerConfig: Record<string, { bg: string; border: string; text: string; label: string; iconSvg: string }> = {
-    time: { bg: "rgba(34,211,238,0.1)", border: "rgba(34,211,238,0.3)", text: "#22d3ee", label: "Time Saving", iconSvg: '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' },
-    gain: { bg: "rgba(192,132,252,0.1)", border: "rgba(192,132,252,0.3)", text: "#c084fc", label: "New User Capability", iconSvg: '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
-    skill: { bg: "rgba(74,222,128,0.1)", border: "rgba(74,222,128,0.3)", text: "#4ade80", label: "Atlas AI & Automation", iconSvg: '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.43.28a2 2 0 0 0 1.68.05 1 1 0 0 1 1.4 1.4 5 5 0 0 1-1.06 5.85l-.84.85a3 3 0 0 1-3.88.27"/><path d="m18 15-2-2"/></svg>' },
-  };
-
   const painPointsHtml = asIsMarkers.length === 0 ? "" : `
     <div style="margin-top: 12px;">
       <details style="cursor: default;">
@@ -513,13 +507,13 @@ function renderPersonaUseCaseTile(id: string, uc: UseCaseDetail, engagement: str
         </summary>
         <div style="padding-top: 8px; display: flex; flex-direction: column; gap: 6px;">
           ${toBeMarkers.map((m) => {
-            const mc = toBeMarkerConfig[m.type];
+            const mc = toBeConfig[m.type];
             if (!mc) return "";
             return `
             <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 8px; background: ${mc.bg}; border: 1px solid ${mc.border};">
               <div style="display: flex; align-items: center; gap: 6px;">
                 ${mc.iconSvg}
-                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: ${mc.text};">${mc.label}</span>
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: ${mc.color};">${mc.label}</span>
               </div>
               <span style="font-size: 11px; font-weight: 500; color: #e2e8f0; line-height: 1.4;">${escapeHTML(m.title)}</span>
               <span style="font-size: 10px; color: #94a3b8; line-height: 1.5;">${escapeHTML(m.description)}</span>
