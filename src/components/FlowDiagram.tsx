@@ -80,6 +80,25 @@ const toBeMarkerConfig: Record<string, MarkerStyle> = {
   },
 };
 
+function formatMultipliedValue(value: string, multiplier: number): string {
+  if (multiplier === 1.0) return value;
+  const match = value.match(/^(~?)([\d,]+(?:\.\d+)?)(.*)$/);
+  if (!match) return value;
+  const [, tilde, numStr, rest] = match;
+  const num = parseFloat(numStr.replace(/,/g, ""));
+  if (isNaN(num)) return value;
+  const multiplied = num * multiplier;
+  let formatted: string;
+  if (multiplied % 1 === 0) {
+    formatted = Math.round(multiplied).toLocaleString();
+  } else if (multiplied < 1) {
+    formatted = multiplied.toFixed(2);
+  } else {
+    formatted = multiplied.toFixed(1);
+  }
+  return `${tilde}${formatted}${rest}`;
+}
+
 function MarkerLegend({ variant }: { variant: "asIs" | "toBe" }) {
   const config = variant === "asIs" ? asIsMarkerConfig : toBeMarkerConfig;
   const title = variant === "asIs" ? "Pain Points" : "Wows!";
@@ -120,9 +139,28 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange, useC
   const [draftType, setDraftType] = useState<MarkerType>("pain");
   const [draftStage, setDraftStage] = useState(0);
   const [showUnitEstimates, setShowUnitEstimates] = useState(false);
+  const [selectedEstateIndex, setSelectedEstateIndex] = useState<number | null>(null);
+  const [checkedAdjustments, setCheckedAdjustments] = useState<Set<number>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
 
   const unitConsumption = useCaseId && !isAsIs ? getUnitConsumption(useCaseId) : null;
+
+  const estateMultiplier = selectedEstateIndex !== null 
+    ? (unitConsumption?.estateSize[selectedEstateIndex]?.multiplierValue ?? 1.0) 
+    : 1.0;
+  
+  const totalAdjustmentDelta = Array.from(checkedAdjustments).reduce((sum, idx) => {
+    return sum + (unitConsumption?.additionalAdjustments[idx]?.unitDelta ?? 0);
+  }, 0);
+
+  const baseTotalUnits = unitConsumption?.steps.reduce((sum, step) => {
+    return sum + step.activities.reduce((s, a) => {
+      const val = parseFloat(a.units);
+      return s + (isNaN(val) ? 0 : val);
+    }, 0);
+  }, 0) ?? 0;
+
+  const adjustedTotalUnits = baseTotalUnits * estateMultiplier + totalAdjustmentDelta;
 
   const togglePersona = useCallback((key: string) => {
     setExpandedPersonas((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -248,18 +286,117 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange, useC
         />
       )}
 
-      {/* Unit Consumption Toggle — only for To-Be */}
+      {/* Unit Consumption Toggle & Controls — only for To-Be */}
       {!isAsIs && unitConsumption && (
-        <div className="mb-4 p-3 rounded-lg border border-green-500/20 bg-green-950/10">
-          <label className="inline-flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showUnitEstimates}
-              onChange={(e) => setShowUnitEstimates(e.target.checked)}
-              className="w-4 h-4 rounded border-border/40 text-green-400 focus:ring-green-400/20"
-            />
-            <span className="text-xs font-semibold text-green-400">Show Atlas token/unit consumption estimates</span>
-          </label>
+        <div className="mb-4 space-y-3">
+          <div className="p-3 rounded-lg border border-green-500/20 bg-green-950/10">
+            <label className="inline-flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showUnitEstimates}
+                onChange={(e) => setShowUnitEstimates(e.target.checked)}
+                className="w-4 h-4 rounded border-border/40 text-green-400 focus:ring-green-400/20"
+              />
+              <span className="text-xs font-semibold text-green-400">Show Atlas token/unit consumption estimates</span>
+            </label>
+          </div>
+
+          {showUnitEstimates && (
+            <>
+              {/* Total Estimated Units */}
+              <div className="rounded-lg border border-green-500/20 bg-green-950/10 overflow-hidden">
+                <div className="px-4 py-3 bg-green-500/10 border-b border-green-500/20 flex items-center gap-2">
+                  <Coins className="w-4 h-4 text-green-400" />
+                  <span className="text-sm font-semibold text-green-400">Total Estimated Units</span>
+                  <span className="ml-auto text-sm font-bold text-green-300">{adjustedTotalUnits.toFixed(adjustedTotalUnits % 1 === 0 ? 0 : 1)}</span>
+                </div>
+              </div>
+
+              {/* Estate Size */}
+              <div className="rounded-lg border border-green-500/20 bg-green-950/10 overflow-hidden">
+                <div className="px-4 py-3 bg-green-500/10 border-b border-green-500/20 flex items-center gap-2">
+                  <Coins className="w-4 h-4 text-green-400" />
+                  <span className="text-sm font-semibold text-green-400">Estate Size</span>
+                </div>
+                <div className="p-4">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-green-500/20">
+                        <th className="text-left py-2 pr-2 w-8"></th>
+                        <th className="text-left py-2 pr-4 font-semibold text-green-300">Scenario</th>
+                        <th className="text-left py-2 pr-4 font-semibold text-green-300">Adjustment</th>
+                        <th className="text-right py-2 font-semibold text-green-300">Multiplier</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {unitConsumption.estateSize.map((row, i) => (
+                        <tr key={i} className="border-b border-green-500/10 last:border-0">
+                          <td className="py-2 pr-2">
+                            <input
+                              type="radio"
+                              name="estate-size"
+                              checked={selectedEstateIndex === i}
+                              onChange={() => setSelectedEstateIndex(i)}
+                              className="w-3.5 h-3.5 text-green-400 border-border/40 focus:ring-green-400/20"
+                            />
+                          </td>
+                          <td className="py-2 pr-4 text-muted-foreground">{row.scenario}</td>
+                          <td className="py-2 pr-4 text-muted-foreground">{row.adjustment}</td>
+                          <td className="py-2 text-right text-green-300 font-medium">{row.multiplierDisplay}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Additional Adjustments */}
+              <div className="rounded-lg border border-green-500/20 bg-green-950/10 overflow-hidden">
+                <div className="px-4 py-3 bg-green-500/10 border-b border-green-500/20 flex items-center gap-2">
+                  <Coins className="w-4 h-4 text-green-400" />
+                  <span className="text-sm font-semibold text-green-400">Additional Adjustments</span>
+                </div>
+                <div className="p-4">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-green-500/20">
+                        <th className="text-left py-2 pr-2 w-8"></th>
+                        <th className="text-left py-2 pr-4 font-semibold text-green-300">Scenario</th>
+                        <th className="text-left py-2 pr-4 font-semibold text-green-300">Adjustment</th>
+                        <th className="text-right py-2 font-semibold text-green-300">Unit Delta</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {unitConsumption.additionalAdjustments.map((row, i) => (
+                        <tr key={i} className="border-b border-green-500/10 last:border-0">
+                          <td className="py-2 pr-2">
+                            <input
+                              type="checkbox"
+                              checked={checkedAdjustments.has(i)}
+                              onChange={(e) => {
+                                setCheckedAdjustments(prev => {
+                                  const next = new Set(prev);
+                                  if (e.target.checked) next.add(i);
+                                  else next.delete(i);
+                                  return next;
+                                });
+                              }}
+                              className="w-3.5 h-3.5 rounded text-green-400 border-border/40 focus:ring-green-400/20"
+                            />
+                          </td>
+                          <td className="py-2 pr-4 text-muted-foreground">{row.scenario}</td>
+                          <td className="py-2 pr-4 text-muted-foreground">{row.adjustment}</td>
+                          <td className={cn("py-2 text-right font-medium", row.unitDelta >= 0 ? "text-green-300" : "text-red-300")}>
+                            {row.unitDelta >= 0 ? "+" : ""}{row.unitDelta}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -315,77 +452,45 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange, useC
                 inputRef={inputRef}
                 showUnitEstimates={showUnitEstimates}
                 unitConsumption={unitConsumption?.steps[stageIndex] || null}
+                estateMultiplier={estateMultiplier}
               />
             );
           })}
         </div>
       </div>
 
-      {/* Full Flow Summary & Sensitivity Analysis */}
+      {/* Full Flow Summary */}
       {!isAsIs && showUnitEstimates && unitConsumption && (
-        <div className="mt-6 space-y-4">
+        <div className="mt-6">
           <div className="rounded-lg border border-green-500/20 bg-green-950/10 overflow-hidden">
-            <div className="px-4 py-3 bg-green-500/10 border-b border-green-500/20 flex items-center gap-2">
-              <Coins className="w-4 h-4 text-green-400" />
-              <span className="text-sm font-semibold text-green-400">Total Estimated Units: {unitConsumption.totalNominal}</span>
+            <div className="px-4 py-3 bg-green-500/10 border-b border-green-500/20">
+              <span className="text-sm font-semibold text-green-400">Full Flow Summary</span>
+            </div>
+            <div className="p-4">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-green-500/20">
+                    <th className="text-left py-2 pr-4 font-semibold text-green-300">Step</th>
+                    <th className="text-left py-2 pr-4 font-semibold text-green-300">Activity</th>
+                    <th className="text-right py-2 font-semibold text-green-300">Units</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {unitConsumption.fullFlowSummary.map((row, i) => (
+                    <tr key={i} className="border-b border-green-500/10 last:border-0">
+                      <td className="py-2 pr-4 text-muted-foreground">{row.step}</td>
+                      <td className="py-2 pr-4 text-muted-foreground">{row.activity}</td>
+                      <td className="py-2 text-right text-green-300 font-medium">{formatMultipliedValue(row.units, estateMultiplier)}</td>
+                    </tr>
+                  ))}
+                  <tr className="border-t-2 border-green-500/30">
+                    <td className="py-2 pr-4 text-green-200 font-semibold" colSpan={2}>Total</td>
+                    <td className="py-2 text-right text-green-300 font-bold">{adjustedTotalUnits.toFixed(adjustedTotalUnits % 1 === 0 ? 0 : 1)}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
-
-          {unitConsumption.fullFlowSummary && unitConsumption.fullFlowSummary.length > 0 && (
-            <div className="rounded-lg border border-green-500/20 bg-green-950/10 overflow-hidden">
-              <div className="px-4 py-3 bg-green-500/10 border-b border-green-500/20">
-                <span className="text-sm font-semibold text-green-400">Full Flow Summary</span>
-              </div>
-              <div className="p-4">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b border-green-500/20">
-                      <th className="text-left py-2 pr-4 font-semibold text-green-300">Step</th>
-                      <th className="text-left py-2 pr-4 font-semibold text-green-300">Activity</th>
-                      <th className="text-right py-2 font-semibold text-green-300">Units</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {unitConsumption.fullFlowSummary.map((row, i) => (
-                      <tr key={i} className="border-b border-green-500/10 last:border-0">
-                        <td className="py-2 pr-4 text-muted-foreground">{row.step}</td>
-                        <td className="py-2 pr-4 text-muted-foreground">{row.activity}</td>
-                        <td className="py-2 text-right text-green-300 font-medium">{row.units}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {unitConsumption.sensitivityAnalysis && unitConsumption.sensitivityAnalysis.length > 0 && (
-            <div className="rounded-lg border border-green-500/20 bg-green-950/10 overflow-hidden">
-              <div className="px-4 py-3 bg-green-500/10 border-b border-green-500/20">
-                <span className="text-sm font-semibold text-green-400">Sensitivity Analysis</span>
-              </div>
-              <div className="p-4">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b border-green-500/20">
-                      <th className="text-left py-2 pr-4 font-semibold text-green-300">Scenario</th>
-                      <th className="text-left py-2 pr-4 font-semibold text-green-300">Adjustment</th>
-                      <th className="text-right py-2 font-semibold text-green-300">Est. Units</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {unitConsumption.sensitivityAnalysis.map((row, i) => (
-                      <tr key={i} className="border-b border-green-500/10 last:border-0">
-                        <td className="py-2 pr-4 text-muted-foreground">{row.scenario}</td>
-                        <td className="py-2 pr-4 text-muted-foreground">{row.adjustment}</td>
-                        <td className="py-2 text-right text-green-300 font-medium">{row.estimatedUnits}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -622,6 +727,7 @@ function StageCard({
   inputRef,
   showUnitEstimates,
   unitConsumption,
+  estateMultiplier,
 }: {
   stage: FlowStage;
   index: number;
@@ -655,6 +761,7 @@ function StageCard({
   inputRef: React.RefObject<HTMLInputElement | null>;
   showUnitEstimates: boolean;
   unitConsumption: StepConsumption | null;
+  estateMultiplier: number;
 }) {
   const isManaging = managingStage === index;
 
@@ -709,7 +816,7 @@ function StageCard({
 
         {/* Unit Consumption Estimates */}
         {showUnitEstimates && unitConsumption && (
-          <UnitConsumptionBox consumption={unitConsumption} />
+          <UnitConsumptionBox consumption={unitConsumption} estateMultiplier={estateMultiplier} />
         )}
 
         {/* Persona sections */}
@@ -1060,14 +1167,14 @@ function MarkerEditor({
   );
 }
 
-function UnitConsumptionBox({ consumption }: { consumption: StepConsumption }) {
-  const totalUnits = consumption.activities.reduce((sum, a) => sum + (parseFloat(a.units) || 0), 0);
+function UnitConsumptionBox({ consumption, estateMultiplier }: { consumption: StepConsumption; estateMultiplier: number }) {
+  const totalUnits = consumption.activities.reduce((sum, a) => sum + (parseFloat(a.units) || 0), 0) * estateMultiplier;
   return (
     <div className="mb-3 rounded-lg border border-green-500/20 bg-green-950/10 overflow-hidden">
       <div className="px-3 py-2 bg-green-500/10 border-b border-green-500/20 flex items-center gap-2">
         <Coins className="w-3.5 h-3.5 text-green-400" />
         <span className="text-xs font-semibold text-green-400 uppercase tracking-wider">Atlas Units</span>
-        <span className="ml-auto text-xs font-medium text-green-300">{totalUnits.toFixed(1)} units</span>
+        <span className="ml-auto text-xs font-medium text-green-300">{totalUnits.toFixed(totalUnits % 1 === 0 ? 0 : 1)} units</span>
       </div>
       <div className="p-3">
         <table className="w-full text-[11px]">
@@ -1084,17 +1191,17 @@ function UnitConsumptionBox({ consumption }: { consumption: StepConsumption }) {
                 key={i}
                 className={cn(
                   "border-b border-green-500/10 last:border-0",
-                  activity.provisionedEnv && "bg-green-400/20"
+                  activity.provisionedEnv && "bg-cyan-400/10"
                 )}
               >
-                <td className={cn("py-1.5 pr-2", activity.provisionedEnv ? "text-green-200 font-medium" : "text-muted-foreground")}>
+                <td className={cn("py-1.5 pr-2", activity.provisionedEnv ? "text-cyan-200 font-medium" : "text-muted-foreground")}>
                   {activity.activity}
                 </td>
-                <td className={cn("py-1.5 pr-2", activity.provisionedEnv ? "text-green-200/70" : "text-muted-foreground")}>
-                  {activity.tokens}
+                <td className={cn("py-1.5 pr-2", activity.provisionedEnv ? "text-cyan-200/70" : "text-muted-foreground")}>
+                  {formatMultipliedValue(activity.tokens, estateMultiplier)}
                 </td>
-                <td className={cn("py-1.5 text-right font-medium", activity.provisionedEnv ? "text-green-300" : "text-green-300")}>
-                  {activity.units}
+                <td className={cn("py-1.5 text-right font-medium", activity.provisionedEnv ? "text-cyan-300" : "text-green-300")}>
+                  {formatMultipliedValue(activity.units, estateMultiplier)}
                 </td>
               </tr>
             ))}
