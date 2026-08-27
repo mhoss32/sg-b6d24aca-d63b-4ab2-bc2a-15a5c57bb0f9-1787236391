@@ -267,7 +267,12 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange, useC
         {/* Connection line */}
         <div className="absolute top-[52px] left-0 right-0 h-0.5 bg-gradient-to-r from-border/20 via-border/40 to-border/20 hidden lg:block" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className={cn(
+          "grid gap-6",
+          showUnitEstimates
+            ? "grid-cols-1 md:grid-cols-2"
+            : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        )}>
           {diagram.stages.map((stage, stageIndex) => {
             const stageExternalTouchpoints = activeExternalTouchpoints.filter(
               (tp) => tp.stageIndex === stageIndex
