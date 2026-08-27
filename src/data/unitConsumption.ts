@@ -2,6 +2,7 @@ export interface UnitActivity {
   activity: string;
   tokens: string;
   units: string;
+  provisionedEnv?: boolean;
 }
 
 export interface StepConsumption {
@@ -126,15 +127,25 @@ export const uc01UnitConsumption: UseCaseUnitConsumption = {
     },
   ],
   fullFlowSummary: [
-    { step: "1 — Detect", activity: "Advisory interpretation / proactive FIXCAT alert", units: "0" },
-    { step: "2 — Assess Exposure", activity: "Multi-LPAR exposure assessment", units: "2.5" },
-    { step: "3 — Blast Radius", activity: "Dependency traversal and topology map", units: "2.5" },
-    { step: "4 — Plan", activity: "Sequenced remediation plan", units: "2.5" },
-    { step: "5 — Provision + Test", activity: "Test environment provision + functional test suite", units: "3.1" },
-    { step: "6 — Decide", activity: "Results review, authorization prompt", units: "0" },
-    { step: "7 — Execute", activity: "Production apply orchestration + DR provision", units: "0.1" },
-    { step: "8 — Monitor", activity: "Continuous monitoring (+ optional alert artifact)", units: "0–0.5" },
-    { step: "9 — Close", activity: "Evidence package / audit trail", units: "4.0" },
+    { step: "1 — Discovery", activity: "Discovery scan", units: "0.5" },
+    { step: "2 — Remediation", activity: "Discovery scan (continuous)", units: "0.05" },
+    { step: "3 — Remediation", activity: "Backlink to target environment", units: "0.05", provisionedEnv: true },
+    { step: "4 — Remediation", activity: "Environmental metrics fetch", units: "0.2", provisionedEnv: true },
+    { step: "5 — Remediation", activity: "Health & dependency check", units: "0.5", provisionedEnv: true },
+    { step: "6 — Remediation", activity: "Remediation task auto-generation", units: "0.5" },
+    { step: "7 — Remediation", activity: "Remediation task auto-generation", units: "0.5" },
+    { step: "8 — Remediation", activity: "Backlink to target environment", units: "0.05", provisionedEnv: true },
+    { step: "9 — Remediation", activity: "Auto remediation actions", units: "1.0", provisionedEnv: true },
+    { step: "10 — Remediation", activity: "Result and metric fetch", units: "0.2", provisionedEnv: true },
+    { step: "11 — Remediation", activity: "Auto-closure of remediation task", units: "0.2" },
+    { step: "12 — Remediation", activity: "Auto remediation actions", units: "1.0", provisionedEnv: true },
+    { step: "13 — Remediation", activity: "Result and metric fetch", units: "0.2", provisionedEnv: true },
+    { step: "14 — Remediation", activity: "Auto-closure of remediation task", units: "0.2" },
+    { step: "15 — Remediation", activity: "Health & dependency check", units: "0.5", provisionedEnv: true },
+    { step: "16 — Remediation", activity: "Auto-closure of remediation task", units: "0.2" },
+    { step: "17 — Remediation", activity: "Remediation task auto-generation", units: "0.5" },
+    { step: "18 — Change Readiness", activity: "Remediation task auto-generation", units: "0.5" },
+    { step: "19 — Change Readiness", activity: "Auto-closure of remediation task", units: "0.2" },
   ],
   sensitivityAnalysis: [
     { scenario: "Small estate (≤5 LPARs, 1 affected)", adjustment: "Simpler exposure scan; no blast radius", estimatedUnits: "~8.0" },

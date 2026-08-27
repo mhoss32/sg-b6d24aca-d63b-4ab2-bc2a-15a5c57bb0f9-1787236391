@@ -1080,10 +1080,22 @@ function UnitConsumptionBox({ consumption }: { consumption: StepConsumption }) {
           </thead>
           <tbody>
             {consumption.activities.map((activity, i) => (
-              <tr key={i} className="border-b border-green-500/10 last:border-0">
-                <td className="py-1.5 pr-2 text-muted-foreground">{activity.activity}</td>
-                <td className="py-1.5 pr-2 text-muted-foreground">{activity.tokens}</td>
-                <td className="py-1.5 text-right text-green-300 font-medium">{activity.units}</td>
+              <tr
+                key={i}
+                className={cn(
+                  "border-b border-green-500/10 last:border-0",
+                  activity.provisionedEnv && "bg-green-400/10"
+                )}
+              >
+                <td className={cn("py-1.5 pr-2", activity.provisionedEnv ? "text-green-200 font-medium" : "text-muted-foreground")}>
+                  {activity.activity}
+                </td>
+                <td className={cn("py-1.5 pr-2", activity.provisionedEnv ? "text-green-200/70" : "text-muted-foreground")}>
+                  {activity.tokens}
+                </td>
+                <td className={cn("py-1.5 text-right font-medium", activity.provisionedEnv ? "text-green-300" : "text-green-300")}>
+                  {activity.units}
+                </td>
               </tr>
             ))}
           </tbody>
