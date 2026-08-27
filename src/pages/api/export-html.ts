@@ -477,19 +477,18 @@ function renderPersonaUseCaseTile(id: string, uc: UseCaseDetail, engagement: str
     skill: { bg: "rgba(74,222,128,0.1)", border: "rgba(74,222,128,0.3)", text: "#4ade80", label: "Atlas AI & Automation", iconSvg: '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.43.28a2 2 0 0 0 1.68.05 1 1 0 0 1 1.4 1.4 5 5 0 0 1-1.06 5.85l-.84.85a3 3 0 0 1-3.88.27"/><path d="m18 15-2-2"/></svg>' },
   };
 
-  const renderMarkers = (markers: typeof asIsMarkers, sectionId: string, sectionLabel: string, labelColor: string, config: Record<string, { bg: string; border: string; text: string; label: string; iconSvg: string }>) => {
-    if (markers.length === 0) return "";
-    return `
+  const painPointsHtml = asIsMarkers.length === 0 ? "" : `
     <div style="margin-top: 12px;">
       <details style="cursor: default;">
-        <summary onclick="event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.03); cursor: pointer; font-size: 12px; font-weight: 600; color: ${labelColor}; list-style: none; user-select: none;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${labelColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; transition: transform 0.2s;"><polyline points="9 18 15 12 9 6"/></svg>
-          <span>${sectionLabel}</span>
-          <span style="margin-left: auto; font-size: 10px; font-weight: 400; color: #64748b;">${markers.length} ${markers.length === 1 ? "item" : "items"}</span>
+        <summary onclick="event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.03); cursor: pointer; font-size: 12px; font-weight: 600; color: #f87171; list-style: none; user-select: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; transition: transform 0.2s;"><polyline points="9 18 15 12 9 6"/></svg>
+          <span>Pain Points</span>
+          <span style="margin-left: auto; font-size: 10px; font-weight: 400; color: #64748b;">${asIsMarkers.length} ${asIsMarkers.length === 1 ? "item" : "items"}</span>
         </summary>
         <div style="padding-top: 8px; display: flex; flex-direction: column; gap: 6px;">
-          ${markers.map((m) => {
-            const mc = config[m.type] || config.pain || config.time;
+          ${asIsMarkers.map((m) => {
+            const mc = asIsMarkerConfig[m.type];
+            if (!mc) return "";
             return `
             <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 8px; background: ${mc.bg}; border: 1px solid ${mc.border};">
               <div style="display: flex; align-items: center; gap: 6px;">
@@ -503,7 +502,32 @@ function renderPersonaUseCaseTile(id: string, uc: UseCaseDetail, engagement: str
         </div>
       </details>
     </div>`;
-  };
+
+  const wowsHtml = toBeMarkers.length === 0 ? "" : `
+    <div style="margin-top: 12px;">
+      <details style="cursor: default;">
+        <summary onclick="event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.03); cursor: pointer; font-size: 12px; font-weight: 600; color: #4ade80; list-style: none; user-select: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; transition: transform 0.2s;"><polyline points="9 18 15 12 9 6"/></svg>
+          <span>Wows!</span>
+          <span style="margin-left: auto; font-size: 10px; font-weight: 400; color: #64748b;">${toBeMarkers.length} ${toBeMarkers.length === 1 ? "item" : "items"}</span>
+        </summary>
+        <div style="padding-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+          ${toBeMarkers.map((m) => {
+            const mc = toBeMarkerConfig[m.type];
+            if (!mc) return "";
+            return `
+            <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 8px; background: ${mc.bg}; border: 1px solid ${mc.border};">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                ${mc.iconSvg}
+                <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: ${mc.text};">${mc.label}</span>
+              </div>
+              <span style="font-size: 11px; font-weight: 500; color: #e2e8f0; line-height: 1.4;">${escapeHTML(m.title)}</span>
+              <span style="font-size: 10px; color: #94a3b8; line-height: 1.5;">${escapeHTML(m.description)}</span>
+            </div>`;
+          }).join("")}
+        </div>
+      </details>
+    </div>`;
 
   return `
     <div onclick="showPage('uc-${id}')" style="cursor: pointer; border-radius: 14px; border: 1px solid ${isPrimary ? "rgba(0,212,255,0.2)" : "rgba(255,255,255,0.08)"}; background: rgba(255,255,255,0.02); padding: 20px; transition: all 0.2s; position: relative;">
@@ -513,8 +537,8 @@ function renderPersonaUseCaseTile(id: string, uc: UseCaseDetail, engagement: str
       </div>
       <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin-bottom: 6px;">${escapeHTML(detail.label)}</h3>
       <p style="font-size: 12px; color: #64748b; line-height: 1.5;">${escapeHTML(detail.description)}</p>
-      ${renderMarkers(asIsMarkers, `pain-${id}`, "Pain Points", "#f87171", asIsMarkerConfig)}
-      ${renderMarkers(toBeMarkers, `wow-${id}`, "Wows!", "#4ade80", toBeMarkerConfig)}
+      ${painPointsHtml}
+      ${wowsHtml}
     </div>`;
 }
 
