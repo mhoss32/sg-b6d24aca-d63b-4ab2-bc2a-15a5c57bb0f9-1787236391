@@ -161,7 +161,7 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
 
       ${!isAsIs ? renderUnitConsumption(ucId) : ""}
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+      <div class="stage-grid stage-grid-${ucId}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; transition: all 0.3s;">
         ${flow.stages.map((stage, i) => {
           const stageExternal = flow.externalTouchpoints?.filter((tp) => tp.stageIndex === i) || [];
           const grouped = groupedByStage[i];
@@ -883,6 +883,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     #modalBody { padding: 20px; }
     #modalClose { background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; }
     @media (max-width: 1024px) { .sidebar { display: none; } }
+    .stage-grid { transition: all 0.3s; }
+    .stage-grid.wide { grid-template-columns: repeat(2, 1fr) !important; }
+    @media (max-width: 768px) { .stage-grid.wide { grid-template-columns: 1fr !important; } }
   </style>
 </head>
 <body>
@@ -962,9 +965,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
           var content = document.querySelector('.uc-content-' + uc);
           var panels = document.querySelectorAll('.uc-panel.uc-total-' + uc + ', .uc-panel.uc-estate-' + uc + ', .uc-panel.uc-adj-' + uc + ', .uc-panel.uc-summary-' + uc);
           var steps = document.querySelectorAll('.uc-step-wrap.uc-step-' + uc + '-0, .uc-step-wrap.uc-step-' + uc + '-1, .uc-step-wrap.uc-step-' + uc + '-2, .uc-step-wrap.uc-step-' + uc + '-3, .uc-step-wrap.uc-step-' + uc + '-4, .uc-step-wrap.uc-step-' + uc + '-5, .uc-step-wrap.uc-step-' + uc + '-6, .uc-step-wrap.uc-step-' + uc + '-7, .uc-step-wrap.uc-step-' + uc + '-8');
+          var grid = document.querySelector('.stage-grid-' + uc);
           if (content) content.style.display = cb.checked ? 'block' : 'none';
           panels.forEach(function(p) { p.style.display = cb.checked ? 'block' : 'none'; });
           steps.forEach(function(s) { s.style.display = cb.checked ? 'block' : 'none'; });
+          if (grid) {
+            if (cb.checked) grid.classList.add('wide');
+            else grid.classList.remove('wide');
+          }
         });
       });
 
