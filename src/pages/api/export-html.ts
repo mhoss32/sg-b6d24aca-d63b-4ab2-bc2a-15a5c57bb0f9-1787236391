@@ -249,7 +249,7 @@ function renderUnitConsumptionControls(ucId: string): string {
 
   const coinSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12"/><path d="M15 10H9.5a2.5 2.5 0 0 0 0 5h5a2.5 2.5 0 0 1 0 5H9"/></svg>';
 
-  const baseTotal = uc.steps.reduce((sum, s) => sum + s.activities.reduce((a, act) => a + (parseFloat(act.units) || 0), 0), 0), 0);
+  const baseTotal = uc.steps.reduce((sum, s) => sum + s.activities.reduce((a, act) => a + (parseFloat(act.units) || 0), 0), 0);
 
   const toggleHtml = `
     <div class="uc-toggle-wrap" style="margin-bottom: 12px; padding: 12px; border-radius: 8px; border: 1px solid rgba(74,222,128,0.2); background: rgba(74,222,128,0.05);">
@@ -350,7 +350,7 @@ function renderUnitConsumptionSummary(ucId: string): string {
   const uc = getUnitConsumption(ucId);
   if (!uc || uc.fullFlowSummary.length === 0) return "";
 
-  const baseTotal = uc.steps.reduce((sum, s) => sum + s.activities.reduce((a, act) => a + (parseFloat(act.units) || 0), 0), 0), 0);
+  const baseTotal = uc.steps.reduce((sum, s) => sum + s.activities.reduce((a, act) => a + (parseFloat(act.units) || 0), 0), 0);
 
   return `
     <div class="uc-panel uc-summary-${ucId}" style="display: none; margin-top: 16px; border-radius: 10px; border: 1px solid rgba(74,222,128,0.2); background: rgba(74,222,128,0.05); overflow: hidden;">
