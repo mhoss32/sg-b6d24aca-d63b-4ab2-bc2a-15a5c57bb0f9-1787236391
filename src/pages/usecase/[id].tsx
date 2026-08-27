@@ -610,6 +610,7 @@ export default function UseCaseDetailPage() {
                     variant="asIs"
                     editable
                     onChange={(asIs) => setDetail({ ...detail, asIs })}
+                    useCaseId={id as string}
                   />
                 </section>
                 <section className="rounded-xl border border-green-500/20 bg-green-950/10 p-6">
@@ -618,6 +619,7 @@ export default function UseCaseDetailPage() {
                     variant="toBe"
                     editable
                     onChange={(toBe) => setDetail({ ...detail, toBe })}
+                    useCaseId={id as string}
                   />
                 </section>
               </div>
