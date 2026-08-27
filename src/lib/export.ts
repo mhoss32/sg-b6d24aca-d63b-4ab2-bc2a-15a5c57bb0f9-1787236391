@@ -426,7 +426,7 @@ function renderPersonaPage(name: string, info: typeof personaData[string]): stri
           Primary Use Cases
         </h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
-          ${primary.map(({ id, detail }) => renderPersonaUseCaseTile(id, detail, "Primary", name)).join("")}
+          ${primary.map(({ id, detail }) => renderPersonaUseCaseTile(id, detail, "Primary", info.name)).join("")}
         </div>
       </div>` : ""}
 
@@ -439,7 +439,7 @@ function renderPersonaPage(name: string, info: typeof personaData[string]): stri
           Secondary Use Cases
         </h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
-          ${secondary.map(({ id, detail }) => renderPersonaUseCaseTile(id, detail, "Secondary", name)).join("")}
+          ${secondary.map(({ id, detail }) => renderPersonaUseCaseTile(id, detail, "Secondary", info.name)).join("")}
         </div>
       </div>` : ""}
     </div>
@@ -464,7 +464,7 @@ function renderPersonaUseCaseTile(id: string, uc: UseCaseDetail, engagement: str
     return `
     <div style="margin-top: 12px;">
       <details>
-        <summary style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.03); cursor: pointer; font-size: 12px; font-weight: 600; color: ${labelColor}; list-style: none; user-select: none;">
+        <summary onclick="event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.03); cursor: pointer; font-size: 12px; font-weight: 600; color: ${labelColor}; list-style: none; user-select: none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${labelColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; transition: transform 0.2s;"><polyline points="9 18 15 12 9 6"/></svg>
           <span>${sectionLabel}</span>
           <span style="margin-left: auto; font-size: 10px; font-weight: 400; color: #64748b;">${markers.length} ${markers.length === 1 ? "item" : "items"}</span>
