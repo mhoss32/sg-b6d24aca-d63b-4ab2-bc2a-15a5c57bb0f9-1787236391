@@ -13,16 +13,20 @@ import {
   X,
   Plus,
   Pencil,
+  Coins,
 } from "lucide-react";
 import type { FlowStage, FlowDiagram as FlowDiagramType, FlowMarker, ExternalTouchpoint } from "@/data/productData";
 import { externalProducts } from "@/data/productData";
 import type { LucideIcon } from "lucide-react";
+import { getUnitConsumption } from "@/data/unitConsumption";
+import type { StepConsumption } from "@/data/unitConsumption";
 
 export interface FlowDiagramProps {
   diagram: FlowDiagramType;
   variant: "asIs" | "toBe";
   editable?: boolean;
   onChange?: (diagram: FlowDiagramType) => void;
+  useCaseId?: string;
 }
 
 type MarkerType = "pain" | "time" | "skill" | "gain";
@@ -102,7 +106,7 @@ function MarkerLegend({ variant }: { variant: "asIs" | "toBe" }) {
   );
 }
 
-export function FlowDiagram({ diagram, variant, editable = false, onChange }: FlowDiagramProps) {
+export function FlowDiagram({ diagram, variant, editable = false, onChange, useCaseId }: FlowDiagramProps) {
   const isAsIs = variant === "asIs";
   const config = isAsIs ? asIsMarkerConfig : toBeMarkerConfig;
   const [editingMarker, setEditingMarker] = useState<number | null>(null);
@@ -115,7 +119,10 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
   const [draftDescription, setDraftDescription] = useState("");
   const [draftType, setDraftType] = useState<MarkerType>("pain");
   const [draftStage, setDraftStage] = useState(0);
+  const [showUnitEstimates, setShowUnitEstimates] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const unitConsumption = useCaseId && !isAsIs ? getUnitConsumption(useCaseId) : null;
 
   const togglePersona = useCallback((key: string) => {
     setExpandedPersonas((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -241,6 +248,21 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
         />
       )}
 
+      {/* Unit Consumption Toggle — only for To-Be */}
+      {!isAsIs && unitConsumption && (
+        <div className="mb-4 p-3 rounded-lg border border-green-500/20 bg-green-950/10">
+          <label className="inline-flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showUnitEstimates}
+              onChange={(e) => setShowUnitEstimates(e.target.checked)}
+              className="w-4 h-4 rounded border-border/40 text-green-400 focus:ring-green-400/20"
+            />
+            <span className="text-xs font-semibold text-green-400">Show Atlas token/unit consumption estimates</span>
+          </label>
+        </div>
+      )}
+
       <div className="relative">
         {/* Connection line */}
         <div className="absolute top-[52px] left-0 right-0 h-0.5 bg-gradient-to-r from-border/20 via-border/40 to-border/20 hidden lg:block" />
@@ -286,11 +308,79 @@ export function FlowDiagram({ diagram, variant, editable = false, onChange }: Fl
                 setDraftStage={setDraftStage}
                 availableTypes={availableTypes}
                 inputRef={inputRef}
+                showUnitEstimates={showUnitEstimates}
+                unitConsumption={unitConsumption?.steps[stageIndex] || null}
               />
             );
           })}
         </div>
       </div>
+
+      {/* Full Flow Summary & Sensitivity Analysis */}
+      {!isAsIs && showUnitEstimates && unitConsumption && (
+        <div className="mt-6 space-y-4">
+          <div className="rounded-lg border border-green-500/20 bg-green-950/10 overflow-hidden">
+            <div className="px-4 py-3 bg-green-500/10 border-b border-green-500/20 flex items-center gap-2">
+              <Coins className="w-4 h-4 text-green-400" />
+              <span className="text-sm font-semibold text-green-400">Total Estimated Units: {unitConsumption.totalNominal}</span>
+            </div>
+          </div>
+
+          {unitConsumption.fullFlowSummary && unitConsumption.fullFlowSummary.length > 0 && (
+            <div className="rounded-lg border border-green-500/20 bg-green-950/10 overflow-hidden">
+              <div className="px-4 py-3 bg-green-500/10 border-b border-green-500/20">
+                <span className="text-sm font-semibold text-green-400">Full Flow Summary</span>
+              </div>
+              <div className="p-4">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-green-500/20">
+                      <th className="text-left py-2 pr-4 font-semibold text-green-300">Metric</th>
+                      <th className="text-left py-2 pr-4 font-semibold text-green-300">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {unitConsumption.fullFlowSummary.map((row, i) => (
+                      <tr key={i} className="border-b border-green-500/10 last:border-0">
+                        <td className="py-2 pr-4 text-muted-foreground">{row.metric}</td>
+                        <td className="py-2 text-green-300 font-medium">{row.value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {unitConsumption.sensitivityAnalysis && unitConsumption.sensitivityAnalysis.length > 0 && (
+            <div className="rounded-lg border border-green-500/20 bg-green-950/10 overflow-hidden">
+              <div className="px-4 py-3 bg-green-500/10 border-b border-green-500/20">
+                <span className="text-sm font-semibold text-green-400">Sensitivity Analysis</span>
+              </div>
+              <div className="p-4">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-green-500/20">
+                      <th className="text-left py-2 pr-4 font-semibold text-green-300">Scenario</th>
+                      <th className="text-left py-2 pr-4 font-semibold text-green-300">Impact</th>
+                      <th className="text-right py-2 font-semibold text-green-300">Est. Units</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {unitConsumption.sensitivityAnalysis.map((row, i) => (
+                      <tr key={i} className="border-b border-green-500/10 last:border-0">
+                        <td className="py-2 pr-4 text-muted-foreground">{row.scenario}</td>
+                        <td className="py-2 pr-4 text-muted-foreground">{row.impact}</td>
+                        <td className="py-2 text-right text-green-300 font-medium">{row.estimatedUnits}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Modal Overlay */}
       {modalTouchpoint && (
@@ -523,6 +613,8 @@ function StageCard({
   setDraftStage,
   availableTypes,
   inputRef,
+  showUnitEstimates,
+  unitConsumption,
 }: {
   stage: FlowStage;
   index: number;
@@ -554,6 +646,8 @@ function StageCard({
   setDraftStage: (v: number) => void;
   availableTypes: MarkerType[];
   inputRef: React.RefObject<HTMLInputElement | null>;
+  showUnitEstimates: boolean;
+  unitConsumption: StepConsumption | null;
 }) {
   const isManaging = managingStage === index;
 
@@ -604,6 +698,11 @@ function StageCard({
               <ExternalTouchpointRenderer key={i} touchpoint={tp} onClick={() => onOpenModal(tp)} />
             ))}
           </div>
+        )}
+
+        {/* Unit Consumption Estimates */}
+        {showUnitEstimates && unitConsumption && (
+          <UnitConsumptionBox consumption={unitConsumption} />
         )}
 
         {/* Persona sections */}
@@ -949,6 +1048,39 @@ function MarkerEditor({
             <option key={i} value={i}>Stage {i + 1}</option>
           ))}
         </select>
+      </div>
+    </div>
+  );
+}
+
+function UnitConsumptionBox({ consumption }: { consumption: StepConsumption }) {
+  const totalUnits = consumption.activities.reduce((sum, a) => sum + (parseFloat(a.units) || 0), 0);
+  return (
+    <div className="mb-3 rounded-lg border border-green-500/20 bg-green-950/10 overflow-hidden">
+      <div className="px-3 py-2 bg-green-500/10 border-b border-green-500/20 flex items-center gap-2">
+        <Coins className="w-3.5 h-3.5 text-green-400" />
+        <span className="text-xs font-semibold text-green-400 uppercase tracking-wider">Atlas Units</span>
+        <span className="ml-auto text-xs font-medium text-green-300">{totalUnits.toFixed(1)} units</span>
+      </div>
+      <div className="p-3">
+        <table className="w-full text-[11px]">
+          <thead>
+            <tr className="border-b border-green-500/20">
+              <th className="text-left py-1.5 pr-2 font-semibold text-green-300">Activity</th>
+              <th className="text-left py-1.5 pr-2 font-semibold text-green-300">Tokens/events</th>
+              <th className="text-right py-1.5 font-semibold text-green-300">Units</th>
+            </tr>
+          </thead>
+          <tbody>
+            {consumption.activities.map((activity, i) => (
+              <tr key={i} className="border-b border-green-500/10 last:border-0">
+                <td className="py-1.5 pr-2 text-muted-foreground">{activity.activity}</td>
+                <td className="py-1.5 pr-2 text-muted-foreground">{activity.tokens}</td>
+                <td className="py-1.5 text-right text-green-300 font-medium">{activity.units}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
