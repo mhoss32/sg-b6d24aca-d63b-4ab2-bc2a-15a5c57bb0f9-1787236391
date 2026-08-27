@@ -162,9 +162,9 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
         </div>
       </div>` : ""}
 
-      ${!isAsIs ? renderUnitConsumption(ucId) : ""}
+      ${!isAsIs ? renderUnitConsumptionControls(ucId) : ""}
 
-      <div class="stage-grid stage-grid-${ucId}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; transition: all 0.3s;">
+      <div class="stage-grid stage-grid-${ucId} ${!isAsIs ? 'stage-grid-tobe-' + ucId : ''}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; transition: all 0.3s;">
         ${flow.stages.map((stage, i) => {
           const stageExternal = flow.externalTouchpoints?.filter((tp) => tp.stageIndex === i) || [];
           const grouped = groupedByStage[i];
@@ -238,16 +238,18 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
           </div>`;
         }).join("")}
       </div>
+
+      ${!isAsIs ? renderUnitConsumptionSummary(ucId) : ""}
     </div>`;
 }
 
-function renderUnitConsumption(ucId: string): string {
+function renderUnitConsumptionControls(ucId: string): string {
   const uc = getUnitConsumption(ucId);
   if (!uc) return "";
 
   const coinSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12"/><path d="M15 10H9.5a2.5 2.5 0 0 0 0 5h5a2.5 2.5 0 0 1 0 5H9"/></svg>';
 
-  const baseTotal = uc.steps.reduce((sum, s) => sum + s.activities.reduce((a, act) => a + (parseFloat(act.units) || 0), 0), 0);
+  const baseTotal = uc.steps.reduce((sum, s) => sum + s.activities.reduce((a, act) => a + (parseFloat(act.units) || 0), 0), 0), 0);
 
   const toggleHtml = `
     <div class="uc-toggle-wrap" style="margin-bottom: 12px; padding: 12px; border-radius: 8px; border: 1px solid rgba(74,222,128,0.2); background: rgba(74,222,128,0.05);">
@@ -333,8 +335,25 @@ function renderUnitConsumption(ucId: string): string {
       </div>
     </div>` : "";
 
-  const summaryHtml = uc.fullFlowSummary.length > 0 ? `
-    <div class="uc-panel uc-summary-${ucId}" style="display: none; margin-top: 16px; margin-bottom: 12px; border-radius: 10px; border: 1px solid rgba(74,222,128,0.2); background: rgba(74,222,128,0.05); overflow: hidden;">
+  return `
+    <div class="uc-wrap" data-uc="${ucId}" style="margin-bottom: 16px;">
+      ${toggleHtml}
+      <div class="uc-content-${ucId}" style="display: none;">
+        ${totalHtml}
+        ${estateHtml}
+        ${adjHtml}
+      </div>
+    </div>`;
+}
+
+function renderUnitConsumptionSummary(ucId: string): string {
+  const uc = getUnitConsumption(ucId);
+  if (!uc || uc.fullFlowSummary.length === 0) return "";
+
+  const baseTotal = uc.steps.reduce((sum, s) => sum + s.activities.reduce((a, act) => a + (parseFloat(act.units) || 0), 0), 0), 0);
+
+  return `
+    <div class="uc-panel uc-summary-${ucId}" style="display: none; margin-top: 16px; border-radius: 10px; border: 1px solid rgba(74,222,128,0.2); background: rgba(74,222,128,0.05); overflow: hidden;">
       <div style="padding: 12px 16px; background: rgba(74,222,128,0.08); border-bottom: 1px solid rgba(74,222,128,0.15);">
         <span style="font-size: 13px; font-weight: 600; color: #4ade80;">Full Flow Summary</span>
       </div>
@@ -361,17 +380,6 @@ function renderUnitConsumption(ucId: string): string {
             </tr>
           </tbody>
         </table>
-      </div>
-    </div>` : "";
-
-  return `
-    <div class="uc-wrap" data-uc="${ucId}" style="margin-bottom: 16px;">
-      ${toggleHtml}
-      <div class="uc-content-${ucId}" style="display: none;">
-        ${totalHtml}
-        ${estateHtml}
-        ${adjHtml}
-        ${summaryHtml}
       </div>
     </div>`;
 }
@@ -966,7 +974,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
           var content = document.querySelector('.uc-content-' + uc);
           var panels = document.querySelectorAll('.uc-panel.uc-total-' + uc + ', .uc-panel.uc-estate-' + uc + ', .uc-panel.uc-adj-' + uc + ', .uc-panel.uc-summary-' + uc);
           var steps = document.querySelectorAll('.uc-step-wrap.uc-step-' + uc + '-0, .uc-step-wrap.uc-step-' + uc + '-1, .uc-step-wrap.uc-step-' + uc + '-2, .uc-step-wrap.uc-step-' + uc + '-3, .uc-step-wrap.uc-step-' + uc + '-4, .uc-step-wrap.uc-step-' + uc + '-5, .uc-step-wrap.uc-step-' + uc + '-6, .uc-step-wrap.uc-step-' + uc + '-7, .uc-step-wrap.uc-step-' + uc + '-8');
-          var grid = document.querySelector('.stage-grid-' + uc);
+          var grid = document.querySelector('.stage-grid-tobe-' + uc);
           if (content) content.style.display = cb.checked ? 'block' : 'none';
           panels.forEach(function(p) { p.style.display = cb.checked ? 'block' : 'none'; });
           steps.forEach(function(s) { s.style.display = cb.checked ? 'block' : 'none'; });
