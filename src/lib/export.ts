@@ -539,6 +539,7 @@ function renderHomePage(): string {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           </div>
           <h1 style="font-size: 48px; font-weight: 700; color: #fff; letter-spacing: -0.02em;">Atlas</h1>
+          <img src="data:image/png;base64,${IBM_LOGO_B64}" alt="IBM" style="height: 48px; width: auto; opacity: 0.5; margin-left: 24px;">
         </div>
         <p style="font-size: 18px; color: #94a3b8; line-height: 1.7; margin-bottom: 48px;">
           AI-powered platform for IBM Z environment intelligence, change management, and predictive operations.
@@ -604,6 +605,8 @@ function renderHomePage(): string {
     </div>
   </section>`;
 }
+
+const IBM_LOGO_B64 = "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";
 
 export function exportSiteHTML() {
   const date = new Date().toLocaleDateString();
@@ -716,7 +719,7 @@ export function exportSiteHTML() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
           <span id="page-title">Back to Atlas</span>
         </div>
-        <div style="font-size: 12px; color: #475569;">IBM Atlas Platform</div>
+        <img src="data:image/png;base64,${IBM_LOGO_B64}" alt="IBM" style="height: 32px; width: auto; opacity: 0.6;">
       </div>
 
       ${renderHomePage()}
