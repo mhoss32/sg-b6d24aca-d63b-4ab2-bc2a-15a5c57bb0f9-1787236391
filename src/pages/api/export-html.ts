@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { useCaseDetails, productNodes, personaData } from "@/data/productData";
 import type { UseCaseDetail, FlowDiagram, ExternalTouchpoint } from "@/data/productData";
+import { getUnitConsumption } from "@/data/unitConsumption";
 
 const asIsConfig: Record<string, { color: string; bg: string; border: string; label: string; iconSvg: string }> = {
   pain: {
@@ -140,10 +141,10 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
       </div>
 
       ${!isAsIs && flow.externalTouchpoints && flow.externalTouchpoints.length > 0 ? `
-      <div style="margin-bottom: 16px; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);">
+      <div style="margin-bottom: 16px; padding: 12px; border-radius: 8px; border: 1px solid rgba(59,130,246,0.2); background: rgba(59,130,246,0.04);">
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.43.28a2 2 0 0 0 1.68.05 1 1 0 0 1 1.4 1.4 5 5 0 0 1-1.06 5.85l-.84.85a3 3 0 0 1-3.88.27"/><path d="m18 15-2-2"/></svg>
-          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b;">External Integrations</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.43.28a2 2 0 0 0 1.68.05 1 1 0 0 1 1.4 1.4 5 5 0 0 1-1.06 5.85l-.84.85a3 3 0 0 1-3.88.27"/><path d="m18 15-2-2"/></svg>
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #3b82f6;">External Integrations</span>
         </div>
         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
           ${["bob-ppz", "concert4z"].map((pid) => {
@@ -157,6 +158,8 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
           }).join("")}
         </div>
       </div>` : ""}
+
+      ${!isAsIs ? renderUnitConsumption(ucId) : ""}
 
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
         ${flow.stages.map((stage, i) => {
@@ -178,7 +181,7 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
                   <summary style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.03); cursor: pointer; font-size: 12px; font-weight: 600; color: #e2e8f0; list-style: none; user-select: none;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polyline points="9 18 15 12 9 6"/></svg>
                     <span>${escapeHTML(persona)}</span>
-                    <span style="margin-left: auto; font-size: 10px; font-weight: 400; color: #64748b;">${markers.length} ${markers.length === 1 ? "item" : "items"}</span>
+                    <span style="margin-left: auto; font-size: 10px; font-weight: 400; color: #64748b;">${markers.length} ${markers.length === 1 ? ("pain" in config ? "pain point" : "WOW!") : ("pain" in config ? "pain points" : "WOWs!")}</span>
                   </summary>
                   <div style="padding-left: 22px; padding-top: 4px;">
                     ${markers.map((m) => {
@@ -204,20 +207,188 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
     </div>`;
 }
 
+function renderUnitConsumption(ucId: string): string {
+  const uc = getUnitConsumption(ucId);
+  if (!uc) return "";
+
+  const coinSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12"/><path d="M15 10H9.5a2.5 2.5 0 0 0 0 5h5a2.5 2.5 0 0 1 0 5H9"/></svg>';
+
+  const baseTotal = uc.steps.reduce((sum, s) => sum + s.activities.reduce((a, act) => a + (parseFloat(act.units) || 0), 0), 0);
+
+  const toggleHtml = `
+    <div class="uc-toggle-wrap" style="margin-bottom: 12px; padding: 12px; border-radius: 8px; border: 1px solid rgba(74,222,128,0.2); background: rgba(74,222,128,0.05);">
+      <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+        <input type="checkbox" class="uc-toggle" data-uc="${ucId}" style="width: 16px; height: 16px; accent-color: #4ade80;">
+        <span style="color: #4ade80; display: inline-flex; align-items: center; gap: 6px;">
+          ${coinSvg}
+          <span style="font-size: 12px; font-weight: 600;">Show Atlas token/unit consumption estimates</span>
+        </span>
+      </label>
+    </div>`;
+
+  const totalHtml = `
+    <div class="uc-panel uc-total-${ucId}" style="display: none; margin-bottom: 12px; border-radius: 10px; border: 1px solid rgba(74,222,128,0.2); background: rgba(74,222,128,0.05); overflow: hidden;">
+      <div style="padding: 12px 16px; background: rgba(74,222,128,0.08); border-bottom: 1px solid rgba(74,222,128,0.15); display: flex; align-items: center; gap: 8px;">
+        ${coinSvg.replace('currentColor', '#4ade80')}
+        <span style="font-size: 13px; font-weight: 600; color: #4ade80;">Total Estimated Units</span>
+        <span class="uc-total-val" data-base="${baseTotal.toFixed(1)}" style="margin-left: auto; font-size: 13px; font-weight: 700; color: #86efac;">${baseTotal.toFixed(1)}</span>
+      </div>
+    </div>`;
+
+  const estateHtml = uc.estateSize.length > 0 ? `
+    <div class="uc-panel uc-estate-${ucId}" style="display: none; margin-bottom: 12px; border-radius: 10px; border: 1px solid rgba(74,222,128,0.2); background: rgba(74,222,128,0.05); overflow: hidden;">
+      <div style="padding: 12px 16px; background: rgba(74,222,128,0.08); border-bottom: 1px solid rgba(74,222,128,0.15); display: flex; align-items: center; gap: 8px;">
+        ${coinSvg.replace('currentColor', '#4ade80')}
+        <span style="font-size: 13px; font-weight: 600; color: #4ade80;">Estate Size</span>
+      </div>
+      <div style="padding: 12px 16px;">
+        <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 1px solid rgba(74,222,128,0.15);">
+              <th style="text-align: left; padding: 6px 8px 6px 0; color: #86efac; font-weight: 600; width: 28px;"></th>
+              <th style="text-align: left; padding: 6px 8px; color: #86efac; font-weight: 600;">Scenario</th>
+              <th style="text-align: left; padding: 6px 8px; color: #86efac; font-weight: 600;">Adjustment</th>
+              <th style="text-align: right; padding: 6px 0 6px 8px; color: #86efac; font-weight: 600;">Multiplier</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${uc.estateSize.map((row, i) => `
+              <tr style="border-bottom: 1px solid rgba(74,222,128,0.08);">
+                <td style="padding: 6px 8px 6px 0;">
+                  <input type="radio" name="estate-${ucId}" value="${row.multiplierValue}" class="uc-estate-radio" data-uc="${ucId}" style="accent-color: #4ade80;">
+                </td>
+                <td style="padding: 6px 8px; color: #94a3b8;">${escapeHTML(row.scenario)}</td>
+                <td style="padding: 6px 8px; color: #94a3b8;">${escapeHTML(row.adjustment)}</td>
+                <td style="padding: 6px 0 6px 8px; text-align: right; color: #86efac; font-weight: 500;">${row.multiplierDisplay}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>` : "";
+
+  const adjHtml = uc.additionalAdjustments.length > 0 ? `
+    <div class="uc-panel uc-adj-${ucId}" style="display: none; margin-bottom: 12px; border-radius: 10px; border: 1px solid rgba(74,222,128,0.2); background: rgba(74,222,128,0.05); overflow: hidden;">
+      <div style="padding: 12px 16px; background: rgba(74,222,128,0.08); border-bottom: 1px solid rgba(74,222,128,0.15); display: flex; align-items: center; gap: 8px;">
+        ${coinSvg.replace('currentColor', '#4ade80')}
+        <span style="font-size: 13px; font-weight: 600; color: #4ade80;">Additional Adjustments</span>
+      </div>
+      <div style="padding: 12px 16px;">
+        <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 1px solid rgba(74,222,128,0.15);">
+              <th style="text-align: left; padding: 6px 8px 6px 0; color: #86efac; font-weight: 600; width: 28px;"></th>
+              <th style="text-align: left; padding: 6px 8px; color: #86efac; font-weight: 600;">Scenario</th>
+              <th style="text-align: left; padding: 6px 8px; color: #86efac; font-weight: 600;">Adjustment</th>
+              <th style="text-align: right; padding: 6px 0 6px 8px; color: #86efac; font-weight: 600;">Unit Delta</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${uc.additionalAdjustments.map((row, i) => `
+              <tr style="border-bottom: 1px solid rgba(74,222,128,0.08);">
+                <td style="padding: 6px 8px 6px 0;">
+                  <input type="checkbox" value="${row.unitDelta}" class="uc-adj-check" data-uc="${ucId}" style="accent-color: #4ade80;">
+                </td>
+                <td style="padding: 6px 8px; color: #94a3b8;">${escapeHTML(row.scenario)}</td>
+                <td style="padding: 6px 8px; color: #94a3b8;">${escapeHTML(row.adjustment)}</td>
+                <td style="padding: 6px 0 6px 8px; text-align: right; color: ${row.unitDelta >= 0 ? '#86efac' : '#fca5a5'}; font-weight: 500;">${row.unitDelta >= 0 ? '+' : ''}${row.unitDelta}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>` : "";
+
+  const stepsHtml = uc.steps.map((step, si) => {
+    const stepTotal = step.activities.reduce((s, a) => s + (parseFloat(a.units) || 0), 0);
+    return `
+    <div class="uc-step-wrap uc-step-${ucId}-${si}" style="display: none; margin-bottom: 10px; border-radius: 10px; border: 1px solid rgba(74,222,128,0.2); background: rgba(74,222,128,0.05); overflow: hidden;">
+      <div style="padding: 10px 14px; background: rgba(74,222,128,0.08); border-bottom: 1px solid rgba(74,222,128,0.15); display: flex; align-items: center; gap: 6px;">
+        ${coinSvg.replace('currentColor', '#4ade80')}
+        <span style="font-size: 11px; font-weight: 600; color: #4ade80; text-transform: uppercase; letter-spacing: 0.05em;">Atlas Units</span>
+        <span class="uc-step-total" data-base="${stepTotal.toFixed(1)}" style="margin-left: auto; font-size: 11px; font-weight: 600; color: #86efac;">${stepTotal.toFixed(1)} units</span>
+      </div>
+      <div style="padding: 12px 14px;">
+        <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 1px solid rgba(74,222,128,0.15);">
+              <th style="text-align: left; padding: 5px 6px 5px 0; color: #86efac; font-weight: 600;">Activity</th>
+              <th style="text-align: left; padding: 5px 6px; color: #86efac; font-weight: 600;">Tokens/events</th>
+              <th style="text-align: right; padding: 5px 0 5px 6px; color: #86efac; font-weight: 600;">Units</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${step.activities.map((act) => `
+              <tr style="border-bottom: 1px solid rgba(74,222,128,0.08); ${act.provisionedEnv ? 'background: rgba(34,211,238,0.08);' : ''}">
+                <td style="padding: 5px 6px 5px 0; ${act.provisionedEnv ? 'color: #a5f3fc; font-weight: 500;' : 'color: #94a3b8;'}">${escapeHTML(act.activity)}</td>
+                <td style="padding: 5px 6px; ${act.provisionedEnv ? 'color: #a5f3fc;' : 'color: #94a3b8;'}">${escapeHTML(act.tokens)}</td>
+                <td class="uc-unit-cell" data-base="${act.units}" style="padding: 5px 0 5px 6px; text-align: right; ${act.provisionedEnv ? 'color: #67e8f9; font-weight: 500;' : 'color: #86efac; font-weight: 500;'}">${act.units}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join("");
+
+  const summaryHtml = uc.fullFlowSummary.length > 0 ? `
+    <div class="uc-panel uc-summary-${ucId}" style="display: none; margin-top: 16px; margin-bottom: 12px; border-radius: 10px; border: 1px solid rgba(74,222,128,0.2); background: rgba(74,222,128,0.05); overflow: hidden;">
+      <div style="padding: 12px 16px; background: rgba(74,222,128,0.08); border-bottom: 1px solid rgba(74,222,128,0.15);">
+        <span style="font-size: 13px; font-weight: 600; color: #4ade80;">Full Flow Summary</span>
+      </div>
+      <div style="padding: 12px 16px;">
+        <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 1px solid rgba(74,222,128,0.15);">
+              <th style="text-align: left; padding: 6px 8px 6px 0; color: #86efac; font-weight: 600;">Step</th>
+              <th style="text-align: left; padding: 6px 8px; color: #86efac; font-weight: 600;">Activity</th>
+              <th style="text-align: right; padding: 6px 0 6px 8px; color: #86efac; font-weight: 600;">Units</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${uc.fullFlowSummary.map((row) => `
+              <tr style="border-bottom: 1px solid rgba(74,222,128,0.08);">
+                <td style="padding: 6px 8px 6px 0; color: #94a3b8;">${escapeHTML(row.step)}</td>
+                <td style="padding: 6px 8px; color: #94a3b8;">${escapeHTML(row.activity)}</td>
+                <td class="uc-summary-unit" data-base="${row.units}" style="padding: 6px 0 6px 8px; text-align: right; color: #86efac; font-weight: 500;">${row.units}</td>
+              </tr>
+            `).join("")}
+            <tr style="border-top: 2px solid rgba(74,222,128,0.2);">
+              <td style="padding: 8px 8px 8px 0; color: #e2e8f0; font-weight: 600;" colspan="2">Total</td>
+              <td class="uc-summary-total" data-base="${baseTotal.toFixed(1)}" style="padding: 8px 0 8px 8px; text-align: right; color: #86efac; font-weight: 700;">${baseTotal.toFixed(1)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>` : "";
+
+  return `
+    <div class="uc-wrap" data-uc="${ucId}" style="margin-bottom: 16px;">
+      ${toggleHtml}
+      <div class="uc-content-${ucId}" style="display: none;">
+        ${totalHtml}
+        ${estateHtml}
+        ${adjHtml}
+        ${stepsHtml}
+        ${summaryHtml}
+      </div>
+    </div>`;
+}
+
 function renderExternalTouchpoint(tp: ExternalTouchpoint, ucId: string): string {
   const pid = tp.product.toLowerCase().replace(/\s+/g, "-");
   if (tp.type === "handoff") {
     return `
-    <div class="ext-box ext-${ucId}-${pid}" style="margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(34,197,94,0.25); background: rgba(34,197,94,0.04); overflow: hidden; display: none; cursor: pointer;" onclick="openModal(this)">
-      <div style="padding: 10px 14px; background: rgba(34,197,94,0.08); border-bottom: 1px solid rgba(34,197,94,0.15);">
-        <h5 style="font-size: 11px; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">${escapeHTML(tp.title)}</h5>
+    <div class="ext-box ext-${ucId}-${pid}" style="margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(59,130,246,0.25); background: rgba(59,130,246,0.04); overflow: hidden; display: none; cursor: pointer;" onclick="openModal(this)">
+      <div style="padding: 10px 14px; background: rgba(59,130,246,0.08); border-bottom: 1px solid rgba(59,130,246,0.15);">
+        <h5 style="font-size: 11px; font-weight: 700; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">${escapeHTML(tp.title)}</h5>
       </div>
       <div style="padding: 14px;">
         ${tp.steps.map((step, j) => `
           <div style="display: flex; gap: 10px; ${j < tp.steps.length - 1 ? "margin-bottom: 12px;" : ""}">
-            <div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(34,197,94,0.15); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #4ade80; flex-shrink: 0;">${j + 1}</div>
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(59,130,246,0.15); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #60a5fa; flex-shrink: 0;">${j + 1}</div>
             <div>
-              <div style="font-size: 11px; font-weight: 600; color: #86efac; margin-bottom: 2px;">${escapeHTML(step.label)}</div>
+              <div style="font-size: 11px; font-weight: 600; color: #93c5fd; margin-bottom: 2px;">${escapeHTML(step.label)}</div>
               <div style="font-size: 11px; color: #94a3b8; line-height: 1.5;">${escapeHTML(step.description).replace(/^([^.!?]+[.!?])/g, "$1")}</div>
             </div>
           </div>
@@ -477,7 +648,7 @@ function renderPersonaUseCaseTile(id: string, uc: UseCaseDetail, engagement: str
         <summary onclick="event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.03); cursor: pointer; font-size: 12px; font-weight: 600; color: #f87171; list-style: none; user-select: none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; transition: transform 0.2s;"><polyline points="9 18 15 12 9 6"/></svg>
           <span>Pain Points</span>
-          <span style="margin-left: auto; font-size: 10px; font-weight: 400; color: #64748b;">${asIsMarkers.length} ${asIsMarkers.length === 1 ? "item" : "items"}</span>
+          <span style="margin-left: auto; font-size: 10px; font-weight: 400; color: #64748b;">${asIsMarkers.length} ${asIsMarkers.length === 1 ? ("pain" in asIsMarkerConfig ? "pain point" : "WOW!") : ("pain" in asIsMarkerConfig ? "pain points" : "WOWs!")}</span>
         </summary>
         <div style="padding-top: 8px; display: flex; flex-direction: column; gap: 6px;">
           ${asIsMarkers.map((m) => {
@@ -503,7 +674,7 @@ function renderPersonaUseCaseTile(id: string, uc: UseCaseDetail, engagement: str
         <summary onclick="event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.03); cursor: pointer; font-size: 12px; font-weight: 600; color: #4ade80; list-style: none; user-select: none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; transition: transform 0.2s;"><polyline points="9 18 15 12 9 6"/></svg>
           <span>Wows!</span>
-          <span style="margin-left: auto; font-size: 10px; font-weight: 400; color: #64748b;">${toBeMarkers.length} ${toBeMarkers.length === 1 ? "item" : "items"}</span>
+          <span style="margin-left: auto; font-size: 10px; font-weight: 400; color: #64748b;">${toBeMarkers.length} ${toBeMarkers.length === 1 ? ("pain" in toBeConfig ? "pain point" : "WOW!") : ("pain" in toBeConfig ? "pain points" : "WOWs!")}</span>
         </summary>
         <div style="padding-top: 8px; display: flex; flex-direction: column; gap: 6px;">
           ${toBeMarkers.map((m) => {
@@ -785,15 +956,77 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         });
       });
 
-      window.openModal = function(el) {
-        document.getElementById('modalTitle').textContent = el.querySelector('h5').textContent;
-        document.getElementById('modalBody').innerHTML = el.querySelector('div:last-child').innerHTML;
-        document.getElementById('modalOverlay').classList.add('active');
-      };
-      window.closeModal = function() {
-        document.getElementById('modalOverlay').classList.remove('active');
-      };
-      document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+      document.querySelectorAll('.uc-toggle').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+          var uc = this.dataset.uc;
+          var content = document.querySelector('.uc-content-' + uc);
+          var panels = document.querySelectorAll('.uc-panel.uc-total-' + uc + ', .uc-panel.uc-estate-' + uc + ', .uc-panel.uc-adj-' + uc + ', .uc-panel.uc-summary-' + uc);
+          var steps = document.querySelectorAll('.uc-step-wrap.uc-step-' + uc + '-0, .uc-step-wrap.uc-step-' + uc + '-1, .uc-step-wrap.uc-step-' + uc + '-2, .uc-step-wrap.uc-step-' + uc + '-3, .uc-step-wrap.uc-step-' + uc + '-4, .uc-step-wrap.uc-step-' + uc + '-5, .uc-step-wrap.uc-step-' + uc + '-6, .uc-step-wrap.uc-step-' + uc + '-7, .uc-step-wrap.uc-step-' + uc + '-8');
+          if (content) content.style.display = cb.checked ? 'block' : 'none';
+          panels.forEach(function(p) { p.style.display = cb.checked ? 'block' : 'none'; });
+          steps.forEach(function(s) { s.style.display = cb.checked ? 'block' : 'none'; });
+        });
+      });
+
+      document.querySelectorAll('.uc-estate-radio').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+          var uc = this.dataset.uc;
+          var multiplier = parseFloat(this.value) || 1.0;
+          updateUcTotals(uc, multiplier);
+        });
+      });
+
+      document.querySelectorAll('.uc-adj-check').forEach(function(check) {
+        check.addEventListener('change', function() {
+          var uc = this.dataset.uc;
+          var radios = document.querySelectorAll('.uc-estate-radio[data-uc="' + uc + '"]');
+          var multiplier = 1.0;
+          radios.forEach(function(r) { if (r.checked) multiplier = parseFloat(r.value) || 1.0; });
+          updateUcTotals(uc, multiplier);
+        });
+      });
+
+      function updateUcTotals(uc, multiplier) {
+        var adjDelta = 0;
+        document.querySelectorAll('.uc-adj-check[data-uc="' + uc + '"]').forEach(function(c) {
+          if (c.checked) adjDelta += parseFloat(c.value) || 0;
+        });
+
+        document.querySelectorAll('.uc-unit-cell[data-base]').forEach(function(cell) {
+          var base = parseFloat(cell.dataset.base) || 0;
+          var mult = cell.closest('.uc-wrap[data-uc="' + uc + '"]') ? multiplier : 1.0;
+          if (mult !== 1.0) {
+            var val = base * mult;
+            cell.textContent = (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1));
+          } else {
+            cell.textContent = cell.dataset.base;
+          }
+        });
+
+        document.querySelectorAll('.uc-step-total[data-base]').forEach(function(el) {
+          var base = parseFloat(el.dataset.base) || 0;
+          var val = base * multiplier;
+          el.textContent = (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)) + ' units';
+        });
+
+        document.querySelectorAll('.uc-summary-unit[data-base]').forEach(function(el) {
+          var base = parseFloat(el.dataset.base) || 0;
+          var val = base * multiplier;
+          el.textContent = (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1));
+        });
+
+        document.querySelectorAll('.uc-total-val[data-base]').forEach(function(el) {
+          var base = parseFloat(el.dataset.base) || 0;
+          var val = base * multiplier + adjDelta;
+          el.textContent = (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1));
+        });
+
+        document.querySelectorAll('.uc-summary-total[data-base]').forEach(function(el) {
+          var base = parseFloat(el.dataset.base) || 0;
+          var val = base * multiplier + adjDelta;
+          el.textContent = (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1));
+        });
+      }
     })();
   </script>
 </body>
