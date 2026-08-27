@@ -1084,7 +1084,7 @@ function UnitConsumptionBox({ consumption }: { consumption: StepConsumption }) {
                 key={i}
                 className={cn(
                   "border-b border-green-500/10 last:border-0",
-                  activity.provisionedEnv && "bg-green-400/10"
+                  activity.provisionedEnv && "bg-green-400/20"
                 )}
               >
                 <td className={cn("py-1.5 pr-2", activity.provisionedEnv ? "text-green-200 font-medium" : "text-muted-foreground")}>

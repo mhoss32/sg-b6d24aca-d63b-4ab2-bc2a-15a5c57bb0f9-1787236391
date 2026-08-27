@@ -81,7 +81,7 @@ export const uc01UnitConsumption: UseCaseUnitConsumption = {
       stepName: "Provision + Test",
       description: "Provisions test environment, executes test plan against the PTF-applied environment, attributes failures, generates configuration updates (e.g. CSD changes) when test failures reveal them, validates the fix.",
       activities: [
-        { activity: "Virtual test environment provision (1 provision)", tokens: "1 successful provision", units: "0.1" },
+        { activity: "Virtual test environment provision (1 provision)", tokens: "1 successful provision", units: "0.1", provisionedEnv: true },
         { activity: "Functional test suite generated for affected applications", tokens: "300,000 tokens", units: "3.0" },
         { activity: "Configuration update artifact (e.g. CSD update generated)", tokens: "~50,000 tokens (sub-artifact within functional test workflow)", units: "included in functional test" },
       ],
@@ -101,7 +101,7 @@ export const uc01UnitConsumption: UseCaseUnitConsumption = {
       description: "Orchestrates production apply across LPARs in sequenced order. Each LPAR apply requires individual authorization. Progress visible in real time. DR remediation follows production.",
       activities: [
         { activity: "Production apply orchestration (no new inference artifact — execution only)", tokens: "Footprint", units: "0" },
-        { activity: "DR environment provision (if Atlas-provisioned DR test prior to DR apply)", tokens: "1 successful provision", units: "0.1" },
+        { activity: "DR environment provision (if Atlas-provisioned DR test prior to DR apply)", tokens: "1 successful provision", units: "0.1", provisionedEnv: true },
       ],
       subtotal: "0.1",
     },
