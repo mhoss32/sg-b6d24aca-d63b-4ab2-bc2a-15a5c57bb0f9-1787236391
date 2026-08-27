@@ -145,3 +145,10 @@ export const uc01UnitConsumption: UseCaseUnitConsumption = {
   ],
   totalNominal: "14.7–15.2",
 };
+
+export function getUnitConsumption(useCaseId: string): UseCaseUnitConsumption | null {
+  if (useCaseId === "UC-01" || useCaseId === "uc-01") {
+    return uc01UnitConsumption;
+  }
+  return null;
+}
