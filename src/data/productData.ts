@@ -535,6 +535,42 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
           summary: "Atlas generates the complete audit trail — exposure assessment, blast radius, plan, test results, apply log, authorization chain. Concert4Z's change evidence integration means the closed vulnerability remediation record in Atlas flows into Concert4Z's operational context, so production operations teams have the full remediation history available during any subsequent incident investigation on the affected systems.",
           stageIndex: 8,
         },
+        {
+          type: "handoff",
+          product: "Terraform",
+          title: "Terraform Handoff",
+          steps: [
+            { label: "Atlas produced", description: "Atlas has generated a sequenced remediation plan: PTF apply order across LPARs, prerequisites resolved, maintenance window scoped. The plan identifies each target LPAR and the infrastructure state it needs to be in for the patch to land safely." },
+            { label: "Atlas directs", description: "Before authorising execution, Atlas surfaces the infrastructure gate: each target LPAR should be confirmed in its declared infrastructure state before the patch sequence begins. The user is directed to run terraform plan against each target LPAR's workspace to confirm no infrastructure drift exists that could affect the patch outcome." },
+            { label: "Terraform returns", description: "Terraform plan output confirming zero infrastructure-layer drift on each target LPAR — or surfacing any infrastructure differences that need to be resolved before patching begins. Atlas incorporates this confirmation into the pre-patch health check record." },
+          ],
+          stageIndex: 3,
+        },
+        {
+          type: "handoff",
+          product: "Terraform",
+          title: "Terraform Handoff",
+          steps: [
+            { label: "Atlas produced", description: "Atlas is orchestrating the production apply across LPARs in sequenced order. If the patch cycle fails mid-sequence on a specific LPAR, Atlas generates a recovery plan from the point of failure." },
+            { label: "Atlas directs", description: "If the patch failure is attributable to an infrastructure state mismatch, Atlas surfaces this and directs the team to Terraform to restore the LPAR to its last known good declared state before retrying." },
+            { label: "Terraform returns", description: "Terraform state restored to the pre-patch baseline. Atlas receives confirmation and resumes the recovery plan from the correct infrastructure checkpoint." },
+          ],
+          stageIndex: 6,
+        },
+        {
+          type: "enrichment",
+          product: "Terraform",
+          title: "Terraform Enrichment Touchpoint",
+          summary: "When Atlas identifies which LPARs are running the affected product version, Terraform's state file provides an authoritative record of each LPAR's current infrastructure specification — CPU, memory, activation profiles, storage mounts. This additional infrastructure context enriches the exposure assessment: Atlas can determine not just which LPARs are exposed but whether any of those LPARs are in non-standard infrastructure configurations that could complicate the patch.",
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Terraform",
+          title: "Terraform Enrichment Touchpoint",
+          summary: "The remediation audit record Atlas generates includes the software change trail. When Terraform is deployed, the infrastructure audit record — versioned state diffs for each LPAR touched during the patch cycle — complements Atlas's software record, producing a complete infrastructure-plus-software audit trail spanning both layers.",
+          stageIndex: 8,
+        },
       ],
     },
     capabilities: [
