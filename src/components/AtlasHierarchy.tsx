@@ -123,8 +123,8 @@ function SynergyColumn({ ratings }: { ratings: SynergyRating }) {
   };
 
   return (
-    <div className="flex flex-col gap-1.5 ml-3 pl-3 border-l border-border/10 flex-shrink-0 self-stretch justify-center">
-      <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">External Product Synergies</div>
+    <div className="flex flex-col gap-1.5 ml-2 py-2 px-2.5 rounded-lg bg-white/[0.04] border border-white/[0.06] flex-shrink-0 self-stretch justify-center min-w-[110px]">
+      <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5 text-center">External Product Synergies</div>
       {items.map((item) => {
         const c = colors[item.rating];
         return (
