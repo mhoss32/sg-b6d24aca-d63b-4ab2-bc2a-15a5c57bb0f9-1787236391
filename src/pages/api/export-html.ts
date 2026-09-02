@@ -4,6 +4,7 @@ import path from "path";
 import { useCaseDetails, productNodes, personaData } from "@/data/productData";
 import type { UseCaseDetail, FlowDiagram, ExternalTouchpoint } from "@/data/productData";
 import { getUnitConsumption } from "@/data/unitConsumption";
+import { getSynergyRating, type SynergyRating } from "@/data/productData";
 
 const asIsConfig: Record<string, { color: string; bg: string; border: string; label: string; iconSvg: string }> = {
   pain: {
@@ -716,6 +717,34 @@ function renderPersonaUseCaseTile(id: string, uc: UseCaseDetail, engagement: str
     </div>`;
 }
 
+function renderSynergyColumn(ratings: SynergyRating): string {
+  const items: { label: string; rating: string }[] = [
+    { label: "Bob PPZ", rating: ratings.bobPpz },
+    { label: "Concert4Z", rating: ratings.concert4z },
+    { label: "Terraform", rating: ratings.terraform },
+  ].filter((i) => i.rating !== "None");
+
+  if (items.length === 0) return "";
+
+  const colors: Record<string, { text: string; border: string; bg: string }> = {
+    High: { text: "#4ade80", border: "rgba(74,222,128,0.25)", bg: "rgba(74,222,128,0.12)" },
+    Medium: { text: "#facc15", border: "rgba(250,204,21,0.25)", bg: "rgba(250,204,21,0.12)" },
+    Low: { text: "#fb923c", border: "rgba(251,146,60,0.25)", bg: "rgba(251,146,60,0.12)" },
+  };
+
+  return `
+    <div style="display: flex; flex-direction: column; gap: 6px; margin-left: 12px; padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.06); flex-shrink: 0;">
+      ${items.map((item) => {
+        const c = colors[item.rating];
+        return `
+        <div style="text-align: right;">
+          <div style="font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.2;">${item.label}</div>
+          <span style="display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 9999px; border: 1px solid ${c.border}; background: ${c.bg}; color: ${c.text}; margin-top: 2px;">${item.rating}</span>
+        </div>`;
+      }).join("")}
+    </div>`;
+}
+
 function renderHomePage(ibmB64: string, systemB64: string, changeB64: string, predictiveB64: string): string {
   const useCases = productNodes.filter((n) => n.type === "useCase");
 
@@ -790,21 +819,23 @@ function renderHomePage(ibmB64: string, systemB64: string, changeB64: string, pr
           const leftColor = PILLARS.find((p) => p.id === ucPillars[0])?.color || "#00D4FF";
           const rightColor = PILLARS.find((p) => p.id === ucPillars[ucPillars.length - 1])?.color || leftColor;
           const isMulti = ucPillars.length > 1;
+          const synergy = getSynergyRating(uc.id);
 
           return `
           <div onclick="showPage('uc-${uc.id}')" style="cursor: pointer; grid-column: ${span.start} / ${span.end}; grid-row: ${row} / ${row + 1}; border-radius: 14px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 20px 24px; transition: border-color 0.2s; border-left: 4px solid ${leftColor}; ${isMulti ? `border-right: 4px solid ${rightColor};` : ""}">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <div style="display: flex; gap: 4px; flex-shrink: 0;">
-                ${ucPillars.map((pid) => {
-                  const p = PILLARS.find((pl) => pl.id === pid);
-                  if (!p) return "";
-                  return `<span style="font-size: 9px; font-weight: 700; color: ${p.color}; padding: 2px 6px; border-radius: 4px; background: ${p.bg}; border: 1px solid ${p.border};">${p.shortName}</span>`;
-                }).join("")}
-              </div>
-              <div>
-                <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin: 0 0 2px;">${escapeHTML(uc.label)}</h3>
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px;">
+                  ${ucPillars.map((pid) => {
+                    const p = PILLARS.find((pl) => pl.id === pid);
+                    if (!p) return "";
+                    return `<span style="font-size: 9px; font-weight: 700; color: ${p.color}; padding: 2px 6px; border-radius: 4px; background: ${p.bg}; border: 1px solid ${p.border};">${p.shortName}</span>`;
+                  }).join("")}
+                </div>
+                <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin: 0 0 4px;">${escapeHTML(uc.label)}</h3>
                 <p style="font-size: 12px; color: #64748b; margin: 0; line-height: 1.4;">${escapeHTML(uc.description)}</p>
               </div>
+              ${renderSynergyColumn(synergy)}
             </div>
           </div>`;
         }).join("")}
