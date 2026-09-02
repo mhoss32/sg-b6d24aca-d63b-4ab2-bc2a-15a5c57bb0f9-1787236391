@@ -68,6 +68,7 @@ export interface ExternalProduct {
 export const externalProducts: ExternalProduct[] = [
   { id: "bob-ppz", label: "Bob PPZ", description: "Code-level application change intelligence with ZUnderstand integration" },
   { id: "concert4z", label: "Concert4Z", description: "Production observability, risk management, and ZEN runtime analytics" },
+  { id: "terraform", label: "Terraform", description: "Infrastructure-as-code provisioning and state management for IBM Z environments" },
 ];
 
 export interface Capability {

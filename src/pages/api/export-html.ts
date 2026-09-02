@@ -150,9 +150,9 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
           <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #3b82f6;">External Integrations</span>
         </div>
         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-          ${["bob-ppz", "concert4z"].map((pid) => {
+          ${["bob-ppz", "concert4z", "terraform"].map((pid) => {
             const hasTp = flow.externalTouchpoints?.some((tp) => tp.product.toLowerCase().replace(/\s+/g, "-") === pid);
-            const label = pid === "bob-ppz" ? "Bob PPZ" : "Concert4Z";
+            const label = pid === "bob-ppz" ? "Bob PPZ" : pid === "concert4z" ? "Concert4Z" : "Terraform";
             return `
             <label style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 6px; border: 1px solid ${hasTp ? "rgba(0,212,255,0.3)" : "rgba(255,255,255,0.1)"}; background: ${hasTp ? "rgba(0,212,255,0.05)" : "rgba(255,255,255,0.02)"}; cursor: ${hasTp ? "pointer" : "not-allowed"}; opacity: ${hasTp ? "1" : "0.4"};">
               <input type="checkbox" ${hasTp ? "" : "disabled"} class="ext-toggle" data-uc="${ucId}" data-product="${pid}" style="width: 14px; height: 14px; accent-color: #00D4FF;">
