@@ -1207,13 +1207,6 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
           stageIndex: 2,
         },
       ],
-      capabilities: [
-        { name: "System Discovery", timeline: "GA", description: "Full environment inventory" },
-        { name: "System Topology", timeline: "GA", description: "Subsystem dependency mapping" },
-        { name: "Change Risk Assessment", timeline: "GA", description: "Compatibility and sequencing analysis" },
-        { name: "Workflow Engine", timeline: "GA", description: "Phased upgrade orchestration" },
-        { name: "Test Environment Provisioning", timeline: "GA", description: "Isolation testing environments" },
-      ],
     },
     capabilities: [
       { name: "System Discovery", timeline: "GA", description: "Full environment inventory" },
