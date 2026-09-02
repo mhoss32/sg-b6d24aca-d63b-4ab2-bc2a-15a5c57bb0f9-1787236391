@@ -71,6 +71,33 @@ export const externalProducts: ExternalProduct[] = [
   { id: "terraform", label: "Terraform", description: "Infrastructure-as-code provisioning and state management for IBM Z environments" },
 ];
 
+export interface SynergyRating {
+  bobPpz: "High" | "Medium" | "Low" | "None";
+  concert4z: "High" | "Medium" | "Low" | "None";
+  terraform: "High" | "Medium" | "Low" | "None";
+}
+
+export function getSynergyRating(useCaseId: string): SynergyRating {
+  const uc = useCaseDetails[useCaseId]?.toBe;
+  const touchpoints = uc?.externalTouchpoints || [];
+
+  function ratingFor(product: string): "High" | "Medium" | "Low" | "None" {
+    const productTps = touchpoints.filter((tp) => tp.product.toLowerCase().replace(/\s+/g, "-") === product);
+    if (productTps.length === 0) return "None";
+    const handoffs = productTps.filter((tp) => tp.type === "handoff").length;
+    const enrichments = productTps.filter((tp) => tp.type === "enrichment").length;
+    if (handoffs >= 2 || (handoffs >= 1 && enrichments >= 2)) return "High";
+    if (handoffs >= 1 || enrichments >= 2) return "Medium";
+    return "Low";
+  }
+
+  return {
+    bobPpz: ratingFor("bob-ppz"),
+    concert4z: ratingFor("concert4z"),
+    terraform: ratingFor("terraform"),
+  };
+}
+
 export interface Capability {
   name: string;
   timeline: "GA" | "H1 2027" | "H2 2027";

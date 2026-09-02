@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { productNodes, type ProductNode } from "@/data/productData";
+import { productNodes, type ProductNode, getSynergyRating, type SynergyRating, externalProducts } from "@/data/productData";
 import { Network, ChevronDown, ChevronUp } from "lucide-react";
 
 interface PillarConfig {
@@ -105,6 +105,39 @@ function computeLayout(useCases: ProductNode[], collapsed: Set<string>, pillarOr
   }
 
   return { rows, spans, visibleUCs };
+}
+
+function SynergyBadge({ label, rating }: { label: string; rating: "High" | "Medium" | "Low" | "None" }) {
+  if (rating === "None") return null;
+  const colors = {
+    High: { bg: "rgba(74,222,128,0.12)", text: "#4ade80", border: "rgba(74,222,128,0.25)" },
+    Medium: { bg: "rgba(250,204,21,0.12)", text: "#facc15", border: "rgba(250,204,21,0.25)" },
+    Low: { bg: "rgba(251,146,60,0.12)", text: "#fb923c", border: "rgba(251,146,60,0.25)" },
+  };
+  const c = colors[rating];
+  return (
+    <span
+      className="text-[10px] px-1.5 py-0.5 rounded-full font-medium border"
+      style={{ color: c.text, borderColor: c.border, backgroundColor: c.bg }}
+    >
+      {label}: {rating}
+    </span>
+  );
+}
+
+function SynergySection({ ratings }: { ratings: SynergyRating }) {
+  const hasAny = ratings.bobPpz !== "None" || ratings.concert4z !== "None" || ratings.terraform !== "None";
+  if (!hasAny) return null;
+  return (
+    <div className="mt-2 pt-2 border-t border-border/10">
+      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">External Product Synergies</p>
+      <div className="flex flex-wrap gap-1">
+        <SynergyBadge label="Bob PPZ" rating={ratings.bobPpz} />
+        <SynergyBadge label="Concert4Z" rating={ratings.concert4z} />
+        <SynergyBadge label="Terraform" rating={ratings.terraform} />
+      </div>
+    </div>
+  );
 }
 
 export function AtlasHierarchy() {
@@ -276,6 +309,7 @@ export function AtlasHierarchy() {
                           );
                         })}
                       </div>
+                      <SynergySection ratings={getSynergyRating(uc.id)} />
                     </div>
                   </div>
                 </Link>
