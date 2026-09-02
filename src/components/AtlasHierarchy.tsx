@@ -123,7 +123,8 @@ function SynergyColumn({ ratings }: { ratings: SynergyRating }) {
   };
 
   return (
-    <div className="flex flex-col gap-1.5 ml-3 pl-3 border-l border-border/10 flex-shrink-0">
+    <div className="flex flex-col gap-1.5 ml-3 pl-3 border-l border-border/10 flex-shrink-0 self-stretch justify-center">
+      <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">External Product Synergies</div>
       {items.map((item) => {
         const c = colors[item.rating];
         return (

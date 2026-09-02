@@ -733,7 +733,8 @@ function renderSynergyColumn(ratings: SynergyRating): string {
   };
 
   return `
-    <div style="display: flex; flex-direction: column; gap: 6px; margin-left: 12px; padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.06); flex-shrink: 0;">
+    <div style="display: flex; flex-direction: column; gap: 6px; margin-left: 12px; padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; align-self: stretch; justify-content: center;">
+      <div style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">External Product Synergies</div>
       ${items.map((item) => {
         const c = colors[item.rating];
         return `
