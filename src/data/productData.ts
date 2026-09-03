@@ -849,6 +849,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Chris", type: "gain", title: "New User Capability — proactive risk surfacing", description: "Shows what matters before new hire knows to ask — no need to know what to look for.", stageIndex: 2 },
         { persona: "Alice", type: "gain", title: "New User Capability — Atlas replaces shadowing", description: "Queryable, current environment model replaces informal shadowing.", stageIndex: 1 },
         { persona: "Zach", type: "skill", title: "Atlas AI & Automation — critical knowledge captured", description: "Reduces retirement impact by preserving expert knowledge in Atlas.", stageIndex: 2 },
+        { persona: "Chris", type: "gain", title: "New User Capability — Atlas-guided first change with full plan, test, and workflow support", description: "Chris's first change is executed through Atlas's guided workflow — impact analysis, test plan, validation, and deployment orchestration all provided step by step.", stageIndex: 4 },
       ],
       externalTouchpoints: [
         {
