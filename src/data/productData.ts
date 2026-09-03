@@ -924,6 +924,8 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Kathleen", type: "pain", title: "Business Impact — process not reproducible", description: "Different engineers get different answers — no consistent methodology.", stageIndex: 2 },
         { persona: "Angie", type: "pain", title: "Business Impact — blast radius routinely underestimated", description: "Changes scoped based on incomplete understanding — production incidents result.", stageIndex: 4 },
         { persona: "Zach", type: "pain", title: "Business Impact — developers require sysprog involvement", description: "Every dependency query creates bottleneck — sysprog team overwhelmed.", stageIndex: 1 },
+        { persona: "Angie", type: "time", title: "Lost Time — hours of manual coordination just to establish the analysis boundary", description: "Angie names an application and must then coordinate with Db2 DBA, CICS specialist, MQ team, and storage admin to establish what is in scope — no single source of application boundary truth.", stageIndex: 0 },
+        { persona: "Kathleen", type: "pain", title: "Business Impact — cross-checking findings from multiple specialists is manual, error-prone, and rarely complete", description: "Validation relies on each specialist confirming their own subsystem findings independently — cross-subsystem validation (does the Db2 finding match the CICS finding for the same application?) is never performed.", stageIndex: 3 },
       ],
     },
     toBe: {
@@ -941,6 +943,8 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Kathleen", type: "gain", title: "New User Capability — reproducible results", description: "Same query returns same result every time — consistent and reliable.", stageIndex: 2 },
         { persona: "Angie", type: "gain", title: "New User Capability — developers self-serve", description: "No z/OS specialist involvement needed for dependency queries.", stageIndex: 1 },
         { persona: "Greg", type: "gain", title: "New User Capability — infrastructure visibility enables architecture decisions", description: "Full stack visibility supports architecture and planning decisions.", stageIndex: 3 },
+        { persona: "Angie", type: "time", title: "Time Saving — application identified and scoped in seconds, not hours of manual coordination", description: "Angie names the application and Atlas immediately knows its scope — no multi-team coordination required to establish the analysis boundary.", stageIndex: 0 },
+        { persona: "Kathleen", type: "gain", title: "New User Capability — deployment confidence from quantified blast radius, not guesswork", description: "Blast radius quantified in applications and data assets — Kathleen promotes changes knowing exactly what is affected, with no reliance on incomplete manual assessment.", stageIndex: 4 },
       ],
       externalTouchpoints: [
         {
@@ -1030,6 +1034,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Derek", type: "pain", title: "Business Impact — no structured artifact produced", description: "Findings live in email and memory — no governance artifact.", stageIndex: 4 },
         { persona: "Quinn", type: "pain", title: "Business Impact — same checks repeated with no historical comparison", description: "Every event requires starting from scratch — no baseline for comparison.", stageIndex: 0 },
         { persona: "Zach", type: "skill", title: "Skill Gap / Bottleneck — only Zach has cross-tool context", description: "Only the most experienced engineer can identify cross-tool implications.", stageIndex: 2 },
+        { persona: "Zach", type: "time", title: "Lost Time — 1–2 hours of expert-only SMP/E dialog navigation to identify missing PTFs and HIPERs", description: "PTF currency review requires ISPF/SMP/E expertise — no automated inventory of missing critical maintenance across the estate. HIPER identification is manual and expert-dependent.", stageIndex: 1 },
       ],
     },
     toBe: {
@@ -1047,6 +1052,8 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Derek", type: "gain", title: "New User Capability — structured artifact enables governance review", description: "Governance-ready health assessment generated automatically.", stageIndex: 3 },
         { persona: "Quinn", type: "gain", title: "New User Capability — health baseline enables trend comparison", description: "Compare health across events — track improvement or degradation over time.", stageIndex: 4 },
         { persona: "Quinn", type: "gain", title: "New User Capability — any team member can request health check", description: "Not just Zach — any authorized user can run a comprehensive health assessment.", stageIndex: 1 },
+        { persona: "Zach", type: "time", title: "Time Saving — scope definition is a single query, not a multi-team coordination effort", description: "Atlas scopes the health assessment from a single user query — no coordination across security, DBA, and systems teams to define what to check.", stageIndex: 0 },
+        { persona: "Quinn", type: "skill", title: "Atlas AI & Automation — compound risk severity ranking surfaces the issues that matter most to operations", description: "Findings ranked by compound risk — a Db2 configuration deviation that also correlates with a missing PTF is elevated above either finding in isolation. Quinn sees priority order, not raw technical output.", stageIndex: 2 },
       ],
       externalTouchpoints: [
         {
@@ -1572,6 +1579,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Quinn", type: "pain", title: "Business Impact — post-change performance regression discovered by accident", description: "Post-change regressions are discovered through user complaints, not proactive monitoring.", stageIndex: 3 },
         { persona: "Annette", type: "pain", title: "Business Impact — dark capacity invisible — teams procure what they have", description: "Underutilized resources are invisible without dedicated analysis — teams procure capacity they already have.", stageIndex: 1 },
         { persona: "Zach", type: "skill", title: "Skill Gap / Bottleneck — diagnosis requires expert across multiple disciplines", description: "Performance diagnosis requires cross-subsystem expertise that only the most experienced engineers possess.", stageIndex: 4 },
+        { persona: "Alex", type: "pain", title: "Business Impact — performance testing skipped due to lab scheduling conflicts, leaving changes unvalidated before production", description: "Test environments are shared and scheduled — performance testing is frequently deferred or skipped, meaning configuration changes reach production without load validation.", stageIndex: 2 },
       ],
     },
     toBe: {
