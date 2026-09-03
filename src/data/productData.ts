@@ -625,6 +625,9 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Quinn", type: "gain", title: "New User Capability — complete change record with test evidence", description: "Full audit trail and test evidence generated automatically at close.", stageIndex: 5 },
         { persona: "Alice", type: "gain", title: "New User Capability — mid-level engineers execute with Atlas guidance", description: "Step-by-step execution guidance reduces expert dependency.", stageIndex: 2 },
         { persona: "Stan", type: "skill", title: "Atlas AI & Automation — cross-subsystem impact visible before apply", description: "CICS regions, Db2 connections, and MQ channels stay stable during patch apply.", stageIndex: 1 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — missing PTFs surfaced proactively without manual query", description: "Atlas identifies missing and at-risk PTFs across all LPARs before a user asks — eliminating the manual SMP/E inventory step entirely.", stageIndex: 0 },
+        { persona: "Alice", type: "gain", title: "New User Capability — isolated test environments provisioned automatically in the background", description: "Test environment ready when needed — no ticket, no wait, no shared environment conflicts.", stageIndex: 3 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — automated smoke and function tests with failure attribution", description: "Validation runs automatically with failures attributed to specific components — no manual test execution or interpretation required.", stageIndex: 4 },
       ],
       externalTouchpoints: [
         {
@@ -751,6 +754,8 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Sage", type: "skill", title: "Atlas AI & Automation — behavioral anomaly detection", description: "Finds patterns no human thought to look for across RACF, SMP/E, and configuration data.", stageIndex: 3 },
         { persona: "Derek", type: "gain", title: "New User Capability — compliance professional operates without deep z/OS expertise", description: "Atlas surfaces findings in plain language — no need for RACF expert to interpret.", stageIndex: 5 },
         { persona: "Quinn", type: "gain", title: "New User Capability — proactive remediation before audit window", description: "Gaps addressed on a continuous basis rather than under audit pressure.", stageIndex: 4 },
+        { persona: "Derek", type: "gain", title: "New User Capability — audit scope confirmed automatically from continuous record", description: "Atlas confirms the audit scope from its live environment model — no manual scope definition across multiple systems.", stageIndex: 0 },
+        { persona: "Sage", type: "skill", title: "Atlas AI & Automation — cross-source compliance analysis joins RACF, Db2, and configuration in one severity-ranked view", description: "Compliance gaps analyzed across all sources simultaneously — severity ranked with compound risk identification.", stageIndex: 2 },
       ],
       externalTouchpoints: [
         {
@@ -1567,6 +1572,8 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Quinn", type: "skill", title: "Atlas AI & Automation — post-change regression detected same day", description: "Behavioral baseline comparison surfaces regressions within hours of a change, not days later.", stageIndex: 3 },
         { persona: "Annette", type: "gain", title: "New User Capability — unified cross-pillar analysis replaces multi-team investigation", description: "Annette can triage performance issues with Atlas's cross-subsystem correlation without escalating to Alex.", stageIndex: 4 },
         { persona: "Zach", type: "skill", title: "Atlas AI & Automation — dark capacity discovered and mapped", description: "Atlas identifies underutilized resources and over-provisioned LPARs — no wasted capacity procurement.", stageIndex: 1 },
+        { persona: "Alex", type: "skill", title: "Atlas AI & Automation — load projection models configuration against actual workload history", description: "Atlas models transaction volume against current configuration — projecting constraints and headroom with data-driven accuracy.", stageIndex: 0 },
+        { persona: "Alex", type: "gain", title: "New User Capability — configuration change plan with isolated test criteria generated automatically", description: "Atlas generates the specific configuration change plan and test criteria — scoped, validated, and ready for execution.", stageIndex: 2 },
       ],
       externalTouchpoints: [
         {
