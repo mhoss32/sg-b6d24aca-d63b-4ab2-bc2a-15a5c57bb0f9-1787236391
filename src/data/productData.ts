@@ -607,6 +607,10 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Zach", type: "pain", title: "Business Impact — prerequisite chains resolved by memory", description: "Missed prerequisites cause production outages during change windows.", stageIndex: 2 },
         { persona: "Quinn", type: "pain", title: "Business Impact — rollback planning improvised", description: "When things go wrong, rollback plans are created on the spot rather than prepared in advance.", stageIndex: 5 },
         { persona: "Zach", type: "skill", title: "Skill Gap / Bottleneck — mid-level engineers cannot execute independently", description: "Every patch application requires Zach's direct involvement — high expert dependency creates bottleneck.", stageIndex: 2 },
+        { persona: "Zach", type: "time", title: "Lost Time — 2–4 hours per environment just to understand current PTF state", description: "Querying SMP/E for PTF inventory and prerequisite chains requires ISPF dialogs with no natural language interface — slow and expert-dependent.", stageIndex: 0 },
+        { persona: "Stan", type: "time", title: "Lost Time — hours per quarter monitoring maintenance bulletins across subsystems", description: "Subsystem-specific maintenance gaps (CICS, Db2, MQ) are not surfaced automatically — Stan must monitor IBM fix lists and product announcements manually.", stageIndex: 0 },
+        { persona: "Zach", type: "time", title: "Lost Time — 2–5 days to provision a test environment, or the step is skipped", description: "Test environments are provisioned manually — slow, error-prone, and frequently skipped under time pressure. Production becomes the de facto test environment.", stageIndex: 3 },
+        { persona: "Alice", type: "skill", title: "Skill Gap / Bottleneck — test environment provisioning blocked on Zach's availability or a separate team", description: "Mid-level engineers cannot independently provision test environments; every provisioning step requires Zach's involvement or a separate infrastructure request.", stageIndex: 3 },
       ],
     },
     toBe: {
@@ -628,6 +632,8 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Zach", type: "skill", title: "Atlas AI & Automation — missing PTFs surfaced proactively without manual query", description: "Atlas identifies missing and at-risk PTFs across all LPARs before a user asks — eliminating the manual SMP/E inventory step entirely.", stageIndex: 0 },
         { persona: "Alice", type: "gain", title: "New User Capability — isolated test environments provisioned automatically in the background", description: "Test environment ready when needed — no ticket, no wait, no shared environment conflicts.", stageIndex: 3 },
         { persona: "Zach", type: "skill", title: "Atlas AI & Automation — automated smoke and function tests with failure attribution", description: "Validation runs automatically with failures attributed to specific components — no manual test execution or interpretation required.", stageIndex: 4 },
+        { persona: "Zach", type: "time", title: "Time Saving — no forced trade-off between speed and rigor; fast-track path is built in", description: "Transparent step-by-step execution with reasoning visible — Zach can pause or abort at any point. Emergency patches fast-tracked through the same safe workflow.", stageIndex: 5 },
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — rollback path is planned before execution begins", description: "Rollback plan is generated alongside the execution plan — rollback is not improvised, it starts from a documented known-good state.", stageIndex: 5 },
       ],
       externalTouchpoints: [
         {
@@ -736,6 +742,10 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Sage", type: "skill", title: "Skill Gap / Bottleneck — separation of duties analysis performed manually under deadline", description: "Complex RACF analysis requires deep expertise and is done under time pressure.", stageIndex: 2 },
         { persona: "Derek", type: "pain", title: "Business Impact — no proactive detection", description: "Gaps surface only when specifically looked for — no continuous monitoring.", stageIndex: 3 },
         { persona: "Quinn", type: "pain", title: "Business Impact — audit findings disrupt planned work", description: "Audit findings must be remediated immediately, pulling resources from planned projects.", stageIndex: 4 },
+        { persona: "Derek", type: "time", title: "Lost Time — 1–3 days to understand what evidence can even be assembled", description: "Scoping an IBM Z audit requires coordinating with Zach, Sage, and multiple subsystem teams just to understand what evidence is available — no unified inventory.", stageIndex: 0 },
+        { persona: "Derek", type: "skill", title: "Skill Gap / Bottleneck — Derek cannot self-serve any z/OS evidence without expert support", description: "Does not have deep z/OS technical expertise; translating audit requirements into system queries requires escalating to Zach or Sage for every domain.", stageIndex: 0 },
+        { persona: "Derek", type: "time", title: "Lost Time — 5–15 business days of senior engineer time per audit cycle", description: "Assembling the evidence package from individual exports (RACF reports, SMP/E records, change logs) takes weeks of engineering time and is error-prone.", stageIndex: 5 },
+        { persona: "Derek", type: "pain", title: "Business Impact — evidence is point-in-time, not continuous", description: "Evidence reflects a snapshot assembled under pressure rather than a continuous, authoritative record. Auditors may find gaps because the snapshot was assembled at a single moment and missed interim changes.", stageIndex: 5 },
       ],
     },
     toBe: {
@@ -756,6 +766,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Quinn", type: "gain", title: "New User Capability — proactive remediation before audit window", description: "Gaps addressed on a continuous basis rather than under audit pressure.", stageIndex: 4 },
         { persona: "Derek", type: "gain", title: "New User Capability — audit scope confirmed automatically from continuous record", description: "Atlas confirms the audit scope from its live environment model — no manual scope definition across multiple systems.", stageIndex: 0 },
         { persona: "Sage", type: "skill", title: "Atlas AI & Automation — cross-source compliance analysis joins RACF, Db2, and configuration in one severity-ranked view", description: "Compliance gaps analyzed across all sources simultaneously — severity ranked with compound risk identification.", stageIndex: 2 },
+        { persona: "Derek", type: "skill", title: "Atlas AI & Automation — compliance framework mapping applied to raw findings automatically", description: "Atlas categorizes findings against SOX IT General Controls, PCI DSS, or customer-defined framework automatically — no manual mapping required.", stageIndex: 2 },
       ],
       externalTouchpoints: [
         {
@@ -832,6 +843,9 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Zach", type: "pain", title: "Business Impact — critical knowledge lives in people's heads", description: "Expert knowledge is lost when people retire — no systematic capture mechanism.", stageIndex: 2 },
         { persona: "Chris", type: "pain", title: "Business Impact — first changes carry high incident risk", description: "Incomplete understanding leads to production incidents during first changes.", stageIndex: 4 },
         { persona: "Alice", type: "skill", title: "Skill Gap / Bottleneck — no systematic knowledge transfer", description: "No mechanism to transfer environmental knowledge from experienced to new staff.", stageIndex: 2 },
+        { persona: "Chris", type: "time", title: "Lost Time — 3–6 months before reaching independent contribution capability", description: "New team members learn the environment through informal shadowing, reading outdated documentation, and asking the one senior engineer who is always too busy.", stageIndex: 0 },
+        { persona: "Zach", type: "time", title: "Lost Time — 4–8 hours of Zach's time per new hire for initial orientation", description: "Every new hire requires Zach to personally deliver environment orientation — the same knowledge transfer, repeated for every new person.", stageIndex: 0 },
+        { persona: "Chris", type: "pain", title: "Business Impact — institutional knowledge lost permanently on retirement", description: "The most critical knowledge lives in people's heads; in environments where the senior engineer has retired, this knowledge is simply gone.", stageIndex: 0 },
       ],
     },
     toBe: {
@@ -850,6 +864,8 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { persona: "Alice", type: "gain", title: "New User Capability — Atlas replaces shadowing", description: "Queryable, current environment model replaces informal shadowing.", stageIndex: 1 },
         { persona: "Zach", type: "skill", title: "Atlas AI & Automation — critical knowledge captured", description: "Reduces retirement impact by preserving expert knowledge in Atlas.", stageIndex: 2 },
         { persona: "Chris", type: "gain", title: "New User Capability — Atlas-guided first change with full plan, test, and workflow support", description: "Chris's first change is executed through Atlas's guided workflow — impact analysis, test plan, validation, and deployment orchestration all provided step by step.", stageIndex: 4 },
+        { persona: "Chris", type: "gain", title: "New User Capability — Chris independently explores the environment without requiring Zach's availability", description: "Self-service exploration — Chris can ask Atlas any environment question and receive a grounded, specific answer without interrupting a senior engineer.", stageIndex: 1 },
+        { persona: "Alice", type: "gain", title: "New User Capability — Alice independently orients to new systems without requiring a shadow period", description: "A mid-level engineer inheriting a system they have not previously managed can orient entirely through Atlas — covering topology, change history, and risk profile in one session.", stageIndex: 1 },
       ],
       externalTouchpoints: [
         {
