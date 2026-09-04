@@ -1,6 +1,6 @@
 ---
 title: Rebuild All Use Cases from New Markdown Files
-status: in_progress
+status: done
 priority: urgent
 type: feature
 tags: [use-cases, data-model, rebuild]
@@ -29,15 +29,15 @@ Update: productData.ts, productNodes, useCaseDetails, persona pages, HTML export
 Do NOT reference old documents.
 
 ## Checklist
-- [ ] Read all 12 new markdown files
-- [ ] Extract data for each use case
-- [ ] Rebuild useCaseDetails with 12 entries
-- [ ] Update productNodes for 12 use cases
-- [ ] Verify external integrations (Bob PPZ, Concert4Z, Terraform)
-- [ ] Update unitConsumption.ts if needed
-- [ ] Verify persona pages reflect new use cases
-- [ ] Update HTML export for new use cases
-- [ ] Build check passes
+- [x] Read all 12 new markdown files
+- [x] Extract data for each use case
+- [x] Rebuild useCaseDetails with 12 entries
+- [x] Update productNodes for 12 use cases
+- [x] Verify external integrations (Bob PPZ, Concert4Z, Terraform)
+- [x] Update unitConsumption.ts if needed
+- [x] Verify persona pages reflect new use cases
+- [x] Update HTML export for new use cases
+- [x] Build check passes
 
 ## Acceptance
 - All 12 use case pages display correctly
