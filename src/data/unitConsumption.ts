@@ -1312,116 +1312,21 @@ export const uc13UnitConsumption: UseCaseUnitConsumption = {
   ],
 };
 
-// UC-14: Change Governance and Traceability
-export const uc14UnitConsumption: UseCaseUnitConsumption = {
-  useCaseId: "UC-14",
-  steps: [
-    {
-      stepNumber: 1,
-      stepName: "Change Initiated (Cross-UC)",
-      description: "A change is initiated in any other Atlas workflow (UC-01 through UC-13). Atlas automatically captures change metadata.",
-      activities: [
-        { activity: "Change metadata capture and audit logging (footprint)", tokens: "Footprint", units: "0" },
-      ],
-      subtotal: "0",
-    },
-    {
-      stepNumber: 2,
-      stepName: "Atlas Records Change (Continuous)",
-      description: "Throughout the change workflow, Atlas records every action, authorization, test result, and decision in the change ledger.",
-      activities: [
-        { activity: "Atlas change ledger recording (footprint)", tokens: "Footprint", units: "0" },
-      ],
-      subtotal: "0",
-    },
-    {
-      stepNumber: 3,
-      stepName: "Governance Gate",
-      description: "At defined governance gates, Atlas surfaces a structured change summary: what is changing, what was tested, what the risk assessment says, who has authorized what so far.",
-      activities: [
-        { activity: "CAB/governance gate change summary (per gate)", tokens: "~100,000", units: "1.0 per gate" },
-      ],
-      subtotal: "1.0",
-    },
-    {
-      stepNumber: 4,
-      stepName: "Change Record Generated",
-      description: "At the conclusion of a change workflow, Atlas generates the complete change record — this is the artifact produced by the originating use case.",
-      activities: [
-        { activity: "Change record (attributed to originating use case)", tokens: "—", units: "0" },
-      ],
-      subtotal: "0",
-      note: "Metered in originating use case. No double-billing.",
-    },
-    {
-      stepNumber: 5,
-      stepName: "Traceability Query",
-      description: "Derek, Quinn, or Sage asks Atlas a traceability question — Atlas searches the change ledger and produces a structured traceability report.",
-      activities: [
-        { activity: "Traceability search / change history query (footprint)", tokens: "Footprint", units: "0" },
-        { activity: "Structured traceability analysis report (generated artifact)", tokens: "250,000", units: "2.5" },
-      ],
-      subtotal: "0",
-      note: "Query = 0 units. Structured analysis = 2.5 units.",
-    },
-    {
-      stepNumber: 6,
-      stepName: "Governance Assessment",
-      description: "On a periodic basis, Atlas assesses the organization's change governance posture.",
-      activities: [
-        { activity: "Change governance posture assessment", tokens: "250,000", units: "2.5" },
-      ],
-      subtotal: "2.5",
-    },
-    {
-      stepNumber: 7,
-      stepName: "Audit Report",
-      description: "For a formal audit, Atlas generates a comprehensive change governance audit report.",
-      activities: [
-        { activity: "Change governance audit report (evidence package)", tokens: "400,000", units: "4.0" },
-      ],
-      subtotal: "4.0",
-    },
-  ],
-  fullFlowSummary: [
-    { step: "1 — Change Initiated", activity: "Metadata capture (footprint)", units: "0" },
-    { step: "2 — Records Change", activity: "Audit ledger (footprint)", units: "0" },
-    { step: "3 — Governance Gate", activity: "CAB change summary (per gate)", units: "1.0 per gate" },
-    { step: "4 — Change Record", activity: "Attributed to originating use case", units: "0" },
-    { step: "5 — Traceability Query", activity: "Search (0) / structured analysis (2.5)", units: "0–2.5" },
-    { step: "6 — Governance Assessment", activity: "Change governance posture assessment", units: "2.5" },
-    { step: "7 — Audit Report", activity: "Change governance evidence package", units: "4.0" },
-  ],
-  estateSize: [
-    { scenario: "Footprint-only governance (change ledger, no reports)", adjustment: "No generated artifacts; audit ledger only", multiplierDisplay: "0×", multiplierValue: 0 },
-    { scenario: "Quarterly audit with CAB summaries", adjustment: "12 CAB summaries + 4 governance assessments + 1 audit report", multiplierDisplay: "~0.13×", multiplierValue: 0.13 },
-    { scenario: "Full annual governance program", adjustment: "Baseline (~200 units/year)", multiplierDisplay: "1.0×", multiplierValue: 1.0 },
-  ],
-  additionalAdjustments: [
-    { scenario: "Each additional CAB gate change summary", adjustment: "One additional governance gate artifact", unitDelta: 1.0 },
-    { scenario: "Each additional governance posture assessment", adjustment: "One additional system assessment", unitDelta: 2.5 },
-    { scenario: "Regulatory examination requiring full traceability", adjustment: "Additional evidence package per system examined", unitDelta: 4.0 },
-    { scenario: "Structured traceability analysis report (on-demand)", adjustment: "Generated traceability synthesis artifact", unitDelta: 2.5 },
-  ],
-};
-
 export function getUnitConsumption(useCaseId: string): UseCaseUnitConsumption | null {
   const normalized = useCaseId.toLowerCase().replace(/[^a-z0-9]/g, "");
   switch (normalized) {
-    case "uc01": return uc01UnitConsumption;
-    case "uc02": return uc02UnitConsumption;
-    case "uc03": return uc03UnitConsumption;
-    case "uc04": return uc04UnitConsumption;
-    case "uc05": return uc05UnitConsumption;
-    case "uc06": return uc06UnitConsumption;
+    case "uc01": return uc03UnitConsumption;
+    case "uc02": return uc04UnitConsumption;
+    case "uc03": return uc13UnitConsumption;
+    case "uc04": return uc06UnitConsumption;
+    case "uc05": return uc14UnitConsumption;
+    case "uc06": return uc02UnitConsumption;
     case "uc07": return uc07UnitConsumption;
     case "uc08": return uc08UnitConsumption;
     case "uc09": return uc09UnitConsumption;
     case "uc10": return uc10UnitConsumption;
     case "uc11": return uc11UnitConsumption;
     case "uc12": return uc12UnitConsumption;
-    case "uc13": return uc13UnitConsumption;
-    case "uc14": return uc14UnitConsumption;
     default: return null;
   }
 }
