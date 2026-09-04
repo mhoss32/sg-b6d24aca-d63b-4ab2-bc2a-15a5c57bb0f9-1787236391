@@ -1,0 +1,400 @@
+  "uc-01": {
+    id: "uc-01",
+    label: "UC-01: Audit and Compliance",
+    description: "Preparing for a SOX, PCI, or internal compliance audit on IBM Z today means weeks of manual evidence assembly by the most experienced people on the team — querying RACF, pulling change logs, reconciling configuration state across LPARs, and hoping nothing was missed. Atlas holds a continuous, timestamped record of the entire environment. An audit that previously took days of investigation takes hours, produces structured auditor-ready artifacts, and — critically — surfaces the undocumented changes and configuration deviations before the auditor finds them.",
+    personas: [
+      { name: "Derek", role: "Compliance Evidence Provider", engagement: "Primary" },
+      { name: "Sage", role: "Security Administrator", engagement: "Secondary" },
+      { name: "Zach", role: "z/OS Systems Programmer", engagement: "Secondary" },
+      { name: "Quinn", role: "IT Operations Manager", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Receive audit request", description: "Derek receives an audit notification with a multi-page evidence checklist. He emails Zach and Sage asking for RACF exports, SMP/E reports, and PARMLIB snapshots. Waits 3–5 days for responses." },
+        { name: "Assemble privileged access evidence", description: "Sage manually queries each LPAR's RACF database, exports SPECIAL/OPERATIONS/AUDITOR user lists, deduplicates across LPARs, and builds a spreadsheet. She catches that SYSADM02 was active on a Saturday but does not have context to investigate." },
+        { name: "Produce change history", description: "Zach exports SMP/E maintenance logs, SYSLOG records, and whatever change tickets were created in ServiceNow. He reconciles the three sources in a spreadsheet and identifies 23 changes in the period. He suspects this is incomplete but has no way to verify." },
+        { name: "Configuration compliance check", description: "Zach compares current PARMLIB members against a printed baseline document from 2022. He identifies 11 deviations but is unsure whether more exist in subsystems he does not routinely manage." },
+        { name: "Remediate deviations", description: "Zach spends two days applying corrections to RACF SETROPTS on PROD4 and PROD5. He updates the spreadsheet manually. Derek hopes no new deviations were introduced during the correction process." },
+        { name: "Separation of duties analysis", description: "Sage manually reviews 30+ user authority combinations looking for SoD violations. This takes half a day and she misses a case where a single user holds both SYSADM and security administration authority." },
+        { name: "Generate evidence package", description: "Derek spends two days assembling evidence from spreadsheets, email attachments, and ISPF screenshots. The package is inconsistent in format and he is not confident it is complete." },
+      ],
+      markers: [
+        { persona: "Zach", type: "pain", title: "Pain Point — Multi-day wait for evidence assembly from multiple specialis", description: "Multi-day wait for evidence assembly from multiple specialists", stageIndex: 0 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Evidence from three non-integrated sources (RACF, SMP/E, cha", description: "Evidence from three non-integrated sources (RACF, SMP/E, change tickets) that must be reconciled by hand", stageIndex: 1 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Compliance deviations discovered during audit prep rather th", description: "Compliance deviations discovered during audit prep rather than before", stageIndex: 2 },
+        { persona: "Zach", type: "pain", title: "Pain Point — No proactive detection of behavioral anomalies (dormant user", description: "No proactive detection of behavioral anomalies (dormant user activity, change clustering)", stageIndex: 3 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Manual remediation with no automatic evidence update", description: "Manual remediation with no automatic evidence update", stageIndex: 4 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Evidence package format designed for engineers, not auditors", description: "Evidence package format designed for engineers, not auditors", stageIndex: 5 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Receive audit request", description: "Derek opens Atlas and says \"prepare the SOX ITGC evidence package for the upcoming audit.\" Atlas immediately scopes what it can produce from the current environment record." },
+        { name: "Assemble privileged access evidence", description: "Atlas queries the RACF model across all connected LPARs and produces a structured privileged access report — 12 SPECIAL users, 3 dormant, 2 anomalous service accounts. SYSADM02's Saturday access outside a change window is flagged automatically as a behavioral anomaly for Sage to investigate." },
+        { name: "Produce change history", description: "Atlas queries its 12-month change history for the scoped LPARs. It surfaces 69 documented changes plus 46 changes with no corresponding change record in the Atlas log — specific, verifiable numbers with timestamps and components." },
+        { name: "Configuration compliance check", description: "Atlas compares current configuration state against the defined compliance baseline across CICS, Db2, MQ, and z/OS parameters. It returns 17 deviations, classified by severity, with the current value, the baseline value, and a recommended remediation for each. Compliance is 94%." },
+        { name: "Remediate deviations", description: "Atlas generates remediation plans for the two RACF SETROPTS deviations, validates them in an isolated environment, and orchestrates the apply. Post-remediation compliance is re-checked automatically: 97%. The remediation is documented in the evidence package as proof of corrective action." },
+        { name: "Separation of duties analysis", description: "Atlas performs SoD analysis across the RACF authority model for all connected LPARs. It identifies the combined-authority violation and flags it as a compliance finding with the specific user, authority roles, and remediation recommendation." },
+        { name: "Generate evidence package", description: "Atlas generates the structured evidence package: privileged access report, change history with undocumented change annotations, configuration compliance report, SoD analysis, and remediation log — in auditor-ready format with source citations and timestamps." },
+      ],
+      markers: [
+      ],
+    },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Automated environment inventory" },
+    ],
+  },
+  "uc-02": {
+    id: "uc-02",
+    label: "UC-02: Staff Onboarding",
+    description: "Every IBM Z organization is facing the same slow-motion crisis: experienced systems programmers and operations engineers are retiring, and the institutional knowledge they carry — how the environment is configured, what depends on what, why things are the way they are — leaves with them. Atlas makes that knowledge available to anyone who asks. A new team member can understand the full production environment in a single conversation, not over months of shadowing. That is not a convenience; it is business continuity.",
+    personas: [
+      { name: "Chris", role: "z/OS Systems Programmer", engagement: "Secondary" },
+      { name: "Zach", role: "z/OS Systems Programmer", engagement: "Secondary" },
+      { name: "Annette", role: "IT Operations Engineer", engagement: "Secondary" },
+      { name: "Alice", role: "z/OS Systems Programmer", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Day one: understand the environment", description: "Chris is pointed to a wiki that was last updated in 2020. The topology diagrams are outdated. He spends his first two weeks asking Zach questions — Zach answers each one patiently but this pulls Zach away from his own work for hours daily." },
+        { name: "Understand application dependencies", description: "Chris needs to know what the Payment Processing application depends on. He asks Zach, who draws a rough diagram on a whiteboard. The diagram misses three CICS transactions and doesn't include the z/OS Connect REST layer that was added last year." },
+        { name: "Learn the change process", description: "Chris asks Annette how changes are managed. She explains the maintenance window policy and change ticket process. Two weeks later, Chris discovers there are 46 changes in the past year with no change record, which means the process is not being followed consistently." },
+        { name: "Generate a reference document", description: "After six weeks, Chris still does not have a single document that describes the current environment. He writes one himself from notes, but cannot keep it current. When Zach reviews it, he finds 12 errors." },
+        { name: "Execute first change", description: "When Chris is assigned his first PTF apply task, he asks Zach to walk him through it. Zach spends 3 hours supervising. Chris still is not sure whether he could do it independently next time." },
+      ],
+      markers: [
+        { persona: "Zach", type: "pain", title: "Pain Point — Institutional knowledge trapped in one or two individuals wh", description: "Institutional knowledge trapped in one or two individuals who are always over-committed", stageIndex: 0 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Outdated documentation that misrepresents the current enviro", description: "Outdated documentation that misrepresents the current environment", stageIndex: 1 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Change history that does not reflect reality (undocumented c", description: "Change history that does not reflect reality (undocumented changes)", stageIndex: 2 },
+        { persona: "Zach", type: "pain", title: "Pain Point — First change execution requires intensive supervision by the", description: "First change execution requires intensive supervision by the senior engineer", stageIndex: 3 },
+        { persona: "Zach", type: "pain", title: "Pain Point — No durable, current artifact that the new hire can reference", description: "No durable, current artifact that the new hire can reference independently", stageIndex: 4 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Day one: understand the environment", description: "Chris opens Atlas and asks \"walk me through this environment.\" Atlas provides a structured overview: LPAR topology, sysplex structure, key subsystems, and the most critical production applications — drawn from the live environment model, not a stale document." },
+        { name: "Understand application dependencies", description: "Chris asks Atlas \"what does Payment Processing depend on?\" Atlas traverses the topology and returns: 7 CICS transactions, 4 Db2 tables, 2 MQ queue managers, and 3 z/OS Connect REST endpoints — with the direction and strength of each dependency." },
+        { name: "Learn the change process", description: "Atlas surfaces the change history: 246 documented changes in the last 12 months, plus 46 changes with no change record. It explains both the official process (maintenance windows, change tickets) and the reality on the ground — giving Chris an honest picture of how the environment is actually managed, not just how it is supposed to be." },
+        { name: "Generate a reference document", description: "Chris asks Atlas to generate a System Intelligence Brief. Atlas produces a structured document: topology overview, key applications and their dependencies, change history summary, current PTF and software inventory, and flagged open risks. It is accurate as of today and can be regenerated on demand." },
+        { name: "Execute first change", description: "Atlas guides Chris through his first PTF apply end-to-end: impact analysis, test plan, provisioning, validation, and production apply with Atlas guardrails at each step. Zach reviews the plan but does not need to supervise the execution. Atlas records the change for governance." },
+      ],
+      markers: [
+      ],
+    },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Automated environment inventory" },
+    ],
+  },
+  "uc-03": {
+    id: "uc-03",
+    label: "UC-03: Regulatory Change Response",
+    description: "A new regulatory requirement arrives with a 90-day compliance deadline. Today, the first month of that window is spent figuring out what you even have — inventorying regulated data, mapping access controls, and identifying gaps across an environment that no single tool fully describes. Atlas compresses that discovery phase from weeks to hours, so the compliance team can spend the deadline doing remediation, not investigation. It also closes a gap that no competitor addresses: post-remediation monitoring that catches new regulated data or configurations that fall into scope after the initial work is done.",
+    personas: [
+      { name: "Sage", role: "Security Administrator", engagement: "Primary" },
+      { name: "Derek", role: "Compliance Evidence Provider", engagement: "Secondary" },
+      { name: "Lupita", role: "Key Management and Cryptography Services", engagement: "Secondary" },
+      { name: "Zach", role: "z/OS Systems Programmer", engagement: "Secondary" },
+      { name: "Quinn", role: "IT Operations Manager", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Receive new regulation", description: "The compliance team receives a new data privacy mandate with a 90-day deadline. Sage convenes a meeting with the DBA, application team, and security team. The first question — \"what do we have that touches this data?\" — has no quick answer. Week one ends with a list of questions, not an inventory." },
+        { name: "Map access controls", description: "The DBA reviews Db2 catalog for table access grants. Sage reviews RACF profiles for dataset access. The application team reviews program source for direct file access. Each team works independently and none of them has the other's data. Three weeks later, a spreadsheet is assembled that no one is confident is complete." },
+        { name: "Identify gaps and sequence remediation", description: "Sage identifies 23 access control gaps and 8 encryption gaps. She writes a remediation plan manually. Three weeks in, a developer tells her that the batch PAYROLL job will fail if she changes the access controls before updating its credentials. She has to reorder the plan." },
+        { name: "Execute remediation", description: "Sage and Zach work through the three workstreams over four weeks. Lupita is brought in for encryption. Each team tracks their own progress in separate spreadsheets. Status calls are needed weekly to synchronize. Two items slip through the gaps." },
+        { name: "Discover new scope items", description: "Three weeks after remediation is complete, a developer creates a new dataset for a new data category. It falls under the regulation's scope but no one notices until the next audit cycle. This becomes an audit finding." },
+        { name: "Generate evidence package", description: "Derek spends two weeks assembling the compliance evidence package from spreadsheets, email chains, RACF exports, and Db2 audit logs. The result is a multi-hundred-page document that regulators find hard to navigate." },
+      ],
+      markers: [
+        { persona: "Zach", type: "pain", title: "Pain Point — Weeks spent on discovery before any remediation can begin", description: "Weeks spent on discovery before any remediation can begin", stageIndex: 0 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Three independent teams with no unified view of the full reg", description: "Three independent teams with no unified view of the full regulated scope", stageIndex: 1 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Cross-workstream sequencing dependencies discovered only whe", description: "Cross-workstream sequencing dependencies discovered only when they cause failures", stageIndex: 2 },
+        { persona: "Zach", type: "pain", title: "Pain Point — New regulated data created post-remediation undetected until", description: "New regulated data created post-remediation undetected until the next audit", stageIndex: 3 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Evidence package assembled manually from multiple disconnect", description: "Evidence package assembled manually from multiple disconnected sources", stageIndex: 4 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Receive new regulation", description: "Sage opens Atlas and says \"we have a new data privacy regulation — here is the scope definition. What in our z/OS environment is in scope?\" Atlas returns a structured inventory: 6 datasets matching the naming convention, 34 Db2 tables with relevant column patterns, 12 VSAM files, and 6 IMS segments — in under an hour." },
+        { name: "Map access controls", description: "Atlas maps all user IDs and service accounts with current access to every identified regulated data component — cross-referencing RACF dataset profiles, Db2 authorization entries, and application topology. 47 user IDs and service accounts with access are enumerated, with the access path for each." },
+        { name: "Identify gaps and sequence remediation", description: "Atlas analyzes the gap set and generates the sequenced remediation plan, proactively identifying the dependency: batch job credential updates must precede access restriction changes. \"If you apply the access controls before updating the PAYROLL job credentials, the Monday batch run will fail.\" The sequencing risk is surfaced before any change is made." },
+        { name: "Execute remediation", description: "Atlas executes each workstream in sequence with progress tracking across all three: credential updates (Zach), access controls (Sage), encryption enablement (Lupita). Post-execution, Atlas monitors for 48 hours and confirms no batch failures or unexpected access denials." },
+        { name: "Discover new scope items", description: "Atlas detects 3 new datasets created since the initial remediation that match the regulation's scope criteria. It alerts Sage immediately: \"New regulated data detected post-remediation.\" The monitoring is continuous and automatic." },
+        { name: "Generate evidence package", description: "Atlas generates the compliance evidence package directly from its verified compliant state: regulated data inventory with source citations, access control gap findings and remediation actions, encryption enablement evidence with timestamps, post-remediation monitoring log. Exportable, structured, and referenced to the specific regulatory requirements." },
+      ],
+      markers: [
+      ],
+    },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Automated environment inventory" },
+    ],
+  },
+  "uc-04": {
+    id: "uc-04",
+    label: "UC-04: Change Readiness and Health Assessment",
+    description: "Before any significant event on IBM Z — a go-live, a major change, an audit, a peak season — organizations want to know the system is sound. Today that answer requires hours of manual inspection across ISPF panels, SMP/E, and multiple vendor consoles, and it is still incomplete because no single tool sees the full picture. Atlas replaces that manual hunt with a single, multi-source health assessment that joins configuration state, security posture, PTF currency, and performance constraints into one artifact — in minutes, not hours. The health check is the most practical demonstration of Atlas's cross-tool value and is available at GA.",
+    personas: [
+      { name: "Zach", role: "z/OS Systems Programmer", engagement: "Primary" },
+      { name: "Sage", role: "Security Administrator", engagement: "Secondary" },
+      { name: "Derek", role: "Compliance Evidence Provider", engagement: "Secondary" },
+      { name: "Quinn", role: "IT Operations Manager", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Scope the health check", description: "Zach is asked to confirm the system is \"good to go\" before the quarterly go-live. He is not sure exactly what to check, so he reviews what he checked last time from memory. Some subsystems he does not routinely manage are skipped." },
+        { name: "Check PTF currency", description: "Zach queries SMP/E on each LPAR. He finds 3 missing PTFs across the estate. He does not know whether any are FIXCAT security items — that requires a separate ibm.com lookup he does not have time for." },
+        { name: "Review configuration state", description: "Sage reviews RACF settings independently. Zach reviews CICS and Db2 settings independently. Nobody checks z/OS Connect SSL configuration. The review takes a combined 4 hours and produces a note in Confluence that does not capture every finding." },
+        { name: "Identify compound risks", description: "Zach sees the missing PTF separately from Sage's note about the unencrypted connection. Neither recognizes that the combination creates a higher compound risk." },
+        { name: "Remediate before go-live", description: "Zach creates three ServiceNow tickets for remediation. Two are completed before go-live; one (the MQ TLS configuration) slips to after go-live. He makes a note but there is no formal acceptance of the deferred risk." },
+        { name: "Generate the health report", description: "Zach writes a paragraph in Confluence summarizing the health check. There is no structured format, no source citations, and no timestamp. When asked in a post-incident review whether a health check was performed, he cannot produce a document that an auditor would accept." },
+      ],
+      markers: [
+        { persona: "Zach", type: "pain", title: "Pain Point — Multiple specialist teams required; each checks a different ", description: "Multiple specialist teams required; each checks a different tool; no unified view", stageIndex: 0 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Cross-subsystem compound risks invisible because findings ar", description: "Cross-subsystem compound risks invisible because findings are in separate systems", stageIndex: 1 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Configuration findings missed in subsystems not routinely ma", description: "Configuration findings missed in subsystems not routinely managed", stageIndex: 2 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Risk acceptance for deferred items has no formal record", description: "Risk acceptance for deferred items has no formal record", stageIndex: 3 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Health check documentation is informal, non-reproducible, an", description: "Health check documentation is informal, non-reproducible, and not auditor-ready", stageIndex: 4 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Scope the health check", description: "Zach opens Atlas and says \"run a pre-go-live health check for the BANKZ application.\" Atlas confirms the scope: 4 LPARs, CICS region CICSBOZ, Db2 subsystem DBD1, MQ queue manager CSQ9, and z/OS Connect ZOSCSRV. Zach adds: \"also check security posture.\"" },
+        { name: "Check PTF currency", description: "Atlas joins the PTF inventory with the current FIXCAT classification data. It surfaces: 3 missing routine PTFs and 1 missing FIXCAT SEC/INT security PTF. The security PTF is flagged with higher severity and Atlas proactively notes the blast radius if it is not applied." },
+        { name: "Review configuration state", description: "Atlas joins the configuration review across all five sources simultaneously. It surfaces: IBMUSER authority concentration (RACF), IPIC unencrypted connection, MQ channel TLS disabled, a plaintext credential in ZOSCSRV configuration, and a Db2 STATHIST warning. None of these were on Zach's individual checklist." },
+        { name: "Identify compound risks", description: "Atlas identifies the compound risk explicitly: \"The missing security PTF and the unencrypted IPIC connection together create an elevated risk — an attacker with network access could exploit the unencrypted path more easily given the known vulnerability. This compound finding is higher severity than either item alone.\"" },
+        { name: "Remediate before go-live", description: "For each critical finding, Atlas offers a remediation path immediately. Zach chooses to remediate the security PTF (Atlas initiates a UC-06 patch workflow), accept the MQ TLS gap with documented rationale for the current window, and defer the IBMUSER authority concentration. Each decision is recorded in the health artifact." },
+        { name: "Generate the health report", description: "Atlas generates the structured health assessment artifact: 9 findings classified by severity, compound risk callout, remediation decisions with named owner and rationale, discovery timestamp for each source, and a compliance readiness summary for Quinn. The document is exportable and auditor-ready." },
+      ],
+      markers: [
+      ],
+    },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Automated environment inventory" },
+    ],
+  },
+  "uc-05": {
+    id: "uc-05",
+    label: "UC-05: Change Governance and Traceability",
+    description: "IBM Z organizations make hundreds of changes per month. A meaningful fraction of those changes have no associated change record, occur outside defined change windows, and cannot be attributed to a named user from the system configuration history alone. This is not a minor process gap — it is an audit finding, a regulatory risk, and the reason incidents that should take an hour to diagnose take a day. Atlas becomes the system of record for change provenance on IBM Z: every change is attributed, every change window violation is surfaced, and the gap between \"what happened on z/OS\" and \"what the change management system knows about\" closes for the first time.",
+    personas: [
+      { name: "Quinn", role: "IT Operations Manager", engagement: "Primary" },
+      { name: "Annette", role: "IT Operations Engineer", engagement: "Secondary" },
+      { name: "Derek", role: "Compliance Evidence Provider", engagement: "Secondary" },
+      { name: "Zach", role: "z/OS Systems Programmer", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+        { name: "Detect changes", description: "A production RACF configuration change is detected during an audit. Quinn cannot tell from the SYSLOG when it happened, who made it, or whether a change record exists. The investigation takes two days and ultimately cannot be resolved." },
+        { name: "Attribute changes", description: "For Atlas-executed changes, there is no automatic attribution — engineers remember to create change records some of the time. For changes made via ISPF panels, there is no attribution mechanism at all." },
+        { name: "Surface change history", description: "Quinn asks \"what changed on PROD1 in the last 30 days?\" She receives a mix of SMP/E logs, ServiceNow tickets, and email chains — from three different systems with no common format. Reconciling them takes four hours and still does not produce a complete picture." },
+        { name: "Investigate undocumented changes", description: "46 changes in the last year have no corresponding change record. This is discovered during an audit review. Investigating each one requires tracking down the person who made the change, reconstructing the context, and hoping the change was not harmful." },
+        { name: "Document undocumented changes", description: "For authorized emergency changes that skipped the formal process, engineers write a post-hoc change record from memory weeks later. The record is incomplete and often inconsistent with what actually happened." },
+        { name: "Generate audit report", description: "Derek assembles the change control evidence manually for the annual audit. He is never confident the picture is complete. The audit routinely produces findings about change records." },
+      ],
+      markers: [
+        { persona: "Zach", type: "pain", title: "Pain Point — No automated attribution for changes made outside Atlas (ISP", description: "No automated attribution for changes made outside Atlas (ISPF, operator commands, JCL)", stageIndex: 0 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Change record creation is manual and frequently skipped for ", description: "Change record creation is manual and frequently skipped for emergency changes", stageIndex: 1 },
+        { persona: "Zach", type: "pain", title: "Pain Point — \"What changed in the last 30 days?\" requires four hours of m", description: "\"What changed in the last 30 days?\" requires four hours of manual reconciliation across three systems", stageIndex: 2 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Undocumented changes discovered in audit reviews rather than", description: "Undocumented changes discovered in audit reviews rather than proactively", stageIndex: 3 },
+        { persona: "Zach", type: "pain", title: "Pain Point — Post-hoc change records assembled from memory are incomplete", description: "Post-hoc change records assembled from memory are incomplete and inconsistent", stageIndex: 4 },
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+        { name: "Detect changes", description: "Atlas detects the configuration change via Config-as-Code baseline diff: \"RACF SETROPTS AUDIT setting changed from NONE to ALL on PROD4 on November 14 at 22:47. No corresponding change record found in Atlas change log.\" Quinn has all the facts in one query." },
+        { name: "Attribute changes", description: "For every Atlas-executed change, attribution is automatic: named user, timestamp, change type, change record template generated. For out-of-Atlas changes detected via baseline diff, Atlas surfaces the configuration delta with any available evidence (SMF user ID if present) and flags it for investigation." },
+        { name: "Surface change history", description: "Quinn asks Atlas \"what changed on PROD1 in the last 30 days?\" Atlas returns a structured change history: all Atlas-executed changes (fully attributed), all out-of-Atlas changes detected through Config-as-Code baseline diff (with available attribution), and all changes with no record flagged separately." },
+        { name: "Investigate undocumented changes", description: "Atlas surfaces the 46 undocumented changes as a structured audit report: component, timestamp, change type, previous value, new value, and risk classification for each. Annette can triage in order of severity — escalating the 3 high-risk items and accepting the 43 low-risk ones with documented rationale." },
+        { name: "Document undocumented changes", description: "For authorized emergency changes detected as undocumented, Atlas pre-populates a retroactive change record template from the configuration delta evidence: what changed, when, what the previous state was. The engineer adds the business justification and links it to the relevant incident. Atlas records the retroactive documentation." },
+        { name: "Generate audit report", description: "Atlas generates a change control audit report for any specified period: all changes with attribution status, all undocumented changes and their resolution, all out-of-window changes and their disposition. Derek delivers it to auditors as a structured, complete artifact." },
+      ],
+      markers: [
+      ],
+    },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Automated environment inventory" },
+    ],
+  },
+  "uc-06": {
+    id: "uc-06",
+    label: "UC-06: Patch Management",
+    description: "IBM Z organizations spend hours on manual patch impact analysis and often skip test validation due to time pressure — leaving production as the de facto test environment. Atlas automates impact analysis, generates sequenced test plans, and orchestrates patch execution with a full audit trail, turning the highest-risk change type on Z into a guided, repeatable workflow. The result is faster patch cycles, fewer PTF-related outages, and change traceability that satisfies audit requirements without manual assembly.",
+    personas: [
+      { name: "Zach", role: "z/OS Systems Programmer", engagement: "Primary" },
+      { name: "Sage", role: "Security Administrator", engagement: "Secondary" },
+      { name: "Stan", role: "Subsystem SME", engagement: "Secondary" },
+      { name: "Alice", role: "z/OS Systems Programmer", engagement: "Secondary" },
+      { name: "Quinn", role: "IT Operations Manager", engagement: "Secondary" },
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+      ],
+      markers: [
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+      ],
+      markers: [
+      ],
+    },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Automated environment inventory" },
+    ],
+  },
+  "uc-07": {
+    id: "uc-07",
+    label: "UC-07: Application Change Management",
+    description: "",
+    personas: [
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+      ],
+      markers: [
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+      ],
+      markers: [
+      ],
+    },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Automated environment inventory" },
+    ],
+  },
+  "uc-08": {
+    id: "uc-08",
+    label: "UC-08: Platform Upgrade and Migration",
+    description: "",
+    personas: [
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+      ],
+      markers: [
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+      ],
+      markers: [
+      ],
+    },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Automated environment inventory" },
+    ],
+  },
+  "uc-09": {
+    id: "uc-09",
+    label: "UC-09: Application Modernization",
+    description: "",
+    personas: [
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+      ],
+      markers: [
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+      ],
+      markers: [
+      ],
+    },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Automated environment inventory" },
+    ],
+  },
+  "uc-10": {
+    id: "uc-10",
+    label: "UC-10: Environment Parity and Drift Control",
+    description: "",
+    personas: [
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+      ],
+      markers: [
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+      ],
+      markers: [
+      ],
+    },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Automated environment inventory" },
+    ],
+  },
+  "uc-11": {
+    id: "uc-11",
+    label: "UC-11: Disaster Recovery Validation",
+    description: "",
+    personas: [
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+      ],
+      markers: [
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+      ],
+      markers: [
+      ],
+    },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Automated environment inventory" },
+    ],
+  },
+  "uc-12": {
+    id: "uc-12",
+    label: "UC-12: Capacity Planning and Performance Readiness",
+    description: "",
+    personas: [
+    ],
+    asIs: {
+      title: "Current State",
+      stages: [
+      ],
+      markers: [
+      ],
+    },
+    toBe: {
+      title: "Desired Outcome",
+      stages: [
+      ],
+      markers: [
+      ],
+    },
+    capabilities: [
+      { name: "System Discovery", timeline: "GA", description: "Automated environment inventory" },
+    ],
+  },
