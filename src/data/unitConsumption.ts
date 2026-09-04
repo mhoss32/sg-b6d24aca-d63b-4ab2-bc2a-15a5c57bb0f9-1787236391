@@ -156,9 +156,9 @@ export const uc01UnitConsumption: UseCaseUnitConsumption = {
   ],
 };
 
-// UC-02: Patch Management
+// UC-06: Patch Management
 export const uc02UnitConsumption: UseCaseUnitConsumption = {
-  useCaseId: "UC-02",
+  useCaseId: "UC-06",
   steps: [
     {
       stepNumber: 1,
@@ -253,7 +253,7 @@ export const uc02UnitConsumption: UseCaseUnitConsumption = {
 
 // UC-03: Audit and Compliance
 export const uc03UnitConsumption: UseCaseUnitConsumption = {
-  useCaseId: "UC-03",
+  useCaseId: "UC-01",
   steps: [
     {
       stepNumber: 1,
@@ -350,171 +350,9 @@ export const uc03UnitConsumption: UseCaseUnitConsumption = {
   ],
 };
 
-// UC-04: Staff Onboarding
-export const uc04UnitConsumption: UseCaseUnitConsumption = {
-  useCaseId: "UC-04",
-  steps: [
-    {
-      stepNumber: 1,
-      stepName: "Identify Knowledge Gap",
-      description: "A new team member or their manager initiates an onboarding workflow. Atlas identifies the new hire's role, responsibilities, and the systems they will be accountable for.",
-      activities: [
-        { activity: "Role and scope scoping (footprint)", tokens: "Footprint", units: "0" },
-      ],
-      subtotal: "0",
-    },
-    {
-      stepNumber: 2,
-      stepName: "Generate Environment Context",
-      description: "Atlas generates a structured overview of the environment the new hire will work in: topology of relevant systems, key subsystem relationships, software versions, PTF currency state, configuration highlights, and known open items.",
-      activities: [
-        { activity: "Environment context document (topology + configuration overview)", tokens: "250,000", units: "2.5" },
-      ],
-      subtotal: "2.5",
-    },
-    {
-      stepNumber: 3,
-      stepName: "Build Onboarding Content",
-      description: "Generates the personalized onboarding content package for the new hire — tailored to their role and the specific systems they are assigned to.",
-      activities: [
-        { activity: "Role-specific onboarding content package", tokens: "250,000", units: "2.5" },
-      ],
-      subtotal: "2.5",
-    },
-    {
-      stepNumber: 4,
-      stepName: "Guided Exploration",
-      description: "The new hire uses Atlas conversationally to explore the environment, ask questions, trace dependencies, understand configurations.",
-      activities: [
-        { activity: "Ongoing chat and navigation (footprint)", tokens: "Footprint", units: "0" },
-      ],
-      subtotal: "0",
-    },
-    {
-      stepNumber: 5,
-      stepName: "Task Delegation",
-      description: "Zach (or another senior) delegates a specific task to the new hire. Atlas generates step-by-step execution guidance tailored to the delegated task and the delegatee's skill level.",
-      activities: [
-        { activity: "Task delegation guidance document (per significant delegated task)", tokens: "~100,000", units: "1.0" },
-      ],
-      subtotal: "1.0",
-    },
-    {
-      stepNumber: 6,
-      stepName: "Ongoing Learning and Refreshes",
-      description: "As the environment changes, Atlas can refresh the onboarding content to keep it current.",
-      activities: [
-        { activity: "Onboarding content refresh (triggered by significant environment change)", tokens: "250,000", units: "2.5" },
-      ],
-      subtotal: "2.5",
-      note: "Conditional, not per onboarding event.",
-    },
-  ],
-  fullFlowSummary: [
-    { step: "1 — Identify Gap", activity: "Role and scope scoping (footprint)", units: "0" },
-    { step: "2 — Environment Context", activity: "Environment overview document", units: "2.5" },
-    { step: "3 — Onboarding Content", activity: "Role-specific onboarding package", units: "2.5" },
-    { step: "4 — Guided Exploration", activity: "Ongoing chat and navigation (footprint)", units: "0" },
-    { step: "5 — Task Delegation", activity: "Per-task execution guidance", units: "1.0 (per task)" },
-    { step: "6 — Refresh", activity: "Content refresh when environment changes", units: "2.5 (conditional)" },
-  ],
-  estateSize: [
-    { scenario: "Narrow onboarding (1 subsystem, 1 LPAR)", adjustment: "Lighter content package", multiplierDisplay: "~0.7×", multiplierValue: 0.7 },
-    { scenario: "Standard (mid-level hire, 3–4 subsystems)", adjustment: "Baseline", multiplierDisplay: "1.0×", multiplierValue: 1.0 },
-    { scenario: "Senior role onboarding (broad scope, multi-subsystem)", adjustment: "Richer content package (400K tokens = 4.0 units)", multiplierDisplay: "~1.2×", multiplierValue: 1.2 },
-  ],
-  additionalAdjustments: [
-    { scenario: "Each additional hire onboarded in the same cycle", adjustment: "+1 content package + 1 environment context per hire", unitDelta: 5.0 },
-    { scenario: "Annual content refresh per hire", adjustment: "2 refreshes/year at 2.5 units each", unitDelta: 5.0 },
-    { scenario: "Each additional delegated task guidance document", adjustment: "One additional task execution guidance artifact", unitDelta: 1.0 },
-  ],
-};
-
-// UC-05: Application Discovery and Dependency Analysis
-export const uc05UnitConsumption: UseCaseUnitConsumption = {
-  useCaseId: "UC-05",
-  steps: [
-    {
-      stepNumber: 1,
-      stepName: "Trigger",
-      description: "User asks Atlas to discover what's in the environment — either a broad question, or a focused query about a specific component.",
-      activities: [
-        { activity: "Query initiation (footprint)", tokens: "Footprint", units: "0" },
-      ],
-      subtotal: "0",
-    },
-    {
-      stepNumber: 2,
-      stepName: "Discover",
-      description: "Atlas collects the inventory of running applications, subsystems, transactions, APIs, datasets, and their interconnections.",
-      activities: [
-        { activity: "Inventory collection (footprint)", tokens: "Footprint", units: "0" },
-      ],
-      subtotal: "0",
-    },
-    {
-      stepNumber: 3,
-      stepName: "Build Dependency Map",
-      description: "From the discovered inventory, Atlas constructs the dependency graph — which applications call which subsystems, which transactions access which datasets, which external APIs are served by which CICS programs.",
-      activities: [
-        { activity: "Dependency map navigation (interactive, footprint)", tokens: "Footprint", units: "0" },
-        { activity: "Structured dependency analysis document (generated artifact)", tokens: "250,000", units: "2.5" },
-      ],
-      subtotal: "0",
-      note: "Navigation = 0 units. Structured analysis = 2.5 units.",
-    },
-    {
-      stepNumber: 4,
-      stepName: "Analyze Impact",
-      description: "For a specific component or change in scope, Atlas traverses the dependency graph to determine impact.",
-      activities: [
-        { activity: "Application impact analysis (change impact / blast radius)", tokens: "250,000", units: "2.5" },
-      ],
-      subtotal: "2.5",
-    },
-    {
-      stepNumber: 5,
-      stepName: "Generate Report",
-      description: "Produces a structured discovery and dependency report — the complete, shareable artifact for architects or project teams planning a change project.",
-      activities: [
-        { activity: "Application discovery and dependency report", tokens: "250,000", units: "2.5" },
-      ],
-      subtotal: "2.5",
-    },
-    {
-      stepNumber: 6,
-      stepName: "Ongoing Topology Refresh",
-      description: "As the environment changes, Atlas updates the topology model.",
-      activities: [
-        { activity: "Discovery scan refresh (footprint)", tokens: "Footprint", units: "0" },
-        { activity: "Topology change summary document (conditional, if generated)", tokens: "~100,000", units: "1.0" },
-      ],
-      subtotal: "0",
-    },
-  ],
-  fullFlowSummary: [
-    { step: "1 — Trigger", activity: "Query initiation (footprint)", units: "0" },
-    { step: "2 — Discover", activity: "Inventory collection (footprint)", units: "0" },
-    { step: "3 — Map", activity: "Dependency map (navigation = 0; structured analysis = 2.5)", units: "0–2.5" },
-    { step: "4 — Analyze Impact", activity: "Application impact analysis", units: "2.5" },
-    { step: "5 — Report", activity: "Application discovery and dependency report", units: "2.5" },
-    { step: "6 — Refresh", activity: "Topology refresh (footprint; change summary = 1.0 conditional)", units: "0–1.0" },
-  ],
-  estateSize: [
-    { scenario: "Small estate (single component impact query)", adjustment: "Navigation only or one focused assessment", multiplierDisplay: "0–0.5×", multiplierValue: 0.5 },
-    { scenario: "Standard (change project scope, 5–10 apps)", adjustment: "Impact analysis + dependency report (baseline)", multiplierDisplay: "1.0×", multiplierValue: 1.0 },
-    { scenario: "Comprehensive architectural discovery (full estate, 20+ apps)", adjustment: "Three assessments (deep analysis)", multiplierDisplay: "~1.5×", multiplierValue: 1.5 },
-  ],
-  additionalAdjustments: [
-    { scenario: "Structured dependency analysis added (Step 3)", adjustment: "Third assessment artifact added to the flow", unitDelta: 2.5 },
-    { scenario: "Monthly topology health summary report", adjustment: "One additional system assessment per month", unitDelta: 2.5 },
-    { scenario: "Topology change summary on each refresh", adjustment: "Small change summary artifact per refresh cycle", unitDelta: 1.0 },
-  ],
-};
-
-// UC-06: Change Readiness and Health Assessment
+// UC-04: Change Readiness and Health Assessment
 export const uc06UnitConsumption: UseCaseUnitConsumption = {
-  useCaseId: "UC-06",
+  useCaseId: "UC-04",
   steps: [
     {
       stepNumber: 1,
@@ -1213,7 +1051,7 @@ export const uc12UnitConsumption: UseCaseUnitConsumption = {
 
 // UC-13: Regulatory Change Response
 export const uc13UnitConsumption: UseCaseUnitConsumption = {
-  useCaseId: "UC-13",
+  useCaseId: "UC-03",
   steps: [
     {
       stepNumber: 1,
