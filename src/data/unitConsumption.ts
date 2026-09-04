@@ -1312,6 +1312,96 @@ export const uc13UnitConsumption: UseCaseUnitConsumption = {
   ],
 };
 
+// UC-05: Change Governance and Traceability (new UC-05, previously UC-14)
+export const uc14UnitConsumption: UseCaseUnitConsumption = {
+  useCaseId: "UC-05",
+  steps: [
+    {
+      stepNumber: 1,
+      stepName: "Trigger",
+      description: "Change governance review initiated — audit, compliance check, or proactive governance sweep.",
+      activities: [
+        { activity: "Governance trigger intake (footprint)", tokens: "Footprint", units: "0" },
+      ],
+      subtotal: "0",
+    },
+    {
+      stepNumber: 2,
+      stepName: "Assess Change Record Completeness",
+      description: "Atlas queries the change record repository and compares against the actual change history to identify gaps.",
+      activities: [
+        { activity: "Change record completeness assessment", tokens: "250,000", units: "2.5" },
+      ],
+      subtotal: "2.5",
+    },
+    {
+      stepNumber: 3,
+      stepName: "Identify Undocumented Changes",
+      description: "Atlas compares configuration state against the change record baseline to identify changes with no corresponding record.",
+      activities: [
+        { activity: "Undocumented change detection (system assessment)", tokens: "250,000", units: "2.5" },
+      ],
+      subtotal: "2.5",
+    },
+    {
+      stepNumber: 4,
+      stepName: "Attribute and Investigate",
+      description: "For each undocumented change, Atlas attempts attribution and generates an investigation starting point.",
+      activities: [
+        { activity: "Change attribution and investigation (per undocumented change)", tokens: "~50,000", units: "0.5" },
+      ],
+      subtotal: "2.5",
+      note: "Est. 5 undocumented changes typical.",
+    },
+    {
+      stepNumber: 5,
+      stepName: "Generate Governance Report",
+      description: "Atlas generates the structured governance report — change record completeness, undocumented changes, attribution status, and remediation recommendations.",
+      activities: [
+        { activity: "Governance evidence package", tokens: "400,000", units: "4.0" },
+      ],
+      subtotal: "4.0",
+    },
+    {
+      stepNumber: 6,
+      stepName: "Remediate Gaps",
+      description: "For identified gaps, Atlas generates remediation plans — retroactive change records, process improvements, or configuration adjustments.",
+      activities: [
+        { activity: "Remediation plan per gap cluster", tokens: "~125,000", units: "1.25" },
+      ],
+      subtotal: "1.25",
+    },
+    {
+      stepNumber: 7,
+      stepName: "Validate and Close",
+      description: "Post-remediation validation confirms gaps are closed. Atlas updates the governance posture model.",
+      activities: [
+        { activity: "Post-remediation governance validation", tokens: "~100,000", units: "1.0" },
+      ],
+      subtotal: "1.0",
+    },
+  ],
+  fullFlowSummary: [
+    { step: "1 — Trigger", activity: "Governance trigger intake (footprint)", units: "0" },
+    { step: "2 — Assess", activity: "Change record completeness assessment", units: "2.5" },
+    { step: "3 — Detect", activity: "Undocumented change detection", units: "2.5" },
+    { step: "4 — Investigate", activity: "Change attribution (per undocumented change)", units: "~2.5" },
+    { step: "5 — Report", activity: "Governance evidence package", units: "4.0" },
+    { step: "6 — Remediate", activity: "Remediation plan per gap cluster", units: "1.25" },
+    { step: "7 — Validate", activity: "Post-remediation validation", units: "1.0" },
+  ],
+  estateSize: [
+    { scenario: "Small scope (single LPAR, 1-week window)", adjustment: "Lightweight assessment; fewer undocumented changes", multiplierDisplay: "~0.5×", multiplierValue: 0.5 },
+    { scenario: "Standard governance sweep (5–10 LPARs, monthly)", adjustment: "Baseline", multiplierDisplay: "1.0×", multiplierValue: 1.0 },
+    { scenario: "Enterprise audit (30+ LPARs, quarterly)", adjustment: "Full assessment + large evidence package", multiplierDisplay: "~1.5–1.7×", multiplierValue: 1.7 },
+  ],
+  additionalAdjustments: [
+    { scenario: "Each additional undocumented change beyond typical 5", adjustment: "One additional attribution artifact per change", unitDelta: 0.5 },
+    { scenario: "Monthly governance sweep cadence (12/year)", adjustment: "~165 units/year for a mid-size shop", unitDelta: 0 },
+    { scenario: "Remediation validation skipped (risk acceptance)", adjustment: "Removes validation step", unitDelta: -1.0 },
+  ],
+};
+
 export function getUnitConsumption(useCaseId: string): UseCaseUnitConsumption | null {
   const normalized = useCaseId.toLowerCase().replace(/[^a-z0-9]/g, "");
   switch (normalized) {
