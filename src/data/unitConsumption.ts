@@ -350,6 +350,78 @@ export const uc03UnitConsumption: UseCaseUnitConsumption = {
   ],
 };
 
+// UC-02: Staff Onboarding
+export const uc04UnitConsumption: UseCaseUnitConsumption = {
+  useCaseId: "UC-02",
+  steps: [
+    {
+      stepNumber: 1,
+      stepName: "Orient",
+      description: "Atlas provides structured environment overview for the new team member — topology, subsystems, applications, change history, and risk profile.",
+      activities: [
+        { activity: "Environment orientation session (footprint)", tokens: "Footprint", units: "0" },
+      ],
+      subtotal: "0",
+    },
+    {
+      stepNumber: 2,
+      stepName: "Explore",
+      description: "New team member explores the environment through natural language queries. Atlas answers questions about topology, dependencies, configuration, and history.",
+      activities: [
+        { activity: "Exploration query responses (per substantive query)", tokens: "~25,000", units: "0.25 per query" },
+      ],
+      subtotal: "1.0",
+      note: "Est. 4 substantive queries typical.",
+    },
+    {
+      stepNumber: 3,
+      stepName: "Assess Risk",
+      description: "Atlas surfaces highest-priority open risks in the new team member's area of ownership — deprecated APIs, security gaps, performance constraints, and coupling risks.",
+      activities: [
+        { activity: "Proactive risk surfacing for new hire's scope", tokens: "250,000", units: "2.5" },
+      ],
+      subtotal: "2.5",
+    },
+    {
+      stepNumber: 4,
+      stepName: "Document",
+      description: "Atlas generates a System Intelligence Brief — a structured knowledge artifact capturing the environment state, risks, and key relationships for the new team member's reference.",
+      activities: [
+        { activity: "System Intelligence Brief generation", tokens: "400,000", units: "4.0" },
+      ],
+      subtotal: "4.0",
+    },
+    {
+      stepNumber: 5,
+      stepName: "Execute First Change",
+      description: "New team member executes their first production change through Atlas's guided workflow — impact analysis, test plan, validation, and deployment orchestration.",
+      activities: [
+        { activity: "Impact analysis for first change", tokens: "250,000", units: "2.5" },
+        { activity: "Test environment provision", tokens: "1 provision", units: "0.1", provisionedEnv: true },
+        { activity: "Functional test suite for first change", tokens: "300,000", units: "3.0" },
+      ],
+      subtotal: "5.6",
+    },
+  ],
+  fullFlowSummary: [
+    { step: "1 — Orient", activity: "Environment orientation (footprint)", units: "0" },
+    { step: "2 — Explore", activity: "Exploration queries (~4)", units: "1.0" },
+    { step: "3 — Assess Risk", activity: "Proactive risk surfacing", units: "2.5" },
+    { step: "4 — Document", activity: "System Intelligence Brief", units: "4.0" },
+    { step: "5 — First Change", activity: "Impact analysis + provision + tests", units: "5.6" },
+  ],
+  estateSize: [
+    { scenario: "Small scope (single LPAR, 1 application)", adjustment: "Simpler orientation; fewer exploration queries", multiplierDisplay: "~0.5×", multiplierValue: 0.5 },
+    { scenario: "Standard onboarding (5–10 LPARs, multi-application)", adjustment: "Baseline", multiplierDisplay: "1.0×", multiplierValue: 1.0 },
+    { scenario: "Complex estate (30+ LPARs, multi-sysplex)", adjustment: "Extended orientation; more exploration queries; larger brief", multiplierDisplay: "~1.3–1.5×", multiplierValue: 1.5 },
+  ],
+  additionalAdjustments: [
+    { scenario: "Each additional exploration query beyond typical 4", adjustment: "One additional query response artifact", unitDelta: 0.25 },
+    { scenario: "First change skipped (observe-only onboarding)", adjustment: "Removes impact analysis, provision, and test suite", unitDelta: -5.6 },
+    { scenario: "Multiple new hires onboarded simultaneously (shared brief)", adjustment: "Brief cost amortized across hires", unitDelta: -3.5 },
+  ],
+};
+
 // UC-04: Change Readiness and Health Assessment
 export const uc06UnitConsumption: UseCaseUnitConsumption = {
   useCaseId: "UC-04",
