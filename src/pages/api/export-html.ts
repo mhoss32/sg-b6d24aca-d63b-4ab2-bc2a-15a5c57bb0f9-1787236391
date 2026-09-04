@@ -67,9 +67,9 @@ const PILLARS = [
 ];
 
 const PILLAR_USE_CASES: Record<string, string[]> = {
-  system: ["uc-01", "uc-02", "uc-03", "uc-04", "uc-05", "uc-06", "uc-07", "uc-08", "uc-09", "uc-12", "uc-13"],
-  change: ["uc-01", "uc-02", "uc-07", "uc-08", "uc-10", "uc-11", "uc-12", "uc-13", "uc-14"],
-  predictive: ["uc-09", "uc-10", "uc-11"],
+  system: ["uc-02", "uc-05"],
+  change: ["uc-06", "uc-07", "uc-08", "uc-09", "uc-12"],
+  predictive: ["uc-01", "uc-03", "uc-04", "uc-10", "uc-11"],
 };
 
 function getUseCasePillars(ucId: string): string[] {
