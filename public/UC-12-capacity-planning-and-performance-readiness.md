@@ -289,6 +289,10 @@ Detect / Trigger → Baseline → Analyze → Model / Diagnose → Plan → Vali
 
 #### Step 1 — Detect
 
+**Brief:** Identify that a performance problem exists or that a performance risk is approaching — through an incident, a user complaint, or a pre-event assessment.
+
+**Personas involved:** Annette, Alex
+
 | Persona | Pain Point | Category |
 |---|---|---|
 | Annette | Performance problems are discovered through user complaints or production incidents — there is no proactive signal before throughput degrades. | 💼 Business Impact — performance degradation is reactive; by the time the user complains, impact is already occurring |
@@ -296,6 +300,10 @@ Detect / Trigger → Baseline → Analyze → Model / Diagnose → Plan → Vali
 | Alex | No systematic projection methodology — capacity estimates are based on experience and rule of thumb, not on modeled projection against actual transaction growth trends. | 💼 Business Impact — peak season capacity surprises are a recurring risk because the projection method is not rigorous |
 
 #### Step 2 — Diagnose
+
+**Brief:** When a performance degradation is reported, trace the root cause — identify the responsible component, configuration constraint, or change event.
+
+**Personas involved:** Alex, Zach, Annette
 
 | Persona | Pain Point | Category |
 |---|---|---|
@@ -305,12 +313,20 @@ Detect / Trigger → Baseline → Analyze → Model / Diagnose → Plan → Vali
 
 #### Step 3 — Size
 
+**Brief:** Model the configuration changes needed to address the identified constraints or to prepare for projected peak load.
+
+**Personas involved:** Alex, Zach
+
 | Persona | Pain Point | Category |
 |---|---|---|
 | Alex | Configuration sizing for peak load (Db2 buffer pools, CICS MXT, MQ queue depth, DASD allocation) is determined by experience and rule of thumb, not by modeled projection against actual transaction growth trends. | 💼 Business Impact — under-sizing causes peak failures; over-sizing wastes capacity that could be right-sized |
 | Alex | Dark capacity (underutilized resources, over-provisioned LPARs) is invisible without dedicated analysis — teams routinely procure capacity they already have. | 💼 Business Impact — unnecessary hardware and software capacity purchased due to lack of right-sizing visibility |
 
 #### Step 4 — Validate
+
+**Brief:** Test the proposed configuration changes in an environment under simulated production load before applying to production.
+
+**Personas involved:** Alex, Zach
 
 | Persona | Pain Point | Category |
 |---|---|---|
@@ -319,12 +335,20 @@ Detect / Trigger → Baseline → Analyze → Model / Diagnose → Plan → Vali
 
 #### Step 5 — Apply
 
+**Brief:** Implement the validated configuration changes in production — buffer pools, MXT, queue depths, DASD allocations.
+
+**Personas involved:** Zach, Quinn
+
 | Persona | Pain Point | Category |
 |---|---|---|
 | Zach | Production configuration change planning is a separate manual process from the performance analysis — no connection between the diagnosis and the remediation plan. | ⏱️ Lost Time — **additional hours** translating performance findings into a production change plan |
 | Quinn | Production capacity changes require Quinn's approval — but the evidence is presented as raw performance data, not as a management-readable risk and recommendation. | 🔒 Skill Gap / Bottleneck — Quinn cannot approve production capacity changes without Zach producing a separate management summary |
 
 #### Step 6 — Monitor
+
+**Brief:** After the event or configuration change, monitor for ongoing performance health and detect post-change regressions.
+
+**Personas involved:** Alex, Annette
 
 | Persona | Pain Point | Category |
 |---|---|---|
@@ -337,12 +361,20 @@ Detect / Trigger → Baseline → Analyze → Model / Diagnose → Plan → Vali
 
 #### Step 1 — Detect
 
+**Brief:** Identify that a performance problem exists or that a performance risk is approaching — through an incident, a user complaint, or a pre-event assessment.
+
+**Personas involved:** Alex, Annette, Atlas
+
 | Persona | Wow Moment | Category |
 |---|---|---|
 | Alex | Capacity constraints approaching peak thresholds surfaced by Atlas before the event — "Db2 buffer pool at 82% projected capacity at forecast peak load" — not discovered during the peak event itself. | 🤖 Atlas AI Insight & Automation — proactive constraint projection from transaction growth trend analysis; no manual SMF analysis required |
 | Annette | Post-change performance regressions surfaced by Atlas automatically — correlated to the responsible configuration change event without manual investigation. | 🤖 Atlas AI Insight & Automation — behavioral baseline comparison attributes regression to the specific change that caused it |
 
 #### Step 2 — Diagnose
+
+**Brief:** When a performance degradation is reported, trace the root cause — identify the responsible component, configuration constraint, or change event.
+
+**Personas involved:** Alex, Annette, Atlas
 
 | Persona | Wow Moment | Category |
 |---|---|---|
@@ -351,12 +383,20 @@ Detect / Trigger → Baseline → Analyze → Model / Diagnose → Plan → Vali
 
 #### Step 3 — Size
 
+**Brief:** Model the configuration changes needed to address the identified constraints or to prepare for projected peak load.
+
+**Personas involved:** Alex, Atlas
+
 | Persona | Wow Moment | Category |
 |---|---|---|
 | Alex | Peak event capacity risk modeled by Atlas in one session — transaction projection against current configuration, constraint identification, configuration recommendation — without pulling data from multiple tools. | ⏱️ Time Saving — **weeks of manual SMF analysis and projection → one Atlas session** for capacity risk modeling |
 | Alex | Dark capacity identified by Atlas — right-sizing recommendations based on actual utilization data, enabling procurement decisions grounded in evidence rather than rule of thumb. | 🤖 Atlas AI Insight & Automation — utilization analysis across the estate surfaces under-provisioned and over-provisioned LPARs automatically |
 
 #### Step 4 — Validate
+
+**Brief:** Test the proposed configuration changes in an environment under simulated production load before applying to production.
+
+**Personas involved:** Alex, Atlas
 
 | Persona | Wow Moment | Category |
 |---|---|---|
@@ -365,12 +405,20 @@ Detect / Trigger → Baseline → Analyze → Model / Diagnose → Plan → Vali
 
 #### Step 5 — Apply
 
+**Brief:** Implement the validated configuration changes in production — buffer pools, MXT, queue depths, DASD allocations.
+
+**Personas involved:** Zach, Quinn, Atlas
+
 | Persona | Wow Moment | Category |
 |---|---|---|
 | Zach | Production configuration change plan generated directly from the validated performance analysis — no separate translation from diagnosis to change plan. | ⏱️ Time Saving — diagnosis → change plan in the same Atlas session |
 | Quinn | Atlas generates a management-readable capacity readiness summary — risk quantified, recommendation justified, validation evidence attached. Quinn approves without requiring a separate Zach briefing. | 🆕 New User Capability — Quinn makes informed production capacity decisions independently from the Atlas artifact |
 
 #### Step 6 — Monitor
+
+**Brief:** After the event or configuration change, monitor for ongoing performance health and detect post-change regressions.
+
+**Personas involved:** Alex, Annette, Atlas
 
 | Persona | Wow Moment | Category |
 |---|---|---|

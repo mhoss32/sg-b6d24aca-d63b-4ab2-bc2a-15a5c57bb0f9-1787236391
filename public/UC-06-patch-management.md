@@ -108,47 +108,441 @@ Detect → Analyze → Plan → Provision → Deploy → Validate → Decide →
 
 ## Part 2 — Pain & Wows Flow Analysis
 
+> **Pillar:** Change Intelligence (primary) + System Intelligence (impact analysis)
+> **GA Status:** GA Dec 2026 (PTF/z/OS patches); H1 2027 (middleware patches)
 > **Sources:**
 > - **S1 (Routine PTF Maintenance):** `use-case-pain-wows/UC-02-patch-management.md` (old UC-02)
 > - **S2 (Security PTF Application):** `use-case-pain-wows/UC-01-vulnerability-remediation.md` (old UC-01, merged in)
 
-### S1 — Routine PTF Maintenance: As-Is / To-Be Flow
+### S1 — Routine PTF Maintenance
 
-| Step | As-Is (Pain) | To-Be (Wow) |
+#### As-Is Flow — Current State (Without Atlas)
+
+##### Step 1 — Detect
+**Brief:** Systems programmer identifies that patches are needed — through a scheduled maintenance review, an advisory, or a subsystem SME raising a concern.
+
+**Personas involved:** Zach, Stan
+
+| Persona | Pain Point | Category |
 |---|---|---|
-| **1 — Identify applicable PTFs** | Zach downloads the latest RSU tape list. He manually cross-references it with the SMP/E GENERATE output for each LPAR. This takes half a day for a 4-LPAR environment. | Atlas queries the PTF inventory across all connected LPARs and cross-references with ibm.com RSU and FIXCAT data. It surfaces: 12 applicable PTFs, 2 of which are FIXCAT SEC/INT, 1 with a PE flag that has been superseded. |
-| **2 — Assess impact** | Zach manually reviews each PTF's ++ HOLD information and tries to identify which subsystems and applications might be affected. He misses a dependency because he does not routinely manage the MQ configuration on PROD3. | Atlas performs topology-aware impact analysis. For each PTF in the batch, it maps affected subsystems, applications, and transactions. It identifies that PTF UI89234 affects the CICS interface to MQ — touching 3 CICS transactions and 14 downstream batch jobs. |
-| **3 — Resolve prerequisites** | Zach runs the SMP/E REPORT CALLLIBS command and manually reads the prerequisite output. Two PTFs have co-requisites not in the batch. He adds them but introduces a new prerequisite. He resolves this after 90 minutes. | Atlas resolves the full prerequisite chain automatically. It identifies the 2 missing co-requisites, adds them, re-resolves the expanded batch, and presents the final ordered apply sequence — no SMP/E dialog required. |
-| **4 — Generate test plan** | Zach writes a test checklist based on what he knows. He tests 7 of the 14 affected batch jobs because he does not have time for the others. The remaining 7 go untested. | Atlas generates a test plan covering all 14 affected batch jobs plus the 3 CICS transactions. The plan includes the environment specification (which CICS definitions and Db2 tables are needed), test scenarios, and expected pass criteria. |
-| **5 — Provision test environment** | Zach submits a ticket to provision a test LPAR. It is ready 2 days later. The maintenance window is already approaching. | Atlas provisions the monoplex L2 virtual LPAR in the background from the Atlas configuration specification. The Application Deployment Engine deploys the application components. By the time Zach is ready to test, the environment is waiting. |
-| **6 — Validate** | Zach runs tests manually. One batch job fails. He spends 3 hours tracing it to a missing CSD definition that the PTF requires. He manually creates the update and retests. | Atlas applies the PTFs to the test environment and runs the test suite. One batch job fails. Atlas attributes the failure: "PTF UI89234 requires a new CICS CSD MAPSET definition for the MXFX interface. This definition is missing from the test environment. Generating the required CSD update now." |
-| **7 — Execute in production** | Zach applies the PTF batch during the maintenance window, manually tracking each apply step. He loses track of where he is at 2:00 AM and has to reconstruct his progress from SYSLOG. | Atlas orchestrates the production apply: sequenced LPAR order, progress visible in real time, each step logged automatically. When Zach authorizes the first LPAR, Atlas proceeds through the sequence and surfaces completion status without requiring manual tracking. |
-| **8 — Generate change record** | After the maintenance window, Zach writes a change record from memory. He forgets two of the PTF numbers and the exact completion time. The record is rejected by ServiceNow for missing fields. | Atlas generates the complete change record automatically: all PTFs applied, sequenced apply log with timestamps, test results attached, authorization chain captured. The record is complete and consistent without any manual assembly. |
+| Zach | Querying SMP/E for PTF inventory and prerequisite chains requires ISPF dialogs with no natural language interface — slow and expert-dependent. | ⏱️ Lost Time — **2–4 hours** per environment just to understand current PTF state |
+| Stan | Subsystem-specific maintenance gaps (CICS, Db2, MQ) are not surfaced automatically — Stan must monitor IBM fix lists and product announcements manually. | ⏱️ Lost Time — **hours per quarter** monitoring maintenance bulletins across subsystems |
 
-### S2 — Security PTF Application (merged from old UC-01): As-Is / To-Be Flow
+---
 
-| Step | As-Is (Pain) | To-Be (Wow) |
+##### Step 2 — Analyze
+**Brief:** Determine what the proposed patches will affect — subsystems, applications, prerequisite chains, restart requirements, and estimated maintenance window duration.
+
+**Personas involved:** Zach, Stan
+
+| Persona | Pain Point | Category |
 |---|---|---|
-| **1 — Receive CVE advisory** | Sage receives an IBM security advisory for a critical z/OS vulnerability. She emails Zach and the SMP/E team asking how many systems are exposed. Three days later, she has partial answers from two teams. | Sage opens Atlas and says "we have a critical security advisory for IBM z/OS. Which of our LPARs are exposed?" Atlas queries the PTF inventory across all connected LPARs simultaneously. Within 10 minutes: "3 of 4 production LPARs are exposed. DR1 is not exposed. DR2 data is stale — assessment pending." |
-| **2 — Assess blast radius** | Zach knows the PTF affects CICS but does not know which CICS regions, which applications, or which downstream services are in the blast radius of an exploit. He estimates "probably the payment processing system" but cannot confirm. | Atlas traverses the topology from the vulnerable CICS component. Blast radius: 4 CICS regions, 12 CICS transactions, 8 downstream Db2 tablespaces, 2 z/OS Connect REST API endpoints, and 3 external partner integrations. "If this vulnerability is exploited via the IPIC connection, these are the systems at direct risk." |
-| **3 — Fast-track remediation plan** | Zach plans the patch apply mentally. He is not sure whether to patch PROD1 or PROD4 first — they share a Db2 coupling facility and he is not confident about the sequencing. He decides to go alphabetical and hopes for the right order. | Atlas generates a sequenced remediation plan accounting for the shared coupling facility: "Apply to PROD1 first (Db2 coupling facility primary), then PROD4, PROD3 last (coupling facility peer). Patching PROD4 before PROD1 would temporarily break Db2 shared data access." |
-| **4 — Execute and validate** | Zach applies the PTF to PROD1 in the maintenance window. He does not have time to test it thoroughly. He hopes it works. | Atlas applies the security PTF to a provisioned test environment first. Validates that all 12 CICS transactions still complete correctly. Results: 11 pass, 1 fails due to a CSD update required by the PTF — Atlas generates the CSD update, re-tests, confirms pass. Production apply follows with the CSD update pre-staged. |
-| **5 — Report to CISO** | Sage needs to brief the CISO on the status. She does not know the exact exposure scope or the remediation timeline. She writes a vague email saying "we are working on it." | Sage asks Atlas "prepare a security status briefing on the CISO advisory." Atlas generates: 3 production LPARs exposed / 1 patched / 2 in-progress / 1 DR stale. Blast radius scoped to specific systems. Estimated completion: next maintenance window. Threat vector: IPIC network path requires network access — external threat limited by network controls. |
+| Zach | Impact assessment requires manually cross-referencing PTF descriptions against application topology — a process relying entirely on expert knowledge not documented anywhere. | ⏱️ Lost Time — **4–8 hours** of manual analysis per patch batch |
+| Zach | Most organizations cannot confidently answer "what will break if I apply this PTF?" without hours of multi-team investigation. | 💼 Business Impact — changes proceed with incomplete impact knowledge, increasing production incident risk |
+| Stan | Each subsystem specialist only knows their own domain; cross-subsystem impact (CICS → Db2 contention scenarios) requires convening multiple teams. | 🔒 Skill Gap / Bottleneck — cross-subsystem analysis requires coordinating Zach, Stan, DBA, MQ admin simultaneously |
 
-### Key Pain Points (Both Scenarios)
+---
 
-- Multi-day wait for exposure assessment across the estate
-- Manual prerequisite chain resolution that introduces sequencing errors
-- Test coverage limited by time pressure — untested changes reach production
-- Change records assembled from memory after the fact — incomplete and inconsistent
-- S2: CISO-level security briefing impossible without complete data
+##### Step 3 — Plan
+**Brief:** Generate a sequenced patch plan — acquisition order, dependency sequence, deployment order, test environment specification, test scenario list.
 
-### Key Wow Moments (Both Scenarios)
+**Personas involved:** Zach, Stan
 
-- Blast radius traversal: "these are the 14 applications at direct risk" (S2) or "these are the 14 batch jobs affected" (S1)
-- Prerequisite chain resolved automatically — no SMP/E dialog
-- Test failure attributed to specific missing CSD definition with automated fix generation
-- Complete change record with no manual assembly
+| Persona | Pain Point | Category |
+|---|---|---|
+| Zach | PTF prerequisite chains are navigated manually in SMP/E — a missed co-requisite causes a failed production apply. | ⏱️ Lost Time — **2–4 hours** of prerequisite tracing, plus potential production incident time |
+| Zach | No AI-generated plan tied to the actual topology — plans are built from memory and informal processes. | 💼 Business Impact — plan quality depends entirely on the experience of whoever writes it |
+| Stan | For middleware patches, Stan's sign-off on the subsystem scope requires manual coordination with Zach via email or meetings. | ⏱️ Lost Time — **1–2 days** of back-and-forth to align plan across SMEs |
+
+---
+
+##### Step 4 — Provision
+**Brief:** Provision a test environment that mirrors production before any patch is applied.
+
+**Personas involved:** Zach, Alice
+
+| Persona | Pain Point | Category |
+|---|---|---|
+| Zach | Test environments are provisioned manually — slow, error-prone, and frequently skipped under time pressure. Production becomes the de facto test environment. | ⏱️ Lost Time — **2–5 days** to provision a test environment, or the step is skipped |
+| Alice | Mid-level engineers cannot independently provision test environments; every provisioning step requires Zach's involvement or a separate infrastructure request. | 🔒 Skill Gap / Bottleneck — test environment provisioning blocked on Zach's availability or a separate team |
+
+---
+
+##### Step 5 — Deploy
+**Brief:** Application components are deployed into the test environment before test execution can begin.
+
+**Personas involved:** Zach
+
+| Persona | Pain Point | Category |
+|---|---|---|
+| Zach | Application component deployment into a test environment is a manual, multi-step process — each component must be configured separately. | ⏱️ Lost Time — **2–6 hours** of manual configuration per test environment setup |
+
+---
+
+##### Step 6 — Validate
+**Brief:** Apply patches in the test environment and run validation — smoke tests, function tests — to confirm no breakage.
+
+**Personas involved:** Zach, Stan, Alice
+
+| Persona | Pain Point | Category |
+|---|---|---|
+| Zach | Test execution is manual; there is no automated test scaffolding tied to the specific change. Coverage depends on individual engineer discipline. | ⏱️ Lost Time — **4–16 hours** of manual test execution per patch cycle |
+| Stan | Subsystem-specific validation results are reviewed separately by Stan in isolation from Zach's overall change view — no shared artifact. | 🔒 Skill Gap / Bottleneck — Stan's sign-off on subsystem test results must be coordinated before Zach can proceed |
+| Alice | Test failures require Zach to investigate — mid-level engineers lack the context to diagnose PTF-related test failures independently. | 🔒 Skill Gap / Bottleneck — Alice escalates every test failure to Zach, creating a bottleneck |
+
+---
+
+##### Step 7 — Decide
+**Brief:** Review test results and make the production promotion decision.
+
+**Personas involved:** Zach, Stan, Quinn
+
+| Persona | Pain Point | Category |
+|---|---|---|
+| Zach | Test evidence is assembled manually from multiple sources — no single place to review pass/fail for the full plan. | ⏱️ Lost Time — **1–2 hours** assembling evidence before the production decision |
+| Quinn | Approving production promotion requires a non-technical summary that Zach must produce separately — no artifact ready for management review. | 🔒 Skill Gap / Bottleneck — Quinn cannot make a risk-informed decision without Zach producing a separate summary |
+
+---
+
+##### Step 8 — Execute
+**Brief:** Orchestrate the production apply — acquisition, sequenced application, LPAR restarts in maintenance window order.
+
+**Personas involved:** Zach
+
+| Persona | Pain Point | Category |
+|---|---|---|
+| Zach | Emergency patches bypass normal process because there is no fast-track workflow that is also safe — teams are forced to choose between speed and rigor. | 💼 Business Impact — emergency patches applied with reduced controls, increasing incident risk |
+| Zach | Rollback planning is informal; when a patch causes a problem the remediation path is improvised. | 💼 Business Impact — unplanned rollback under time pressure is a leading cause of extended outages |
+
+---
+
+##### Step 9 — Govern
+**Brief:** Create the change record, attach evidence, and seal the audit trail.
+
+**Personas involved:** Zach, Annette
+
+| Persona | Pain Point | Category |
+|---|---|---|
+| Zach | Change records are assembled after the fact from memory and email threads — a separate manual step that gets skipped under time pressure. | ⏱️ Lost Time — **1–3 hours** of retrospective change record assembly |
+| Annette | Monitoring change execution and reviewing change records requires querying multiple systems — no single source of truth. | ⏱️ Lost Time — **1–2 hours** per patch cycle pulling change evidence from disparate tools |
+
+---
+
+#### To-Be Flow — Desired Outcome (With Atlas)
+
+##### Step 1 — Detect
+**Brief:** Atlas proactively surfaces missing or at-risk PTFs, or the user queries Atlas for PTF state. Security-flagged PTFs are highlighted. Subsystem SMEs receive subsystem-specific gaps directly.
+
+**Personas involved:** Zach, Stan, Atlas
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Atlas proactively surfaces PTF gaps — Zach doesn't need to initiate a quarterly SMP/E review; Atlas has already identified what needs attention. | 🤖 Atlas AI Insight & Automation — continuous PTF monitoring surfaces gaps without user prompting |
+| Stan | Subsystem-specific maintenance gaps surfaced directly to Stan — MQ, CICS, Db2 SMEs see their subsystem's patch needs without Zach as an intermediary. | 🆕 New User Capability — Stan independently tracks subsystem maintenance needs via Atlas |
+
+---
+
+##### Step 2 — Analyze
+**Brief:** Atlas maps the impact of proposed changes: affected subsystems, applications, prerequisite chains, restart requirements, estimated maintenance window duration.
+
+**Personas involved:** Zach, Stan
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Full impact of any PTF batch understood in minutes — which subsystems, applications, and transactions are affected, with prerequisite chains already resolved. | ⏱️ Time Saving — **4–8 hours → under 30 minutes** for impact analysis |
+| Stan | Atlas surfaces subsystem-specific impact analysis to Stan directly — cross-subsystem risks like CICS thread limits creating Db2 contention are identified automatically. | 🤖 Atlas AI Insight & Automation — cross-subsystem risk compounding is only visible through Atlas's unified topology model |
+
+---
+
+##### Step 3 — Plan
+**Brief:** Atlas generates a sequenced patch plan tied to actual environment topology — acquisition steps, dependency order, deployment sequence, test environment spec, test scenario list.
+
+**Personas involved:** Zach, Stan
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | AI-generated plan anchored to the actual topology — prerequisite chains resolved, apply order determined, test scenarios scoped to the affected applications. | 🤖 Atlas AI Insight & Automation — topology-aware plan generation eliminates the leading cause of PTF-related outages |
+| Stan | Stan reviews and approves the subsystem scope within the plan directly in Atlas — no email back-and-forth. Plan captures his sign-off before returning to Zach. | ⏱️ Time Saving — **1–2 days coordination → structured workflow in Atlas** |
+
+---
+
+##### Step 4 — Provision
+**Brief:** A monoplex L2 virtual LPAR is provisioned mirroring production. At GA, the customer operates the engine; Atlas-native provisioning arrives at H1 2027.
+
+**Personas involved:** Zach, Alice
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Test environment specification is generated automatically from the plan — no manual translation of requirements to infrastructure. | ⏱️ Time Saving — **2–5 days → automated provisioning** |
+| Alice | Mid-level engineers can follow Atlas's provisioning specification without requiring Zach's involvement for every step. | 🆕 New User Capability — Alice can participate in test environment setup independently |
+
+---
+
+##### Step 5 — Deploy
+**Brief:** Application components from the Atlas topology model are deployed into the provisioned environment automatically.
+
+**Personas involved:** Zach, Atlas
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Application components deployed automatically from the topology model — the test environment is ready to use without manual component-by-component configuration. | ⏱️ Time Saving — **2–6 hours → automatic** via Application Deployment Engine |
+
+---
+
+##### Step 6 — Validate
+**Brief:** Atlas applies patches to the test environment in sequence and runs the test package. Smoke and function tests at GA; integration and regression tests at H1 2027.
+
+**Personas involved:** Zach, Stan, Alice
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Automated test execution — Atlas runs the test package and surfaces pass/fail with failure context. No manual test writing for standard scenarios. | ⏱️ Time Saving — **4–16 hours manual testing → automated execution** |
+| Stan | Subsystem-specific test results reviewed by Stan in Atlas — structured, filterable, with clear attribution to the subsystem scope he owns. | 🆕 New User Capability — Stan reviews his subsystem's validation independently, in context |
+| Alice | Test failures attributed to specific dependencies — Alice can diagnose without escalating to Zach for every failure. | 🆕 New User Capability — Alice independently interprets failure context Atlas provides |
+
+---
+
+##### Step 7 — Decide
+**Brief:** Zach reviews test results and Atlas's recommendation; authorizes production promotion. For middleware patches, Stan approves the subsystem plan first.
+
+**Personas involved:** Zach, Stan, Quinn
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Clear recommendation with supporting evidence — all in one place: test results, subsystem SME sign-offs, prerequisite resolution, maintenance window. | ⏱️ Time Saving — **1–2 hours assembling evidence → pre-assembled in Atlas** |
+| Quinn | Atlas presents a non-technical risk summary alongside the technical evidence — Quinn can make the approval decision without requiring a separate Zach briefing. | 🆕 New User Capability — Quinn makes informed production decisions independently |
+
+---
+
+##### Step 8 — Execute
+**Brief:** Atlas orchestrates the production apply — patch acquisition, sequenced application, LPAR restarts in maintenance window order. Real-time progress visible throughout.
+
+**Personas involved:** Zach, Stan
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Transparent step-by-step execution with reasoning visible — Zach can pause or abort at any point. Emergency patches fast-tracked through the same safe workflow. | ⏱️ Time Saving — no forced trade-off between speed and rigor; fast-track path is built in |
+| Zach | Rollback plan is generated alongside the execution plan — rollback is not improvised, it starts from a documented known-good state. | 🤖 Atlas AI Insight & Automation — rollback path is planned before execution begins |
+
+---
+
+##### Step 9 — Govern
+**Brief:** Atlas generates the change record, attaches the plan, test results, and execution log. ServiceNow record created. Audit trail sealed.
+
+**Personas involved:** Zach, Annette
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Complete traceability from detection through production apply generated automatically — no manual assembly required. | ⏱️ Time Saving — **1–3 hours retrospective work → automatic** |
+| Annette | Single source of truth for change monitoring and review — Annette queries Atlas rather than assembling evidence from multiple systems. | ⏱️ Time Saving — **1–2 hours per cycle → single Atlas query** |
+
+---
+
+> **Overall outcome (S1):** Full patch cycle — from impact analysis to production apply with audit trail — delivered faster, safer, and with complete traceability. Emergency patches can be safely fast-tracked through the same workflow with a defensible decision record.
+
+---
+
+### S2 — Security PTF Application (merged from old UC-01)
+
+#### As-Is Flow — Current State (Without Atlas)
+
+##### Step 1 — Discover
+**Brief:** An advisory is published or a security gap is suspected. The team must determine whether they are exposed.
+
+**Personas involved:** Zach, Sage
+
+| Persona | Pain Point | Category |
+|---|---|---|
+| Zach | Answering "are we exposed?" requires logging into ISPF on each LPAR individually and running SMP/E or GIMAPI queries — typically a 2–3 day process across a large estate. | ⏱️ Lost Time — **2–3 business days** |
+| Sage | Has no direct way to determine exposure without going through Zach first; dependent on a verbal summary rather than real data. | 🔒 Skill Gap / Bottleneck — requires Zach's availability to produce any exposure answer |
+| Sage | CISO and management expect an exposure brief she cannot produce without a multi-day investigation. | 💼 Business Impact — security posture is undefended at the executive level during the exposure window |
+
+---
+
+##### Step 2 — Assess
+**Brief:** Cross-reference multi-LPAR query results to determine which systems are actually affected and at what PTF level.
+
+**Personas involved:** Zach
+
+| Persona | Pain Point | Category |
+|---|---|---|
+| Zach | Manually cross-referencing results across LPARs relies entirely on expert memory and is not documented anywhere. | ⏱️ Lost Time — **4–8 hours** of additional expert-only analysis |
+| Zach | No proactive signal before a CVE is publicly published — exposure is discovered reactively, from the advisory. | 💼 Business Impact — detection window always lags the threat |
+
+---
+
+##### Step 3 — Blast Radius
+**Brief:** Determine which applications, datasets, and downstream systems are reachable from the exposed component.
+
+**Personas involved:** Zach, Sage
+
+| Persona | Pain Point | Category |
+|---|---|---|
+| Zach | Blast radius analysis has no automated tooling — it requires the most experienced engineer to trace dependencies from memory. | ⏱️ Lost Time — **1–3 days** of senior engineer investigation time |
+| Sage | No unified, query-ready evidence source to defend certificate and compliance posture in audits. | 💼 Business Impact — audit exposure is compounded by inability to quantify blast radius |
+| Sage | Compound risk (e.g., missing PTF + unencrypted connection) is invisible to any single tool. | 💼 Business Impact — unknown compound risks remain open |
+
+---
+
+##### Step 4 — Plan
+**Brief:** Build a remediation plan — PTF prerequisite chain, LPAR apply order, DR sequencing, test environment requirements.
+
+**Personas involved:** Zach
+
+| Persona | Pain Point | Category |
+|---|---|---|
+| Zach | PTF prerequisite chain resolution is manual; a missed co-requisite causes a failed apply discovered only during a production change window. | ⏱️ Lost Time — **2–4 hours** of SMP/E prerequisite chain tracing + potential production incident |
+| Zach | Multi-LPAR sequencing for patches with shared subsystem dependencies (shared Db2, shared MQ) is planned from memory. | 💼 Business Impact — incorrect sequencing can cause outages worse than the original vulnerability |
+| Zach | DR environments are frequently patched last or forgotten entirely. | 💼 Business Impact — a live failover exposure remains open after production is remediated |
+
+---
+
+##### Step 5 — Validate
+**Brief:** Provision a test environment, apply the PTF, and confirm no breakage before touching production.
+
+**Personas involved:** Zach, Alice
+
+| Persona | Pain Point | Category |
+|---|---|---|
+| Zach | Lab environments take days to provision; under time pressure this step is skipped — production becomes the de facto test environment for emergency patches. | ⏱️ Lost Time — **2–5 days** to provision lab, or the step is skipped entirely |
+| Alice | Remediation steps delegated by Zach lack the context needed to execute them safely; every delegated task still requires Zach's availability. | 🔒 Skill Gap / Bottleneck — Alice cannot execute safely without Zach present |
+
+---
+
+##### Step 6 — Execute
+**Brief:** Apply the PTF across all affected LPARs in the correct order, monitoring for failures.
+
+**Personas involved:** Zach
+
+| Persona | Pain Point | Category |
+|---|---|---|
+| Zach | Multi-LPAR apply sequenced from memory; shared dependencies create coordination risk. | 💼 Business Impact — apply failures on one LPAR can have knock-on effects across the estate |
+
+---
+
+##### Step 7 — Close
+**Brief:** Assemble the audit trail — what was applied, when, who authorized it, what validation was performed.
+
+**Personas involved:** Zach, Sage
+
+| Persona | Pain Point | Category |
+|---|---|---|
+| Zach | The entire audit trail is assembled after the fact from memory, email threads, and change tickets. | ⏱️ Lost Time — **2–4 hours** of manual retrospective assembly |
+| Sage | No auditor-ready evidence package without the same manual investigation effort. | 💼 Business Impact — compliance evidence is incomplete and unreliable |
+
+---
+
+#### To-Be Flow — Desired Outcome (With Atlas)
+
+##### Step 1 — Detect
+**Brief:** Atlas proactively identifies a FIXCAT security gap or a user queries Atlas immediately on receipt of an advisory.
+
+**Personas involved:** Zach, Sage, Atlas
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Atlas surfaces a FIXCAT security gap without a user query — shortening the detection-to-response window from "whenever the advisory reaches the right person" to "when Atlas's next PTF currency check runs." | 🤖 Atlas AI Insight & Automation — proactive monitoring surfaces risk before it is asked |
+| Sage | Proactive alert means Sage can initiate a CISO brief immediately rather than waiting for Zach's investigation to complete. | 🆕 New User Capability — Sage can act on a finding without depending on Zach |
+
+---
+
+##### Step 2 — Assess
+**Brief:** Atlas queries all connected LPARs simultaneously and returns a complete exposure picture with PTF gap details, FIXCAT classification, and affected products.
+
+**Personas involved:** Zach, Sage
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | "Are we exposed?" answered in seconds — Atlas queries all connected LPARs simultaneously. No ISPF. No SMP/E dialogs. | ⏱️ Time Saving — **2–3 business days → under 10 minutes** |
+| Sage | Real exposure data rather than Zach's verbal summary — Sage can independently verify exposure scope without going through Zach first. | 🆕 New User Capability — Sage gains direct access to exposure facts |
+
+---
+
+##### Step 3 — Traverse Blast Radius
+**Brief:** Atlas traverses the dependency graph from each exposed component, naming every reachable system, dataset, and downstream application — including those not themselves vulnerable.
+
+**Personas involved:** Zach, Sage
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Blast radius is a topology map, not a guess. Atlas traverses the dependency graph and names every reachable system — coverage confidence surfaced alongside the map. | 🤖 Atlas AI Insight & Automation — multi-source topology traversal from ZUnderstand, impossible manually |
+| Sage | Real blast radius map allows Sage to produce a CISO-ready exposure brief in minutes, not after a multi-day investigation. | ⏱️ Time Saving — **1–3 days → under 30 minutes** for executive-ready briefing |
+| Zach | Compound risk identification: Atlas surfaces combinations of findings (missing security PTF + unencrypted IPIC connection) that create compound risk invisible to any single tool. | 🤖 Atlas AI Insight & Automation — cross-source risk compounding only possible with Atlas's unified model |
+
+---
+
+##### Step 4 — Plan Remediation
+**Brief:** Atlas generates a sequenced remediation plan: apply order, PTF prerequisites resolved, test environment specification, DR remediation sequenced in.
+
+**Personas involved:** Zach
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Every PTF prerequisite resolved automatically — eliminating the leading cause of PTF-related production outages. | 🤖 Atlas AI Insight & Automation — Atlas resolves co-requisite chains without Zach navigating SMP/E resolution rules |
+| Zach | DR exposure flagged proactively while production is being remediated — the failure mode that leads to breaches. | 🤖 Atlas AI Insight & Automation — Atlas flags this without being asked |
+
+---
+
+##### Step 5 — Provision + Test
+**Brief:** Atlas provisions the test environment, deploys application components, and executes the test plan — attributing pass/fail and generating required configuration updates.
+
+**Personas involved:** Zach, Alice
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Test environment available; no manual provisioning lag before the validation step can begin. | ⏱️ Time Saving — **2–5 days → automated provisioning** |
+| Alice | Step-by-step execution guidance generated for each delegated LPAR apply — Alice can execute safely without Zach in the room. | 🆕 New User Capability — Alice independently executes delegated steps |
+| Alice | If a test fails, Atlas identifies the specific dependency and generates the required fix (e.g., CSD update) in real time. | 🤖 Atlas AI Insight & Automation — configuration update generated automatically from test failure |
+
+---
+
+##### Step 6 — Decide
+**Brief:** Zach reviews test results and Atlas's recommendation. Authorizes production apply — hard governance gate per LPAR.
+
+**Personas involved:** Zach
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Clear recommendation with supporting evidence — test results, prerequisite resolution, blast radius, DR status — all in one place for the authorization decision. | ⏱️ Time Saving — decision is made from a complete picture, not assembled from multiple sources |
+
+---
+
+##### Step 7 — Execute
+**Brief:** Atlas orchestrates production apply across LPARs in sequenced order. Each LPAR apply requires individual Zach authorization. Real-time progress visible throughout.
+
+**Personas involved:** Zach
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Dependency-aware sequencing prevents knock-on failures during multi-LPAR apply. Progress visible in real time. | 🤖 Atlas AI Insight & Automation — shared dependency ordering computed and enforced automatically |
+
+---
+
+##### Step 8 — Monitor
+**Brief:** During the production remediation window, Atlas monitors for exploitation activity on patched and unpatched LPARs and proactively flags any remaining DR exposure.
+
+**Personas involved:** Zach, Sage
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Exploitation activity detected during remediation window surfaces immediately — Atlas surfaces anomalies without being asked. | 🤖 Atlas AI Insight & Automation — proactive behavioral monitoring during the exposure window |
+| Sage | DR exposure remains tracked and flagged until DR remediation is confirmed complete — no silent failover risk. | 🆕 New User Capability — Sage has independent visibility into DR remediation status |
+
+---
+
+##### Step 9 — Close
+**Brief:** All LPARs and DR environments patched and validated. Atlas generates the complete remediation record — audit trail sealed, ServiceNow ticket updated.
+
+**Personas involved:** Zach, Sage
+
+| Persona | Wow Moment | Category |
+|---|---|---|
+| Zach | Complete audit trail generated automatically — exposure assessment, blast radius, plan, test results, apply log, authorization chain. Zero manual assembly. | ⏱️ Time Saving — **2–4 hours manual assembly → automatic** |
+| Sage | CISO-ready evidence package available immediately at close — auditor-ready without further effort. | 🆕 New User Capability — Sage produces the evidence package without Zach's involvement |
+
+---
+
+> **Overall outcome (S2):** Exposure window shrinks from 15–30 business days to under 5 business days for CRIT/HIGH findings. DR exposure tracked to confirmed close. 100% audit trail coverage for all Atlas-managed remediations.
 
 ---
 

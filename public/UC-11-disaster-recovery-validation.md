@@ -243,6 +243,10 @@ Compare → Predict → Remediate → Simulate → Monitor
 
 #### Step 1 — Assess
 
+**Brief:** Evaluate the current state of DR environments against production — identify all configuration, PTF, RACF, and MQ differences.
+
+**Personas involved:** Greg, Zach
+
 | Persona | Pain Point | Category |
 |---|---|---|
 | Greg | DR readiness is assessed manually and infrequently — typically in the weeks before a scheduled DR test. The assessment relies on comparing configuration snapshots, spreadsheets, and team memory. | ⏱️ Lost Time — **2–4 weeks** of manual assessment effort before each DR test |
@@ -251,12 +255,20 @@ Compare → Predict → Remediate → Simulate → Monitor
 
 #### Step 2 — Monitor
 
+**Brief:** Track whether the DR environment is drifting from production between formal test events.
+
+**Personas involved:** Greg, Zach
+
 | Persona | Pain Point | Category |
 |---|---|---|
 | Greg | No continuous monitoring between DR tests — DR environments drift invisibly as production changes accumulate without being applied to DR. | 💼 Business Impact — by the next DR test, months of drift have accumulated with no visibility until test day |
 | Zach | Changes applied to production (PTF applies, RACF updates, MQ channel changes) are not systematically tracked for DR propagation — each change requires a separate manual decision to replicate to DR. | 💼 Business Impact — systematic production→DR drift is a natural consequence of the process, not an exception |
 
 #### Step 3 — Remediate
+
+**Brief:** Apply corrective changes to bring the DR environment to production equivalence.
+
+**Personas involved:** Zach, Greg
 
 | Persona | Pain Point | Category |
 |---|---|---|
@@ -265,6 +277,10 @@ Compare → Predict → Remediate → Simulate → Monitor
 
 #### Step 4 — Simulate
 
+**Brief:** Validate that the DR environment would successfully handle a failover.
+
+**Personas involved:** Greg, Quinn
+
 | Persona | Pain Point | Category |
 |---|---|---|
 | Greg | DR tests fail for reasons that were knowable in advance. Post-mortem analysis consistently identifies changes that were applied to production but not to DR — changes that were in the change log the whole time. | 💼 Business Impact — DR test failures are expensive to recover from, and the cause is retrospectively obvious but prospectively invisible |
@@ -272,6 +288,10 @@ Compare → Predict → Remediate → Simulate → Monitor
 | Quinn | Go/no-go for the DR test is made without a simulation result — the decision is based on the team's assessment of completeness, not on a verified test outcome. | 🔒 Skill Gap / Bottleneck — Quinn must approve or defer the DR test without an objective readiness verdict |
 
 #### Step 5 — Record
+
+**Brief:** Document the DR test outcome and readiness evidence for compliance and governance.
+
+**Personas involved:** Greg, Derek
 
 | Persona | Pain Point | Category |
 |---|---|---|
@@ -284,12 +304,20 @@ Compare → Predict → Remediate → Simulate → Monitor
 
 #### Step 1 — Assess
 
+**Brief:** Evaluate the current state of DR environments against production — identify all configuration, PTF, RACF, and MQ differences.
+
+**Personas involved:** Greg, Atlas
+
 | Persona | Wow Moment | Category |
 |---|---|---|
 | Greg | Complete DR vs. production diff produced on demand — every configuration, PTF, RACF, and subsystem difference enumerated with severity classification. | ⏱️ Time Saving — **2–4 weeks manual assessment → hours** for a complete DR readiness assessment |
 | Greg | High-severity gaps (missing RACF groups, insufficient buffer pools, missing critical PTFs) surfaced immediately and classified — Greg knows exactly what would cause a DR failure without running a test first. | 🤖 Atlas AI Insight & Automation — DR failure point prediction identifies specific items that would cause failover failure based on the observed diff |
 
 #### Step 2 — Monitor
+
+**Brief:** Track whether the DR environment is drifting from production between formal test events.
+
+**Personas involved:** Greg, Atlas
 
 | Persona | Wow Moment | Category |
 |---|---|---|
@@ -298,6 +326,10 @@ Compare → Predict → Remediate → Simulate → Monitor
 
 #### Step 3 — Remediate
 
+**Brief:** Apply corrective changes to bring the DR environment to production equivalence.
+
+**Personas involved:** Zach, Greg, Atlas
+
 | Persona | Wow Moment | Category |
 |---|---|---|
 | Zach | DR remediation plan generated from the complete diff — every gap addressed, nothing left to memory or guesswork. | ⏱️ Time Saving — **days to weeks of manual remediation planning → Atlas-generated targeted plan** |
@@ -305,12 +337,20 @@ Compare → Predict → Remediate → Simulate → Monitor
 
 #### Step 4 — Simulate
 
+**Brief:** Validate that the DR environment would successfully handle a failover.
+
+**Personas involved:** Greg, Quinn, Atlas
+
 | Persona | Wow Moment | Category |
 |---|---|---|
 | Greg | Simulated failover validation produces a certified pass result before the actual DR test — organizations enter the test with documented evidence it will work. | 🤖 Atlas AI Insight & Automation — isolation-based DR simulation at production load is only possible through Atlas's environment provisioning and test execution capabilities |
 | Quinn | Go/no-go decision for the DR test is made from Atlas's simulation pass/fail verdict — an objective, reproducible readiness signal rather than a team assessment. | 🆕 New User Capability — Quinn makes the DR test authorization decision from a verified simulation result, independently |
 
 #### Step 5 — Record
+
+**Brief:** Document the DR test outcome and readiness evidence for compliance and governance.
+
+**Personas involved:** Greg, Derek, Atlas
 
 | Persona | Wow Moment | Category |
 |---|---|---|
