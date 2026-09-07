@@ -747,10 +747,11 @@ function renderSynergyColumn(ratings: SynergyRating): string {
 }
 
 function renderNetworkGraph(useCases: typeof productNodes): string {
+  const atlasNode = { x: 500, y: 60, color: "#F59E0B", label: "Atlas", r: 42 };
   const pillarNodes = [
-    { id: "system", x: 200, y: 80, color: "#00D4FF", label: "System Intelligence" },
-    { id: "change", x: 500, y: 80, color: "#FF6B6B", label: "Change Intelligence" },
-    { id: "predictive", x: 800, y: 80, color: "#A78BFA", label: "Predictive Intelligence" },
+    { id: "system", x: 250, y: 200, color: "#00D4FF", label: "System Intelligence", r: 38 },
+    { id: "change", x: 500, y: 200, color: "#FF6B6B", label: "Change Intelligence", r: 38 },
+    { id: "predictive", x: 750, y: 200, color: "#A78BFA", label: "Predictive Intelligence", r: 38 },
   ];
 
   const ucNodes = useCases.map((uc, i) => {
@@ -759,68 +760,127 @@ function renderNetworkGraph(useCases: typeof productNodes): string {
     const avgX = pillarXs.reduce((a, b) => a + b, 0) / pillarXs.length;
     const row = Math.floor(i / 3);
     const col = i % 3;
+    const spread = pillars.length > 1 ? (pillars.length - 1) * 80 : 0;
     return {
       ...uc,
-      x: avgX + (col - 1) * 30,
-      y: 180 + row * 100,
+      x: avgX + (col - 1) * 25,
+      y: 340 + row * 110,
+      r: 34,
       pillars,
     };
   });
 
   const connections: { x1: number; y1: number; x2: number; y2: number; color: string }[] = [];
+
+  // Atlas to pillars
+  pillarNodes.forEach((p) => {
+    connections.push({
+      x1: atlasNode.x,
+      y1: atlasNode.y + atlasNode.r,
+      x2: p.x,
+      y2: p.y - p.r,
+      color: atlasNode.color + "30",
+    });
+  });
+
+  // Pillars to use cases
   ucNodes.forEach((uc) => {
     uc.pillars.forEach((pid) => {
       const pillar = pillarNodes.find((p) => p.id === pid);
       if (pillar) {
         connections.push({
           x1: pillar.x,
-          y1: pillar.y + 20,
+          y1: pillar.y + pillar.r,
           x2: uc.x,
-          y2: uc.y - 15,
-          color: pillar.color + "40",
+          y2: uc.y - uc.r,
+          color: pillar.color + "35",
         });
       }
     });
   });
 
   return `
-  <div style="width: 100%; max-width: 1000px; margin: 0 auto 32px; padding: 0 24px;">
-    <svg viewBox="0 0 1000 500" style="width: 100%; height: auto;" xmlns="http://www.w3.org/2000/svg">
+  <div style="width: 100%; max-width: 1000px; margin: 0 auto 40px; padding: 0 24px;">
+    <svg viewBox="0 0 1000 700" style="width: 100%; height: auto;" xmlns="http://www.w3.org/2000/svg">
       <defs>
+        <filter id="glow-amber" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
         <filter id="glow-cyan" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
           <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
         <filter id="glow-coral" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
           <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
         <filter id="glow-purple" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-white" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
           <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
+        <radialGradient id="grad-amber" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#F59E0B" stop-opacity="0.02"/>
+        </radialGradient>
+        <radialGradient id="grad-cyan" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#00D4FF" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#00D4FF" stop-opacity="0.02"/>
+        </radialGradient>
+        <radialGradient id="grad-coral" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#FF6B6B" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#FF6B6B" stop-opacity="0.02"/>
+        </radialGradient>
+        <radialGradient id="grad-purple" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#A78BFA" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#A78BFA" stop-opacity="0.02"/>
+        </radialGradient>
+        <radialGradient id="grad-white" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#E2E8F0" stop-opacity="0.10"/>
+          <stop offset="100%" stop-color="#E2E8F0" stop-opacity="0.02"/>
+        </radialGradient>
       </defs>
       
       ${connections.map((c) => `
         <line x1="${c.x1}" y1="${c.y1}" x2="${c.x2}" y2="${c.y2}" 
-          stroke="${c.color}" stroke-width="1.5" stroke-dasharray="4,4"/>
+          stroke="${c.color}" stroke-width="1.5" stroke-dasharray="5,5"/>
       `).join("")}
+      
+      <!-- Atlas node -->
+      <g>
+        <circle cx="${atlasNode.x}" cy="${atlasNode.y}" r="${atlasNode.r + 6}" fill="none" stroke="${atlasNode.color}" stroke-width="1" stroke-opacity="0.3" filter="url(#glow-amber)"/>
+        <circle cx="${atlasNode.x}" cy="${atlasNode.y}" r="${atlasNode.r}" fill="url(#grad-amber)" stroke="${atlasNode.color}" stroke-width="2" filter="url(#glow-amber)"/>
+        <circle cx="${atlasNode.x}" cy="${atlasNode.y}" r="${atlasNode.r - 4}" fill="rgba(10,10,15,0.9)"/>
+        <text x="${atlasNode.x}" y="${atlasNode.y + 5}" text-anchor="middle" fill="${atlasNode.color}" font-size="14" font-weight="700" font-family="IBM Plex Sans, sans-serif">${atlasNode.label}</text>
+      </g>
       
       ${pillarNodes.map((p) => `
         <g>
-          <circle cx="${p.x}" cy="${p.y}" r="28" fill="${p.color}15" stroke="${p.color}" stroke-width="2" 
-            filter="${p.id === "system" ? "url(#glow-cyan)" : p.id === "change" ? "url(#glow-coral)" : "url(#glow-purple)"}"/>
-          <text x="${p.x}" y="${p.y + 5}" text-anchor="middle" fill="${p.color}" font-size="11" font-weight="600" font-family="IBM Plex Mono, monospace">${p.label.split(" ")[0]}</text>
-          <text x="${p.x}" y="${p.y + 50}" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="IBM Plex Sans, sans-serif">${p.label}</text>
+          <circle cx="${p.x}" cy="${p.y}" r="${p.r + 6}" fill="none" stroke="${p.color}" stroke-width="1" stroke-opacity="0.3" filter="url(#glow-${p.id === 'system' ? 'cyan' : p.id === 'change' ? 'coral' : 'purple'})"/>
+          <circle cx="${p.x}" cy="${p.y}" r="${p.r}" fill="url(#grad-${p.id === 'system' ? 'cyan' : p.id === 'change' ? 'coral' : 'purple'})" stroke="${p.color}" stroke-width="2" filter="url(#glow-${p.id === 'system' ? 'cyan' : p.id === 'change' ? 'coral' : 'purple'})"/>
+          <circle cx="${p.x}" cy="${p.y}" r="${p.r - 4}" fill="rgba(10,10,15,0.9)"/>
+          <text x="${p.x}" y="${p.y - 4}" text-anchor="middle" fill="${p.color}" font-size="10" font-weight="600" font-family="IBM Plex Mono, monospace">${p.label.split(" ")[0]}</text>
+          <text x="${p.x}" y="${p.y + 10}" text-anchor="middle" fill="${p.color}" font-size="8" font-weight="500" font-family="IBM Plex Mono, monospace" opacity="0.8">${p.label.split(" ")[1]}</text>
         </g>
       `).join("")}
       
       ${ucNodes.map((uc) => {
-        const leftColor = PILLARS.find((p) => p.id === uc.pillars[0])?.color || "#00D4FF";
+        const leftColor = PILLARS.find((p) => p.id === uc.pillars[0])?.color || "#E2E8F0";
+        const glowId = uc.pillars[0] === 'system' ? 'glow-cyan' : uc.pillars[0] === 'change' ? 'glow-coral' : uc.pillars[0] === 'predictive' ? 'glow-purple' : 'glow-white';
+        const gradId = uc.pillars[0] === 'system' ? 'grad-cyan' : uc.pillars[0] === 'change' ? 'grad-coral' : uc.pillars[0] === 'predictive' ? 'grad-purple' : 'grad-white';
+        const shortLabel = uc.label.replace("UC-0", "UC-").replace("UC-", "").split(": ")[1] || uc.label;
+        const labelParts = shortLabel.length > 18 ? [shortLabel.substring(0, 18) + "...", ""] : [shortLabel, ""];
         return `
         <g onclick="showPage('uc-${uc.id}')" style="cursor: pointer;">
-          <circle cx="${uc.x}" cy="${uc.y}" r="18" fill="${leftColor}12" stroke="${leftColor}" stroke-width="1.5"/>
-          <text x="${uc.x}" y="${uc.y + 4}" text-anchor="middle" fill="#e2e8f0" font-size="9" font-weight="500" font-family="IBM Plex Sans, sans-serif">${uc.label.split(": ")[1]?.substring(0, 20) || uc.label}</text>
+          <circle cx="${uc.x}" cy="${uc.y}" r="${uc.r + 4}" fill="none" stroke="${leftColor}" stroke-width="1" stroke-opacity="0.25" filter="url(#${glowId})"/>
+          <circle cx="${uc.x}" cy="${uc.y}" r="${uc.r}" fill="url(#${gradId})" stroke="${leftColor}" stroke-width="1.5" filter="url(#${glowId})"/>
+          <circle cx="${uc.x}" cy="${uc.y}" r="${uc.r - 3}" fill="rgba(10,10,15,0.92)"/>
+          <text x="${uc.x}" y="${uc.y - 2}" text-anchor="middle" fill="${leftColor}" font-size="8" font-weight="600" font-family="IBM Plex Mono, monospace">UC-${uc.id.replace("uc-0", "").replace("uc-", "")}</text>
+          <text x="${uc.x}" y="${uc.y + 10}" text-anchor="middle" fill="#94a3b8" font-size="7" font-weight="400" font-family="IBM Plex Sans, sans-serif">${labelParts[0]}</text>
         </g>`;
       }).join("")}
     </svg>
