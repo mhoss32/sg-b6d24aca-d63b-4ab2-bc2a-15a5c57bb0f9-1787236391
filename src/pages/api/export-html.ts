@@ -918,35 +918,26 @@ function renderHomePage(ibmB64: string, systemB64: string, changeB64: string, pr
 
   return `
   <section id="home" class="page-section">
-    <div style="padding: 64px 24px 32px; text-align: center;">
+    <!-- Hero Header -->
+    <div style="padding: 64px 24px 48px; text-align: center;">
       <div style="max-width: 768px; margin: 0 auto;">
         <div style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 24px;">
           <div style="width: 48px; height: 48px; border-radius: 10px; background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); display: flex; align-items: center; justify-content: center;">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           </div>
           <h1 style="font-size: 48px; font-weight: 700; color: #fff; letter-spacing: -0.02em;">Atlas</h1>
-          <img src="data:image/png;base64,${ibmB64}" alt="IBM" style="height: 48px; width: auto; opacity: 0.5; margin-left: 24px;">
         </div>
         <p style="font-size: 18px; color: #94a3b8; line-height: 1.7; margin-bottom: 24px;">
           AI-powered platform for IBM Z environment intelligence, change management, and predictive operations.
           Explore use cases across three pillars of intelligence.
         </p>
-        <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 32px;">
-          ${PILLARS.map((pillar) => `
-            <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 8px; border: 1px solid ${pillar.border}; background: ${pillar.bg};">
-              <div style="width: 10px; height: 10px; border-radius: 50%; background: ${pillar.color}; box-shadow: 0 0 8px ${pillar.color}66;"></div>
-              <span style="font-size: 12px; font-weight: 600; color: ${pillar.color};">${pillar.name}</span>
-              <span style="font-size: 11px; color: #64748b;">${useCases.filter((uc) => getUseCasePillars(uc.id).includes(pillar.id)).length} use cases</span>
-            </div>
-          `).join("")}
-        </div>
       </div>
     </div>
 
-    ${renderNetworkGraph(useCases)}
-
+    <!-- Pillar + Use Case Grid -->
     <div style="max-width: 1280px; margin: 0 auto; padding: 0 24px 32px;">
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(60px, auto); gap: 16px;">
+        <!-- Pillar Headers -->
         ${PILLARS.map((pillar, i) => {
           const iconB64 = pillar.id === "system" ? systemB64 : pillar.id === "change" ? changeB64 : predictiveB64;
           const visibleCount = useCases.filter((uc) => getUseCasePillars(uc.id).includes(pillar.id)).length;
@@ -964,34 +955,63 @@ function renderHomePage(ibmB64: string, systemB64: string, changeB64: string, pr
           </div>`;
         }).join("")}
 
+        <!-- Use Cases -->
         ${useCases.map((uc) => {
           const ucPillars = getUseCasePillars(uc.id);
           const row = rows[uc.id];
           const span = spans[uc.id];
           if (!row || !span) return "";
-          const leftColor = PILLARS.find((p) => p.id === ucPillars[0])?.color || "#00D4FF";
-          const rightColor = PILLARS.find((p) => p.id === ucPillars[ucPillars.length - 1])?.color || leftColor;
+          const primaryPillar = PILLARS.find((p) => p.id === ucPillars[0]);
+          const leftColor = primaryPillar?.color || "#E2E8F0";
           const isMulti = ucPillars.length > 1;
           const synergy = getSynergyRating(uc.id);
 
           return `
-          <div onclick="showPage('uc-${uc.id}')" style="cursor: pointer; grid-column: ${span.start} / ${span.end}; grid-row: ${row} / ${row + 1}; border-radius: 14px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 20px 24px; transition: border-color 0.2s; border-left: 4px solid ${leftColor}; ${isMulti ? `border-right: 4px solid ${rightColor};` : ""}">
+          <div onclick="showPage('uc-${uc.id}')" style="cursor: pointer; grid-column: ${span.start} / ${span.end}; grid-row: ${row} / ${row + 1}; border-radius: 14px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 16px 20px; transition: all 0.2s; border-left: 3px solid ${leftColor}; position: relative; overflow: hidden;"
+            onmouseover="this.style.boxShadow='0 0 30px ${leftColor}15'; this.style.transform='scale(1.01)';"
+            onmouseout="this.style.boxShadow='0 0 20px ${leftColor}08'; this.style.transform='scale(1)';"
+            style="box-shadow: 0 0 20px ${leftColor}08;">
+            ${isMulti ? `
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(to right, ${ucPillars.map((pid) => PILLARS.find((p) => p.id === pid)?.color).join(", ")});"></div>
+            ` : ""}
             <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="width: 12px; height: 12px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; background: ${leftColor}; box-shadow: 0 0 8px ${leftColor}60;"></div>
               <div style="flex: 1; min-width: 0;">
-                <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px;">
+                <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin: 0 0 6px; line-height: 1.3;">${escapeHTML(uc.label)}</h3>
+                <p style="font-size: 12px; color: #64748b; margin: 0 0 8px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${escapeHTML(uc.description)}</p>
+                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                   ${ucPillars.map((pid) => {
                     const p = PILLARS.find((pl) => pl.id === pid);
                     if (!p) return "";
-                    return `<span style="font-size: 9px; font-weight: 700; color: ${p.color}; padding: 2px 6px; border-radius: 4px; background: ${p.bg}; border: 1px solid ${p.border};">${p.shortName}</span>`;
+                    return `<span style="font-size: 10px; font-weight: 600; color: ${p.color}; padding: 2px 8px; border-radius: 9999px; border: 1px solid ${p.color}40; background: ${p.color}10;">${p.shortName}</span>`;
                   }).join("")}
                 </div>
-                <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin: 0 0 4px;">${escapeHTML(uc.label)}</h3>
-                <p style="font-size: 12px; color: #64748b; margin: 0; line-height: 1.4;">${escapeHTML(uc.description)}</p>
               </div>
               ${renderSynergyColumn(synergy)}
             </div>
           </div>`;
         }).join("")}
+      </div>
+
+      <!-- Legend -->
+      <div style="margin-top: 32px; display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap;">
+        ${PILLARS.map((pillar) => `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: ${pillar.color}; box-shadow: 0 0 6px ${pillar.color}60;"></div>
+            <span style="font-size: 12px; color: #64748b;">${pillar.name}</span>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="border-top: 1px solid rgba(255,255,255,0.06); padding: 32px 24px; margin-top: 32px;">
+      <div style="max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+        <p style="font-size: 14px; color: #64748b;">IBM Atlas Platform — ${new Date().getFullYear()}</p>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span style="font-size: 14px; color: #64748b;">Explore the Atlas</span>
+        </div>
       </div>
     </div>
   </section>`;
