@@ -1684,3 +1684,25 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
     ],
   },
 };
+
+export const nodeTypeConfig: Record<NodeType, { color: string; label: string }> = {
+  atlas: { color: "#F59E0B", label: "Atlas" },
+  systemIntelligence: { color: "#00D4FF", label: "System Intelligence" },
+  changeIntelligence: { color: "#FF6B6B", label: "Change Intelligence" },
+  predictiveIntelligence: { color: "#A78BFA", label: "Predictive Intelligence" },
+  useCase: { color: "#E2E8F0", label: "Use Case" },
+};
+
+export function getNodeById(id: string): ProductNode | undefined {
+  return productNodes.find((n) => n.id === id);
+}
+
+export function getConnections(): { source: string; target: string }[] {
+  const connections: { source: string; target: string }[] = [];
+  for (const node of productNodes) {
+    for (const conn of node.connections) {
+      connections.push({ source: node.id, target: conn });
+    }
+  }
+  return connections;
+}
