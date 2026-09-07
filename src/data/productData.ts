@@ -1683,32 +1683,4 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       { name: "Test Environment Provisioning", timeline: "GA", description: "Isolation testing environments" },
     ],
   },
-  "uc-09": {
-    id: "uc-09",
-    label: "UC-09: Application Modernization",
-    type: "useCase",
-    description: "Legacy application analysis, technical debt identification, and safe phased modernization — turning 'we cannot safely touch this' into a phased, validated, risk-controlled project.",
-    connections: ["change", "system"],
-  },
-  {
-    id: "uc-10",
-    label: "UC-10: Environment Parity and Drift Control",
-    type: "useCase",
-    description: "Continuous environment parity monitoring with unauthorized change detection and automated remediation — detecting drift before a human notices a behavioral symptom.",
-    connections: ["predictive", "system"],
-  },
-  {
-    id: "uc-11",
-    label: "UC-11: Disaster Recovery Validation",
-    type: "useCase",
-    description: "Continuous DR readiness assessment with cross-environment comparison and failover simulation — treating DR readiness as a continuous, measurable state rather than an annual test event.",
-    connections: ["predictive", "system"],
-  },
-  {
-    id: "uc-12",
-    label: "UC-12: Capacity Planning and Performance Readiness",
-    type: "useCase",
-    description: "Proactive capacity management with load projection, constraint identification, and validated configuration changes — replacing reactive firefighting with proactive capacity management.",
-    connections: ["change", "predictive"],
-  },
-];
+};
