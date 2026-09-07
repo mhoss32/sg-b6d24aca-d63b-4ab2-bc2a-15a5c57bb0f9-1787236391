@@ -66,12 +66,6 @@ const PILLARS = [
   { id: "predictive", name: "Predictive Intelligence", shortName: "PI", color: "#A78BFA", bg: "rgba(167,139,250,0.1)", border: "rgba(167,139,250,0.3)" },
 ];
 
-const PILLAR_USE_CASES: Record<string, string[]> = {
-  system: ["uc-02", "uc-05"],
-  change: ["uc-06", "uc-07", "uc-08", "uc-09", "uc-12"],
-  predictive: ["uc-01", "uc-03", "uc-04", "uc-10", "uc-11"],
-};
-
 function getUseCasePillars(ucId: string): string[] {
   const node = productNodes.find((n) => n.id === ucId);
   return node?.connections || [];
