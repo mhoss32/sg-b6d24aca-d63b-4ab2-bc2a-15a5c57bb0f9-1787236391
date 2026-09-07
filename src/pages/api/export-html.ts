@@ -748,7 +748,12 @@ function renderHomePage(ibmB64: string, systemB64: string, changeB64: string, pr
   const spans: Record<string, { start: number; end: number }> = {};
 
   for (const uc of useCases) {
-    const ucPillars = getUseCasePillars(uc.id);
+    const ucPillarsRaw = getUseCasePillars(uc.id);
+    const ucPillars = [...ucPillarsRaw].sort((a, b) => {
+      const idxA = PILLARS.findIndex((p) => p.id === a);
+      const idxB = PILLARS.findIndex((p) => p.id === b);
+      return idxA - idxB;
+    });
     const indices = ucPillars.map((p) => PILLARS.findIndex((pl) => pl.id === p)).filter((i) => i !== -1);
     if (indices.length === 0) continue;
     const minIdx = Math.min(...indices);
@@ -808,7 +813,12 @@ function renderHomePage(ibmB64: string, systemB64: string, changeB64: string, pr
 
         <!-- Use Cases (spanning horizontally across their pillars) -->
         ${useCases.map((uc) => {
-          const ucPillars = getUseCasePillars(uc.id);
+          const ucPillarsRaw = getUseCasePillars(uc.id);
+          const ucPillars = [...ucPillarsRaw].sort((a, b) => {
+            const idxA = PILLARS.findIndex((p) => p.id === a);
+            const idxB = PILLARS.findIndex((p) => p.id === b);
+            return idxA - idxB;
+          });
           const row = rows[uc.id];
           const span = spans[uc.id];
           if (!row || !span) return "";

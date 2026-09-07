@@ -49,18 +49,15 @@ const PILLARS: PillarConfig[] = [
   },
 ];
 
-const PILLAR_USE_CASES: Record<string, string[]> = {
-  system: ["uc-01", "uc-02", "uc-03", "uc-04", "uc-05", "uc-06", "uc-07", "uc-08", "uc-09", "uc-12", "uc-13"],
-  change: ["uc-01", "uc-02", "uc-07", "uc-08", "uc-10", "uc-11", "uc-12", "uc-13", "uc-14"],
-  predictive: ["uc-09", "uc-10", "uc-11"],
-};
-
 function getUseCasePillars(ucId: string): string[] {
-  const pillars: string[] = [];
-  for (const [pillarId, ucIds] of Object.entries(PILLAR_USE_CASES)) {
-    if (ucIds.includes(ucId)) pillars.push(pillarId);
-  }
-  return pillars;
+  const node = productNodes.find((n) => n.id === ucId);
+  const pillars = node?.connections || [];
+  // Sort by pillar index so colors are always blue → red → purple left-to-right
+  return [...pillars].sort((a, b) => {
+    const idxA = PILLARS.findIndex((p) => p.id === a);
+    const idxB = PILLARS.findIndex((p) => p.id === b);
+    return idxA - idxB;
+  });
 }
 
 interface LayoutResult {
