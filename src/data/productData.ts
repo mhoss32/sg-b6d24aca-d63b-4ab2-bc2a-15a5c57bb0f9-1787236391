@@ -1149,20 +1149,6 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       { name: "Workflow Engine", timeline: "GA", description: "Change orchestration and governance" },
     ],
   },
-  "uc-06": {
-    id: "uc-06",
-    label: "UC-06: Patch Management",
-    type: "useCase",
-    description: "Automated PTF impact analysis, test plan generation, and orchestrated patch execution with full audit trail.",
-    connections: ["change", "system"],
-  },
-  "uc-07": {
-    id: "uc-07",
-    label: "UC-07: Application Change Management",
-    type: "useCase",
-    description: "Developer-native change lifecycle with impact analysis, test generation, and deployment orchestration.",
-    connections: ["change", "system", "predictive"],
-  },
   "uc-08": {
     id: "uc-08",
     label: "UC-08: Platform Upgrade and Migration",
