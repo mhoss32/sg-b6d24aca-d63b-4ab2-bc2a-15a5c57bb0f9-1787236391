@@ -746,6 +746,87 @@ function renderSynergyColumn(ratings: SynergyRating): string {
     </div>`;
 }
 
+function renderNetworkGraph(useCases: typeof productNodes): string {
+  const pillarNodes = [
+    { id: "system", x: 200, y: 80, color: "#00D4FF", label: "System Intelligence" },
+    { id: "change", x: 500, y: 80, color: "#FF6B6B", label: "Change Intelligence" },
+    { id: "predictive", x: 800, y: 80, color: "#A78BFA", label: "Predictive Intelligence" },
+  ];
+
+  const ucNodes = useCases.map((uc, i) => {
+    const pillars = getUseCasePillars(uc.id);
+    const pillarXs = pillars.map((pid) => pillarNodes.find((p) => p.id === pid)?.x || 500);
+    const avgX = pillarXs.reduce((a, b) => a + b, 0) / pillarXs.length;
+    const row = Math.floor(i / 3);
+    const col = i % 3;
+    return {
+      ...uc,
+      x: avgX + (col - 1) * 30,
+      y: 180 + row * 100,
+      pillars,
+    };
+  });
+
+  const connections: { x1: number; y1: number; x2: number; y2: number; color: string }[] = [];
+  ucNodes.forEach((uc) => {
+    uc.pillars.forEach((pid) => {
+      const pillar = pillarNodes.find((p) => p.id === pid);
+      if (pillar) {
+        connections.push({
+          x1: pillar.x,
+          y1: pillar.y + 20,
+          x2: uc.x,
+          y2: uc.y - 15,
+          color: pillar.color + "40",
+        });
+      }
+    });
+  });
+
+  return `
+  <div style="width: 100%; max-width: 1000px; margin: 0 auto 32px; padding: 0 24px;">
+    <svg viewBox="0 0 1000 500" style="width: 100%; height: auto;" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow-cyan" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-coral" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-purple" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      
+      ${connections.map((c) => `
+        <line x1="${c.x1}" y1="${c.y1}" x2="${c.x2}" y2="${c.y2}" 
+          stroke="${c.color}" stroke-width="1.5" stroke-dasharray="4,4"/>
+      `).join("")}
+      
+      ${pillarNodes.map((p) => `
+        <g>
+          <circle cx="${p.x}" cy="${p.y}" r="28" fill="${p.color}15" stroke="${p.color}" stroke-width="2" 
+            filter="${p.id === "system" ? "url(#glow-cyan)" : p.id === "change" ? "url(#glow-coral)" : "url(#glow-purple)"}"/>
+          <text x="${p.x}" y="${p.y + 5}" text-anchor="middle" fill="${p.color}" font-size="11" font-weight="600" font-family="IBM Plex Mono, monospace">${p.label.split(" ")[0]}</text>
+          <text x="${p.x}" y="${p.y + 50}" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="IBM Plex Sans, sans-serif">${p.label}</text>
+        </g>
+      `).join("")}
+      
+      ${ucNodes.map((uc) => {
+        const leftColor = PILLARS.find((p) => p.id === uc.pillars[0])?.color || "#00D4FF";
+        return `
+        <g onclick="showPage('uc-${uc.id}')" style="cursor: pointer;">
+          <circle cx="${uc.x}" cy="${uc.y}" r="18" fill="${leftColor}12" stroke="${leftColor}" stroke-width="1.5"/>
+          <text x="${uc.x}" y="${uc.y + 4}" text-anchor="middle" fill="#e2e8f0" font-size="9" font-weight="500" font-family="IBM Plex Sans, sans-serif">${uc.label.split(": ")[1]?.substring(0, 20) || uc.label}</text>
+        </g>`;
+      }).join("")}
+    </svg>
+  </div>`;
+}
+
 function renderHomePage(ibmB64: string, systemB64: string, changeB64: string, predictiveB64: string): string {
   const useCases = productNodes.filter((n) => n.type === "useCase");
 
@@ -777,7 +858,7 @@ function renderHomePage(ibmB64: string, systemB64: string, changeB64: string, pr
 
   return `
   <section id="home" class="page-section">
-    <div style="padding: 64px 24px 48px; text-align: center;">
+    <div style="padding: 64px 24px 32px; text-align: center;">
       <div style="max-width: 768px; margin: 0 auto;">
         <div style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 24px;">
           <div style="width: 48px; height: 48px; border-radius: 10px; background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); display: flex; align-items: center; justify-content: center;">
@@ -786,12 +867,23 @@ function renderHomePage(ibmB64: string, systemB64: string, changeB64: string, pr
           <h1 style="font-size: 48px; font-weight: 700; color: #fff; letter-spacing: -0.02em;">Atlas</h1>
           <img src="data:image/png;base64,${ibmB64}" alt="IBM" style="height: 48px; width: auto; opacity: 0.5; margin-left: 24px;">
         </div>
-        <p style="font-size: 18px; color: #94a3b8; line-height: 1.7; margin-bottom: 48px;">
+        <p style="font-size: 18px; color: #94a3b8; line-height: 1.7; margin-bottom: 24px;">
           AI-powered platform for IBM Z environment intelligence, change management, and predictive operations.
           Explore use cases across three pillars of intelligence.
         </p>
+        <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 32px;">
+          ${PILLARS.map((pillar) => `
+            <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 8px; border: 1px solid ${pillar.border}; background: ${pillar.bg};">
+              <div style="width: 10px; height: 10px; border-radius: 50%; background: ${pillar.color}; box-shadow: 0 0 8px ${pillar.color}66;"></div>
+              <span style="font-size: 12px; font-weight: 600; color: ${pillar.color};">${pillar.name}</span>
+              <span style="font-size: 11px; color: #64748b;">${useCases.filter((uc) => getUseCasePillars(uc.id).includes(pillar.id)).length} use cases</span>
+            </div>
+          `).join("")}
+        </div>
       </div>
     </div>
+
+    ${renderNetworkGraph(useCases)}
 
     <div style="max-width: 1280px; margin: 0 auto; padding: 0 24px 32px;">
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(60px, auto); gap: 16px;">
