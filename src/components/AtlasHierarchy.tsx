@@ -168,9 +168,11 @@ export function AtlasHierarchy() {
       <section className="pt-16 pb-12 px-4 sm:px-6 lg:px-8 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-cyan/10 border border-cyan/30 flex items-center justify-center">
-              <Network className="w-6 h-6 text-cyan" />
-            </div>
+            <img
+              src="/ibm-logo-black-and-white.png"
+              alt="IBM"
+              className="h-12 w-auto opacity-80"
+            />
             <h1 className="text-5xl sm:text-6xl font-bold text-foreground tracking-tight">
               Atlas
             </h1>

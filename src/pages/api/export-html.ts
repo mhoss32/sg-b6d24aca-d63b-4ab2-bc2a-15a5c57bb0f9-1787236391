@@ -778,9 +778,7 @@ function renderHomePage(ibmB64: string, systemB64: string, changeB64: string, pr
     <div style="padding: 64px 24px 48px; text-align: center;">
       <div style="max-width: 768px; margin: 0 auto;">
         <div style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 24px;">
-          <div style="width: 48px; height: 48px; border-radius: 10px; background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); display: flex; align-items: center; justify-content: center;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          </div>
+          <img src="data:image/png;base64,${ibmB64}" alt="IBM" style="height: 48px; width: auto; opacity: 0.8;">
           <h1 style="font-size: 48px; font-weight: 700; color: #fff; letter-spacing: -0.02em;">Atlas</h1>
         </div>
         <p style="font-size: 18px; color: #94a3b8; line-height: 1.7; margin-bottom: 24px;">
