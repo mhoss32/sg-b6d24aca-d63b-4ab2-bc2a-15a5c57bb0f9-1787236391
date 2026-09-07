@@ -746,32 +746,6 @@ function renderSynergyColumn(ratings: SynergyRating): string {
 function renderHomePage(ibmB64: string, systemB64: string, changeB64: string, predictiveB64: string): string {
   const useCases = productNodes.filter((n) => n.type === "useCase");
 
-  const nextRow: Record<number, number> = {};
-  for (let i = 1; i <= 4; i++) nextRow[i] = 2;
-
-  const rows: Record<string, number> = {};
-  const spans: Record<string, { start: number; end: number }> = {};
-
-  for (const uc of useCases) {
-    const ucPillars = getUseCasePillars(uc.id);
-    const indices = ucPillars.map((p) => PILLARS.findIndex((pl) => pl.id === p)).filter((i) => i !== -1);
-    if (indices.length === 0) continue;
-    const minIdx = Math.min(...indices);
-    const maxIdx = Math.max(...indices);
-    const start = minIdx + 1;
-    const end = maxIdx + 2;
-    spans[uc.id] = { start, end };
-
-    let maxRow = 0;
-    for (let col = start; col < end; col++) {
-      maxRow = Math.max(maxRow, nextRow[col]);
-    }
-    rows[uc.id] = maxRow;
-    for (let col = start; col < end; col++) {
-      nextRow[col] = maxRow + 1;
-    }
-  }
-
   return `
   <section id="home" class="page-section">
     <!-- Hero Header -->
@@ -790,61 +764,59 @@ function renderHomePage(ibmB64: string, systemB64: string, changeB64: string, pr
       </div>
     </div>
 
-    <!-- Pillar + Use Case Grid -->
+    <!-- 3-Column Pillar Grid -->
     <div style="max-width: 1280px; margin: 0 auto; padding: 0 24px 32px;">
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(60px, auto); gap: 16px;">
-        <!-- Pillar Headers -->
-        ${PILLARS.map((pillar, i) => {
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+        ${PILLARS.map((pillar) => {
           const iconB64 = pillar.id === "system" ? systemB64 : pillar.id === "change" ? changeB64 : predictiveB64;
-          const visibleCount = useCases.filter((uc) => getUseCasePillars(uc.id).includes(pillar.id)).length;
+          const pillarUseCases = useCases.filter((uc) => getUseCasePillars(uc.id).includes(pillar.id));
+
           return `
-          <div style="grid-column: ${i + 1} / ${i + 2}; grid-row: 1 / 2;">
-            <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px; border-radius: 12px; border: 1px solid ${pillar.border}; background: ${pillar.bg}; color: ${pillar.color};">
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Pillar Header -->
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px; border-radius: 12px; border: 1px solid ${pillar.border}; background: ${pillar.bg}; color: ${pillar.color};">
               <div style="width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
                 <img src="data:image/png;base64,${iconB64}" alt="${pillar.name}" style="width: 28px; height: 28px; object-fit: contain;">
               </div>
               <div style="text-align: center;">
                 <h2 style="font-size: 16px; font-weight: 600; color: ${pillar.color};">${pillar.name}</h2>
-                <p style="font-size: 11px; color: #64748b; margin-top: 4px;">${visibleCount} use cases</p>
+                <p style="font-size: 11px; color: #64748b; margin-top: 4px;">${pillarUseCases.length} use cases</p>
               </div>
             </div>
-          </div>`;
-        }).join("")}
 
-        <!-- Use Cases -->
-        ${useCases.map((uc) => {
-          const ucPillars = getUseCasePillars(uc.id);
-          const row = rows[uc.id];
-          const span = spans[uc.id];
-          if (!row || !span) return "";
-          const primaryPillar = PILLARS.find((p) => p.id === ucPillars[0]);
-          const leftColor = primaryPillar?.color || "#E2E8F0";
-          const isMulti = ucPillars.length > 1;
-          const synergy = getSynergyRating(uc.id);
+            <!-- Use Cases in this pillar -->
+            ${pillarUseCases.map((uc) => {
+              const ucPillars = getUseCasePillars(uc.id);
+              const primaryPillar = PILLARS.find((p) => p.id === ucPillars[0]);
+              const leftColor = primaryPillar?.color || "#E2E8F0";
+              const isMulti = ucPillars.length > 1;
+              const synergy = getSynergyRating(uc.id);
 
-          return `
-          <div onclick="showPage('uc-${uc.id}')" style="cursor: pointer; grid-column: ${span.start} / ${span.end}; grid-row: ${row} / ${row + 1}; border-radius: 14px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 16px 20px; transition: all 0.2s; border-left: 3px solid ${leftColor}; position: relative; overflow: hidden;"
-            onmouseover="this.style.boxShadow='0 0 30px ${leftColor}15'; this.style.transform='scale(1.01)';"
-            onmouseout="this.style.boxShadow='0 0 20px ${leftColor}08'; this.style.transform='scale(1)';"
-            style="box-shadow: 0 0 20px ${leftColor}08;">
-            ${isMulti ? `
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(to right, ${ucPillars.map((pid) => PILLARS.find((p) => p.id === pid)?.color).join(", ")});"></div>
-            ` : ""}
-            <div style="display: flex; align-items: flex-start; gap: 12px;">
-              <div style="width: 12px; height: 12px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; background: ${leftColor}; box-shadow: 0 0 8px ${leftColor}60;"></div>
-              <div style="flex: 1; min-width: 0;">
-                <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin: 0 0 6px; line-height: 1.3;">${escapeHTML(uc.label)}</h3>
-                <p style="font-size: 12px; color: #64748b; margin: 0 0 8px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${escapeHTML(uc.description)}</p>
-                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                  ${ucPillars.map((pid) => {
-                    const p = PILLARS.find((pl) => pl.id === pid);
-                    if (!p) return "";
-                    return `<span style="font-size: 10px; font-weight: 600; color: ${p.color}; padding: 2px 8px; border-radius: 9999px; border: 1px solid ${p.color}40; background: ${p.color}10;">${p.shortName}</span>`;
-                  }).join("")}
+              return `
+              <div onclick="showPage('uc-${uc.id}')" style="cursor: pointer; border-radius: 14px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 16px 20px; transition: all 0.2s; border-left: 3px solid ${leftColor}; position: relative; overflow: hidden;"
+                onmouseover="this.style.boxShadow='0 0 30px ${leftColor}15'; this.style.transform='scale(1.01)';"
+                onmouseout="this.style.boxShadow='0 0 20px ${leftColor}08'; this.style.transform='scale(1)';"
+                style="box-shadow: 0 0 20px ${leftColor}08;">
+                ${isMulti ? `
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(to right, ${ucPillars.map((pid) => PILLARS.find((p) => p.id === pid)?.color).join(", ")});"></div>
+                ` : ""}
+                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                  <div style="width: 12px; height: 12px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; background: ${leftColor}; box-shadow: 0 0 8px ${leftColor}60;"></div>
+                  <div style="flex: 1; min-width: 0;">
+                    <h3 style="font-size: 14px; font-weight: 500; color: #e2e8f0; margin: 0 0 6px; line-height: 1.3;">${escapeHTML(uc.label)}</h3>
+                    <p style="font-size: 12px; color: #64748b; margin: 0 0 8px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${escapeHTML(uc.description)}</p>
+                    <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                      ${ucPillars.map((pid) => {
+                        const p = PILLARS.find((pl) => pl.id === pid);
+                        if (!p) return "";
+                        return `<span style="font-size: 10px; font-weight: 600; color: ${p.color}; padding: 2px 8px; border-radius: 9999px; border: 1px solid ${p.color}40; background: ${p.color}10;">${p.shortName}</span>`;
+                      }).join("")}
+                    </div>
+                  </div>
+                  ${renderSynergyColumn(synergy)}
                 </div>
-              </div>
-              ${renderSynergyColumn(synergy)}
-            </div>
+              </div>`;
+            }).join("")}
           </div>`;
         }).join("")}
       </div>
