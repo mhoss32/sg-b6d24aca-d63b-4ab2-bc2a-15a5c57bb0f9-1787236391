@@ -73,11 +73,8 @@ const PILLAR_USE_CASES: Record<string, string[]> = {
 };
 
 function getUseCasePillars(ucId: string): string[] {
-  const pillars: string[] = [];
-  for (const [pillarId, ucIds] of Object.entries(PILLAR_USE_CASES)) {
-    if (ucIds.includes(ucId)) pillars.push(pillarId);
-  }
-  return pillars;
+  const node = productNodes.find((n) => n.id === ucId);
+  return node?.connections || [];
 }
 
 const escapeHTML = (str: string) =>
