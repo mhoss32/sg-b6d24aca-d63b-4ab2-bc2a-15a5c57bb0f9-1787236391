@@ -713,7 +713,7 @@ function renderSynergyColumn(ratings: SynergyRating): string {
     { label: "Bob PPZ", rating: ratings.bobPpz },
     { label: "Concert4Z", rating: ratings.concert4z },
     { label: "Terraform", rating: ratings.terraform },
-  ].filter((i) => i.rating !== "None");
+  ];
 
   if (items.length === 0) return "";
 
@@ -721,6 +721,7 @@ function renderSynergyColumn(ratings: SynergyRating): string {
     High: { text: "#4ade80", border: "rgba(74,222,128,0.25)", bg: "rgba(74,222,128,0.12)" },
     Medium: { text: "#facc15", border: "rgba(250,204,21,0.25)", bg: "rgba(250,204,21,0.12)" },
     Low: { text: "#fb923c", border: "rgba(251,146,60,0.25)", bg: "rgba(251,146,60,0.12)" },
+    None: { text: "#64748b", border: "rgba(100,116,139,0.25)", bg: "rgba(100,116,139,0.12)" },
   };
 
   return `
