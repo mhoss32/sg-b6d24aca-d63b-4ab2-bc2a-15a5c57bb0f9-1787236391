@@ -224,7 +224,7 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
                         <span style="font-size: 11px; font-weight: 500; color: #e2e8f0; line-height: 1.4;">${escapeHTML(m.title)}</span>
                         <span style="font-size: 10px; color: #94a3b8; line-height: 1.5;">${escapeHTML(m.description)}</span>
                       </div>`;
-                    }).join(")}
+                    }).join("")}
                   </div>
                 </details>
               `);
@@ -669,7 +669,7 @@ function renderPersonaUseCaseTile(id: string, uc: UseCaseDetail, engagement: str
               <span style="font-size: 11px; font-weight: 500; color: #e2e8f0; line-height: 1.4;">${escapeHTML(m.title)}</span>
               <span style="font-size: 10px; color: #94a3b8; line-height: 1.5;">${escapeHTML(m.description)}</span>
             </div>`;
-          }).join(")}
+          }).join("")}
         </div>
       </details>
     </div>`;
@@ -695,7 +695,7 @@ function renderPersonaUseCaseTile(id: string, uc: UseCaseDetail, engagement: str
               <span style="font-size: 11px; font-weight: 500; color: #e2e8f0; line-height: 1.4;">${escapeHTML(m.title)}</span>
               <span style="font-size: 10px; color: #94a3b8; line-height: 1.5;">${escapeHTML(m.description)}</span>
             </div>`;
-          }).join(")}
+          }).join("")}
         </div>
       </details>
     </div>`;
