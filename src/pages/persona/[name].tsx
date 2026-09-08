@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { ArrowLeft, Network, UserCircle, Star, ArrowRight, ExternalLink, ChevronDown } from "lucide-react";
-import { personaData, getPersonaUseCases, useCaseDetails } from "@/data/productData";
+import { ArrowLeft, Network, UserCircle, Star, ArrowRight, ExternalLink, ChevronDown, Crown } from "lucide-react";
+import { personaData, getPersonaUseCases, useCaseDetails, isTier1Persona } from "@/data/productData";
 import { SEO } from "@/components/SEO";
 
 export default function PersonaDetailPage() {
@@ -26,6 +26,7 @@ export default function PersonaDetailPage() {
     );
   }
 
+  const tier1 = isTier1Persona(persona.name);
   const { primary, secondary } = getPersonaUseCases(persona.name);
 
   return (
@@ -50,11 +51,24 @@ export default function PersonaDetailPage() {
         {/* Persona Header */}
         <section>
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 rounded-full bg-cyan/15 text-cyan flex items-center justify-center">
+            <div className={cn(
+              "w-16 h-16 rounded-full flex items-center justify-center",
+              tier1 ? "bg-gold/15 text-gold" : "bg-cyan/15 text-cyan"
+            )}>
               <UserCircle className="w-9 h-9" />
             </div>
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-foreground">{persona.name}</h1>
+              <div className="flex items-center gap-3 mb-1">
+                <h1 className={cn("text-3xl sm:text-4xl font-bold", tier1 ? "text-gold" : "text-foreground")}>
+                  {persona.name}
+                </h1>
+                {tier1 && (
+                  <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-medium px-3 py-1 rounded-full bg-gold/15 text-gold border border-gold/20">
+                    <Crown className="w-3 h-3" />
+                    Tier 1 Persona
+                  </span>
+                )}
+              </div>
               <p className="text-lg text-muted-foreground">{persona.role}</p>
             </div>
           </div>
@@ -68,8 +82,11 @@ export default function PersonaDetailPage() {
               </div>
 
               {persona.quote && (
-                <div className="rounded-xl border-l-4 border-cyan bg-cyan/5 p-5">
-                  <p className="text-foreground italic leading-relaxed">"{persona.quote}"</p>
+                <div className={cn(
+                  "rounded-xl border-l-4 p-5",
+                  tier1 ? "border-gold bg-gold/5" : "border-cyan bg-cyan/5"
+                )}>
+                  <p className={cn("italic leading-relaxed", tier1 ? "text-gold/90" : "text-foreground")}>"{persona.quote}"</p>
                 </div>
               )}
 
@@ -79,7 +96,7 @@ export default function PersonaDetailPage() {
                   <ul className="space-y-2">
                     {persona.painPoints.map((point, i) => (
                       <li key={i} className="flex items-start gap-2 text-muted-foreground">
-                        <span className="text-cyan mt-1">•</span>
+                        <span className={cn("mt-1", tier1 ? "text-gold" : "text-cyan")}>•</span>
                         <span>{point}</span>
                       </li>
                     ))}

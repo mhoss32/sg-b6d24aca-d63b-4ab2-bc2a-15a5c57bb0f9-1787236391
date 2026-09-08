@@ -96,6 +96,11 @@ const config: Config = {
           light: "rgba(34, 197, 94, 0.15)",
           glow: "rgba(34, 197, 94, 0.4)",
         },
+        gold: {
+          DEFAULT: "#FACC15",
+          light: "rgba(250, 204, 21, 0.15)",
+          glow: "rgba(250, 204, 21, 0.4)",
+        },
       },
       fontFamily: {
         sans: ["IBM Plex Sans", "system-ui", "sans-serif"],

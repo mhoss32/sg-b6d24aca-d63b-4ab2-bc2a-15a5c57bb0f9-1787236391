@@ -104,6 +104,9 @@
   .glow-purple {
     box-shadow: 0 0 12px rgba(167, 139, 250, 0.4), 0 0 40px rgba(167, 139, 250, 0.1);
   }
+  .glow-gold {
+    box-shadow: 0 0 12px rgba(250, 204, 21, 0.4), 0 0 40px rgba(250, 204, 21, 0.1);
+  }
   .glow-line {
     filter: drop-shadow(0 0 4px rgba(0, 212, 255, 0.2));
   }

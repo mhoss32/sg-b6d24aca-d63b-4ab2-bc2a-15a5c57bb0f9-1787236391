@@ -16,6 +16,12 @@ export interface PersonaInfo {
   quote?: string;
 }
 
+export const TIER_1_PERSONAS = ["Zach", "Stan", "Angie", "Kathleen", "Sage"];
+
+export function isTier1Persona(name: string): boolean {
+  return TIER_1_PERSONAS.includes(name);
+}
+
 export interface FlowStage {
   name: string;
   description: string;

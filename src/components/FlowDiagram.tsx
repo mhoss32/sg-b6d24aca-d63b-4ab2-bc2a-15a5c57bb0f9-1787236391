@@ -16,7 +16,7 @@ import {
   Coins,
 } from "lucide-react";
 import type { FlowStage, FlowDiagram as FlowDiagramType, FlowMarker, ExternalTouchpoint } from "@/data/productData";
-import { externalProducts } from "@/data/productData";
+import { externalProducts, isTier1Persona } from "@/data/productData";
 import type { LucideIcon } from "lucide-react";
 import { getUnitConsumption } from "@/data/unitConsumption";
 import type { StepConsumption } from "@/data/unitConsumption";
@@ -824,18 +824,22 @@ function StageCard({
         {!isManaging && Object.entries(grouped).map(([persona, markers]) => {
           const key = `${index}-${persona}`;
           const isExpanded = expandedPersonas[key];
+          const tier1 = isTier1Persona(persona);
           return (
             <div key={persona} className="mb-2">
               <button
                 onClick={() => onTogglePersona(key)}
-                className="flex items-center gap-2 w-full text-left py-1.5 px-2 rounded-md hover:bg-muted/30 transition-colors"
+                className={cn(
+                  "flex items-center gap-2 w-full text-left py-1.5 px-2 rounded-md transition-colors",
+                  tier1 ? "hover:bg-gold/10 bg-gold/5" : "hover:bg-muted/30"
+                )}
               >
                 {isExpanded ? (
-                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                  <ChevronDown className={cn("w-3.5 h-3.5", tier1 ? "text-gold" : "text-muted-foreground")} />
                 ) : (
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                  <ChevronRight className={cn("w-3.5 h-3.5", tier1 ? "text-gold" : "text-muted-foreground")} />
                 )}
-                <span className="text-xs font-semibold text-foreground">{persona}</span>
+                <span className={cn("text-xs font-semibold", tier1 ? "text-gold" : "text-foreground")}>{persona}</span>
                 <span className="text-[10px] text-muted-foreground ml-auto">
                   {markers.length} {markers.length === 1 ? ("pain" in config ? "pain point" : "WOW!") : ("pain" in config ? "pain points" : "WOWs!")}
                 </span>
