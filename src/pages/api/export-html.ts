@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import fs from "fs";
 import path from "path";
-import { useCaseDetails, productNodes, personaData } from "@/data/productData";
+import { useCaseDetails, productNodes, personaData, isTier1Persona } from "@/data/productData";
 import type { UseCaseDetail, FlowDiagram, ExternalTouchpoint } from "@/data/productData";
 import { getUnitConsumption } from "@/data/unitConsumption";
 import { getSynergyRating, type SynergyRating } from "@/data/productData";
@@ -202,12 +202,14 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
                 </div>
               </div>` : ""}
 
-              ${Object.entries(grouped).map(([persona, markers]) => `
+              ${Object.entries(grouped).map(([persona, markers]) => {
+                const tier1 = isTier1Persona(persona);
+                return `
                 <details style="margin-bottom: 6px;">
-                  <summary style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.03); cursor: pointer; font-size: 12px; font-weight: 600; color: #e2e8f0; list-style: none; user-select: none;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polyline points="9 18 15 12 9 6"/></svg>
+                  <summary style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: ${tier1 ? "rgba(250,204,21,0.05)" : "rgba(255,255,255,0.03)"}; cursor: pointer; font-size: 12px; font-weight: 600; color: ${tier1 ? "#FACC15" : "#e2e8f0"}; list-style: none; user-select: none;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${tier1 ? "#FACC15" : "#64748b"}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polyline points="9 18 15 12 9 6"/></svg>
                     <span>${escapeHTML(persona)}</span>
-                    <span style="margin-left: auto; font-size: 10px; font-weight: 400; color: #64748b;">${markers.length} ${markers.length === 1 ? ("pain" in config ? "pain point" : "WOW!") : ("pain" in config ? "pain points" : "WOWs!")}</span>
+                    <span style="margin-left: auto; font-size: 10px; font-weight: 400; color: ${tier1 ? "rgba(250,204,21,0.7)" : "#64748b"};">${markers.length} ${markers.length === 1 ? ("pain" in config ? "pain point" : "WOW!") : ("pain" in config ? "pain points" : "WOWs!")}</span>
                   </summary>
                   <div style="padding-left: 22px; padding-top: 4px;">
                     ${markers.map((m) => {
@@ -225,7 +227,8 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
                     }).join("")}
                   </div>
                 </details>
-              `).join("")}
+              `);
+              }).join("")}
             </div>
           </div>`;
         }).join("")}
@@ -468,17 +471,18 @@ function renderUseCasePage(id: string, detail: UseCaseDetail): string {
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
             ${detail.personas.map((p, i) => {
               const isPrimary = p.engagement === "Primary";
+              const tier1 = isTier1Persona(p.name);
               return `
-              <div onclick="showPage('persona-${p.name.toLowerCase()}')" style="cursor: pointer; position: relative; border-radius: 14px; border: 1px solid ${isPrimary ? "rgba(0,212,255,0.25)" : "rgba(255,255,255,0.08)"}; background: rgba(255,255,255,0.02); padding: 20px; ${isPrimary ? "box-shadow: 0 0 20px rgba(0,212,255,0.06);" : ""} transition: border-color 0.2s;">
+              <div onclick="showPage('persona-${p.name.toLowerCase()}')" style="cursor: pointer; position: relative; border-radius: 14px; border: 1px solid ${isPrimary ? "rgba(0,212,255,0.25)" : tier1 ? "rgba(250,204,21,0.25)" : "rgba(255,255,255,0.08)"}; background: rgba(255,255,255,0.02); padding: 20px; ${isPrimary ? "box-shadow: 0 0 20px rgba(0,212,255,0.06);" : tier1 ? "box-shadow: 0 0 20px rgba(250,204,21,0.06);" : ""} transition: border-color 0.2s;">
                 ${isPrimary ? `<svg style="position: absolute; top: -10px; right: -10px; width: 20px; height: 20px; color: #00D4FF;" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>` : ""}
                 <div style="display: flex; align-items: flex-start; gap: 16px;">
-                  <div style="flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; ${isPrimary ? "background: rgba(0,212,255,0.12); color: #00D4FF;" : "background: rgba(255,255,255,0.06); color: #64748b;"}">
+                  <div style="flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; ${isPrimary ? "background: rgba(0,212,255,0.12); color: #00D4FF;" : tier1 ? "background: rgba(250,204,21,0.12); color: #FACC15;" : "background: rgba(255,255,255,0.06); color: #64748b;"}">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
                   </div>
                   <div>
-                    <div style="font-size: 15px; font-weight: 600; color: #e2e8f0; margin-bottom: 2px;">${escapeHTML(p.name)}</div>
+                    <div style="font-size: 15px; font-weight: 600; color: ${tier1 ? "#FACC15" : "#e2e8f0"}; margin-bottom: 2px;">${escapeHTML(p.name)}</div>
                     <div style="font-size: 13px; color: #64748b; margin-bottom: 12px;">${escapeHTML(p.role)}</div>
-                    <span style="display: inline-block; padding: 3px 12px; border-radius: 9999px; font-size: 10px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; ${isPrimary ? "background: rgba(0,212,255,0.1); color: #00D4FF; border: 1px solid rgba(0,212,255,0.2);" : "background: rgba(255,255,255,0.04); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1);"}">${p.engagement}</span>
+                    <span style="display: inline-block; padding: 3px 12px; border-radius: 9999px; font-size: 10px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; ${isPrimary ? "background: rgba(0,212,255,0.1); color: #00D4FF; border: 1px solid rgba(0,212,255,0.2);" : tier1 ? "background: rgba(250,204,21,0.1); color: #FACC15; border: 1px solid rgba(250,204,21,0.2);" : "background: rgba(255,255,255,0.04); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1);"}">${p.engagement}</span>
                   </div>
                 </div>
               </div>`;
@@ -519,6 +523,7 @@ function renderUseCasePage(id: string, detail: UseCaseDetail): string {
 }
 
 function renderPersonaPage(name: string, info: typeof personaData[string]): string {
+  const tier1 = isTier1Persona(name);
   const { primary, secondary } = (() => {
     const p: { id: string; detail: UseCaseDetail }[] = [];
     const s: { id: string; detail: UseCaseDetail }[] = [];
@@ -538,12 +543,12 @@ function renderPersonaPage(name: string, info: typeof personaData[string]): stri
       <section class="hero" style="margin-bottom: 32px;">
         <div class="badge-row" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
           <div class="badge" style="display: inline-flex; align-items: center; gap: 8px;">
-            <div style="width: 16px; height: 16px; border-radius: 50%; background: #A78BFA; box-shadow: 0 0 12px rgba(167,139,250,0.5);"></div>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: #A78BFA;">Persona</span>
+            <div style="width: 16px; height: 16px; border-radius: 50%; background: ${tier1 ? "#FACC15" : "#A78BFA"}; box-shadow: 0 0 12px ${tier1 ? "rgba(250,204,21,0.5)" : "rgba(167,139,250,0.5)"};"></div>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: ${tier1 ? "#FACC15" : "#A78BFA"};">Persona</span>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
-          <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(167,139,250,0.12); color: #A78BFA; display: flex; align-items: center; justify-content: center;">
+          <div style="width: 64px; height: 64px; border-radius: 50%; background: ${tier1 ? "rgba(250,204,21,0.12)" : "rgba(167,139,250,0.12)"}; color: ${tier1 ? "#FACC15" : "#A78BFA"}; display: flex; align-items: center; justify-content: center;">
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
           </div>
           <div>
@@ -901,7 +906,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }).join("");
 
   const personaNavItems = Object.entries(personaData).map(([key, info]) => {
-    return `<button onclick="showPage('persona-${key}')" class="nav-item" data-page="persona-${key}" style="display: block; width: 100%; text-align: left; padding: 8px 16px; border-radius: 8px; border: none; background: transparent; color: #94a3b8; font-size: 13px; cursor: pointer; transition: all 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(info.name)}<br><span style="font-size: 11px; color: #64748b;">${escapeHTML(info.role)}</span></button>`;
+    const tier1 = isTier1Persona(info.name);
+    return `<button onclick="showPage('persona-${key}')" class="nav-item" data-page="persona-${key}" style="display: block; width: 100%; text-align: left; padding: 8px 16px; border-radius: 8px; border: none; background: transparent; color: ${tier1 ? "#FACC15" : "#94a3b8"}; font-size: 13px; cursor: pointer; transition: all 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(info.name)}<br><span style="font-size: 11px; color: ${tier1 ? "rgba(250,204,21,0.7)" : "#64748b"};">${escapeHTML(info.role)}</span></button>`;
   }).join("");
 
   const html = `<!DOCTYPE html>
