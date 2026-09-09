@@ -1228,7 +1228,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         {
           type: "handoff",
           product: "Concert4Z",
-          title: "Scope Upgrade from Risk Signal",
+          title: "Concert4z handoff - Scope upgrade from risk signal",
           steps: [
             {
               label: "Concert for Z produced",
@@ -1248,7 +1248,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         {
           type: "handoff",
           product: "Concert4Z",
-          title: "Validate Each Phase Behavior",
+          title: "Concert4z handoff - validate each phase behavior",
           steps: [
             {
               label: "Atlas produced",
@@ -1268,21 +1268,21 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         {
           type: "enrichment",
           product: "Concert4Z",
-          title: "Assess Active Application Flows",
+          title: "Concert4z enrichment touchpoint - assess active application workflows",
           summary: "ZEN data from Concert for Z enriches Atlas's application-level compatibility assessment with runtime evidence of which application flows are actually active — ensuring compatibility analysis prioritizes programs in active production use.",
           stageIndex: 1,
         },
         {
           type: "enrichment",
           product: "Concert4Z",
-          title: "Close Behavioral Baseline",
+          title: "Concert4z enrichment touchpoint - close behavioral baseline",
           summary: "Concert for Z's post-upgrade production monitoring provides the behavioral baseline that complements Atlas's configuration baseline — the complete \"known good\" state includes both the Atlas-registered configuration state and the Concert for Z-established behavioral baseline.",
           stageIndex: 6,
         },
         {
           type: "handoff",
           product: "Terraform",
-          title: "Terraform Handoff",
+          title: "Terraform handoff - assess infrastructure resource requirements",
           steps: [
             { label: "Atlas produced", description: "Atlas identifies infrastructure resource requirements for the new release: memory increases, storage allocation changes, CPU entitlement adjustments." },
             { label: "Atlas directs", description: "Atlas passes the infrastructure resource requirement delta to Terraform as proposed HCL changes. Terraform generates a plan output showing exactly what infrastructure changes are needed." },
@@ -1293,7 +1293,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         {
           type: "handoff",
           product: "Terraform",
-          title: "Terraform Handoff",
+          title: "Terraform handoff - provision phase test environments",
           steps: [
             { label: "Atlas produced", description: "Atlas passes the phase-specific infrastructure specification to Terraform for provisioning." },
             { label: "Atlas directs", description: "Terraform provisions the LPAR resources in an isolated workspace that prevents test resources from affecting production." },
@@ -1304,7 +1304,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         {
           type: "handoff",
           product: "Bob PPZ",
-          title: "Bob PPZ Handoff — Deprecated API Remediation",
+          title: "Bobppz handoff - deprecated API remediation",
           steps: [
             { label: "Atlas produced", description: "Atlas has produced a complete compatibility gap list — every LPAR, subsystem, and application with a known incompatibility with the target version. For application-level gaps (programs using deprecated APIs, JCL using removed features), Atlas identifies the affected program(s) and the compatibility issue." },
             { label: "Atlas directs", description: "For each application-level compatibility gap, Atlas presents the finding with affected program identified and directs application owners to Bob PPZ. ZUnderstand analyzes the program to locate the specific deprecated construct and provides the safe migration path." },
@@ -1315,7 +1315,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         {
           type: "handoff",
           product: "Bob PPZ",
-          title: "Bob PPZ Handoff — Phase Execution Fix",
+          title: "Bobppz handoff - phase execution fix",
           steps: [
             { label: "Atlas produced", description: "Atlas is orchestrating upgrade phase execution. If an unexpected application code issue surfaces during phase execution, Atlas surfaces the finding." },
             { label: "Atlas directs", description: "Atlas directs the developer to Bob PPZ for an accelerated fix — passing the phase context, failed compatibility test, and affected program." },
@@ -1326,7 +1326,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         {
           type: "handoff",
           product: "Bob PPZ",
-          title: "Bob PPZ Handoff — Regression Fix",
+          title: "Bobppz handoff - regression fix",
           steps: [
             { label: "Atlas produced", description: "Atlas has run application regression testing scoped to each phase's changes. If regression failures are attributed to application code issues — a program that behaved correctly before the upgrade but now fails — Atlas surfaces the failure." },
             { label: "Atlas directs", description: "Atlas directs the developer to Bob PPZ with the regression failure context: specific program, failing execution path, and pre/post-upgrade behavior difference." },
@@ -1337,21 +1337,21 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         {
           type: "enrichment",
           product: "Bob PPZ",
-          title: "Bob PPZ Enrichment Touchpoint",
+          title: "Bobppz enrichment touchpoint - quantify application compatibility scope",
           summary: "Atlas scopes compatibility impact across all LPARs, subsystems, and applications. Bob PPZ enriches the application-level scope with ZUnderstand's code-level inventory: rather than identifying 'Application X may be affected,' Bob PPZ enables Atlas to identify '47 programs in Application X use EXEC CICS commands being deprecated in the target version, with 12 in transaction-critical paths.'",
           stageIndex: 0,
         },
         {
           type: "enrichment",
           product: "Bob PPZ",
-          title: "Bob PPZ Enrichment Touchpoint",
+          title: "Bobppz enrichment touchpoint - assess remediation complexity",
           summary: "Bob PPZ enriches the compatibility assessment by enabling Atlas to classify remediation complexity (simple API substitution vs. structural change), identify safe batching of programs with the same deprecated construct, and surface hidden dependencies through ZUnderstand's call graph.",
           stageIndex: 1,
         },
         {
           type: "enrichment",
           product: "Bob PPZ",
-          title: "Bob PPZ Enrichment Touchpoint",
+          title: "Bobppz enrichment touchpoint - estimate remediation effort",
           summary: "The Atlas-generated upgrade plan includes application remediation phases. When Bob PPZ is present, the plan includes code-level effort estimates for each application remediation task — derived from ZUnderstand's analysis of scope and complexity — enabling accurate resource planning that directly impacts the overall upgrade timeline.",
           stageIndex: 2,
         },
