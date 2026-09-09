@@ -1226,11 +1226,58 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       ],
       externalTouchpoints: [
         {
+          type: "handoff",
+          product: "Concert4Z",
+          title: "Scope Upgrade from Risk Signal",
+          steps: [
+            {
+              label: "Concert for Z produced",
+              description: "Concert for Z's Risk Management module — using IZSAM software inventory and APAR risk scoring — has identified that one or more components are at a level that creates unquantified operational risk: a z/OS version approaching end of support, a middleware version with known vulnerabilities, or a pattern of missing critical updates.",
+            },
+            {
+              label: "Concert for Z directs",
+              description: "Concert for Z raises the upgrade as a required change and triggers an Atlas upgrade workflow. Atlas applies full change intelligence: scoping compatibility impact, generating the sequenced plan, provisioning phase validation environments, and orchestrating test execution.",
+            },
+            {
+              label: "Atlas returns",
+              description: "Atlas completes the upgrade phases and records the upgrade in its change log. Concert for Z's Risk Management module sees the operational risk item resolved and linked to the Atlas change record.",
+            },
+          ],
+          stageIndex: 0,
+        },
+        {
+          type: "handoff",
+          product: "Concert4Z",
+          title: "Validate Each Phase Behavior",
+          steps: [
+            {
+              label: "Atlas produced",
+              description: "Atlas has executed an upgrade phase and validated it in test environments. Before moving to the next phase, Atlas needs production-level behavioral assurance for the upgraded subsystem.",
+            },
+            {
+              label: "Concert for Z directs",
+              description: "Concert for Z's Observe module provides the production behavioral baseline that Atlas's post-phase monitoring compares against. If an upgraded subsystem is running differently, Concert for Z's continuous monitoring detects the behavioral change and surfaces it to Atlas's phase validation step.",
+            },
+            {
+              label: "Atlas returns",
+              description: "If Concert for Z detects a post-phase behavioral regression, Atlas treats it as a validation failure, investigates the cause, and either remediates or rolls back before the next phase proceeds.",
+            },
+          ],
+          stageIndex: 5,
+        },
+        {
           type: "enrichment",
           product: "Concert4Z",
-          title: "Concert4Z Enrichment Touchpoint",
-          summary: "Concert4Z's Risk Management module may detect that the estate is running software at a level that creates operational risk, triggering the upgrade initiative. Post-upgrade, Concert4Z's behavioral monitoring detects silent regressions after each upgrade phase.",
-          stageIndex: 0,
+          title: "Assess Active Application Flows",
+          summary: "ZEN data from Concert for Z enriches Atlas's application-level compatibility assessment with runtime evidence of which application flows are actually active — ensuring compatibility analysis prioritizes programs in active production use.",
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Close Behavioral Baseline",
+          summary: "Concert for Z's post-upgrade production monitoring provides the behavioral baseline that complements Atlas's configuration baseline — the complete \"known good\" state includes both the Atlas-registered configuration state and the Concert for Z-established behavioral baseline.",
+          stageIndex: 6,
         },
         {
           type: "handoff",
