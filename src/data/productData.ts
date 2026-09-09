@@ -2712,12 +2712,99 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Record", description: "Manual assembly of test reports, remediation records, and team notes." },
       ],
       markers: [
-        { persona: "Greg", type: "time", title: "Lost Time — 2–4 weeks manual assessment", description: "Comparison relies on snapshots, spreadsheets, and team memory.", stageIndex: 0 },
-        { persona: "Greg", type: "pain", title: "Business Impact — comparison always incomplete", description: "Changes applied over months are partially tracked and partially missed.", stageIndex: 0 },
-        { persona: "Greg", type: "pain", title: "Business Impact — months of drift with no visibility", description: "No continuous monitoring; drift accumulates until test day.", stageIndex: 1 },
-        { persona: "Zach", type: "time", title: "Lost Time — days to weeks remediating accumulated drift", description: "DR changes lower priority and deferred, compounding the drift.", stageIndex: 2 },
-        { persona: "Quinn", type: "skill", title: "Skill Gap — go/no-go without objective readiness verdict", description: "Decision based on team assessment, not verified test outcome.", stageIndex: 3 },
-        { persona: "Derek", type: "time", title: "Lost Time — days assembling DR test evidence", description: "Manual assembly from test reports and team notes for compliance.", stageIndex: 4 },
+        // Step 1 — Assess
+        {
+          persona: "Greg",
+          type: "time",
+          title: "Lost Time — 2–4 weeks manual assessment",
+          description: "DR readiness is assessed manually and infrequently — typically in the weeks before a scheduled DR test. The assessment relies on comparing configuration snapshots, spreadsheets, and team memory.",
+          stageIndex: 0,
+        },
+        {
+          persona: "Greg",
+          type: "pain",
+          title: "Business Impact — comparison always incomplete",
+          description: "The comparison is always incomplete — changes applied over months to production are partially tracked, partially remembered, and partially missed in the DR assessment.",
+          stageIndex: 0,
+        },
+        {
+          persona: "Zach",
+          type: "time",
+          title: "Lost Time — emergency remediation effort under test deadline",
+          description: "When the DR test reveals gaps, remediation must be executed under the time pressure of a test deadline rather than proactively while there was time to address drift gradually.",
+          stageIndex: 0,
+        },
+
+        // Step 2 — Monitor
+        {
+          persona: "Greg",
+          type: "pain",
+          title: "Business Impact — months of drift with no visibility",
+          description: "No continuous monitoring between DR tests — DR environments drift invisibly as production changes accumulate without being applied to DR. By the next DR test, months of drift have accumulated with no visibility until test day.",
+          stageIndex: 1,
+        },
+        {
+          persona: "Zach",
+          type: "pain",
+          title: "Business Impact — systematic production→DR drift is a natural consequence of the process",
+          description: "Changes applied to production — PTF applies, RACF updates, MQ channel changes — are not systematically tracked for DR propagation. Each change requires a separate manual decision to replicate to DR, so drift is structural, not exceptional.",
+          stageIndex: 1,
+        },
+
+        // Step 3 — Remediate
+        {
+          persona: "Zach",
+          type: "pain",
+          title: "Business Impact — incomplete remediation means DR test will surface gaps that should have been fixed",
+          description: "Remediation is executed against an incomplete diff; the list of what needs to change is manually assembled and always incomplete, so remediations leave residual gaps for the DR test to discover.",
+          stageIndex: 2,
+        },
+        {
+          persona: "Zach",
+          type: "time",
+          title: "Lost Time — days to weeks remediating accumulated drift",
+          description: "Remediating DR environments requires the same expert time as production changes — but DR changes are lower priority and often deferred, compounding drift and requiring days to weeks of catch-up before each test cycle.",
+          stageIndex: 2,
+        },
+
+        // Step 4 — Simulate
+        {
+          persona: "Greg",
+          type: "pain",
+          title: "Business Impact — DR tests fail for reasons that were knowable in advance",
+          description: "When DR tests fail, post-mortem analysis consistently identifies changes that were applied to production but not to DR — changes that were visible in the change log but never compared systematically.",
+          stageIndex: 3,
+        },
+        {
+          persona: "Greg",
+          type: "pain",
+          title: "Business Impact — no simulated failover; DR test is first real exercise",
+          description: "There is no simulated failover capability; the scheduled DR test is the first time the environment is exercised under production-level conditions, so predictable failures only surface during the real test.",
+          stageIndex: 3,
+        },
+        {
+          persona: "Quinn",
+          type: "skill",
+          title: "Skill Gap / Bottleneck — go/no-go without objective readiness verdict",
+          description: "Go/no-go for the DR test is made based on team assessment of readiness, not on a verified simulation result, forcing Quinn to make a governance decision without an objective readiness verdict.",
+          stageIndex: 3,
+        },
+
+        // Step 5 — Record
+        {
+          persona: "Derek",
+          type: "time",
+          title: "Lost Time — days assembling DR test evidence",
+          description: "DR test documentation is assembled manually from test reports, remediation records, and team notes — a time-consuming audit evidence exercise.",
+          stageIndex: 4,
+        },
+        {
+          persona: "Derek",
+          type: "pain",
+          title: "Business Impact — compliance evidence quality limited by manual assembly",
+          description: "Regulatory frameworks require documented DR test evidence and proof of ongoing readiness, but current evidence is point-in-time and manually assembled, limiting its quality and defensibility.",
+          stageIndex: 4,
+        },
       ],
     },
     toBe: {
@@ -2730,11 +2817,85 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Record", description: "Complete DR readiness history generated automatically from Atlas." },
       ],
       markers: [
-        { persona: "Greg", type: "time", title: "Time Saving — 2–4 weeks → hours for assessment", description: "Every configuration, PTF, RACF, and subsystem difference enumerated.", stageIndex: 0 },
-        { persona: "Greg", type: "skill", title: "Atlas AI Insight — DR failure point prediction", description: "Specific items that would cause failover failure identified before test.", stageIndex: 0 },
-        { persona: "Zach", type: "time", title: "Time Saving — days to weeks → targeted plan", description: "DR remediation plan generated from complete diff; nothing left to memory.", stageIndex: 2 },
-        { persona: "Quinn", type: "gain", title: "New User Capability — objective readiness verdict", description: "Go/no-go decision from Atlas simulation pass/fail, not team assessment.", stageIndex: 3 },
-        { persona: "Derek", type: "time", title: "Time Saving — days manual documentation → automatic", description: "Regulatory compliance evidence produced directly from Atlas records.", stageIndex: 4 },
+        // Step 1 — Assess
+        {
+          persona: "Greg",
+          type: "time",
+          title: "Time Saving — 2–4 weeks → hours for assessment",
+          description: "Complete DR vs. production diff produced on demand — every configuration, PTF, RACF, and subsystem difference enumerated with severity classification instead of weeks of manual comparison.",
+          stageIndex: 0,
+        },
+        {
+          persona: "Greg",
+          type: "skill",
+          title: "Atlas AI Insight & Automation — DR failure point prediction",
+          description: "Atlas predicts which specific drift items — missing RACF groups, insufficient buffer pools, missing critical PTFs — would cause DR failover failure and how quickly, turning a diff list into a prioritized risk list.",
+          stageIndex: 0,
+        },
+
+        // Step 2 — Monitor
+        {
+          persona: "Greg",
+          type: "skill",
+          title: "Atlas AI Insight & Automation — continuous DR monitoring closes the gap between test cycles",
+          description: "High-severity DR drift surfaced as it appears — each significant production change triggers a DR equivalence check, so months of invisible drift no longer accumulate between tests.",
+          stageIndex: 1,
+        },
+        {
+          persona: "Zach",
+          type: "skill",
+          title: "Atlas AI Insight & Automation — production change → DR equivalence check runs automatically",
+          description: "When Zach applies a change to production, Atlas automatically checks whether the same change needs to be applied to DR and surfaces any gap — no separate manual tracking required.",
+          stageIndex: 1,
+        },
+
+        // Step 3 — Remediate
+        {
+          persona: "Zach",
+          type: "time",
+          title: "Time Saving — days to weeks → targeted plan",
+          description: "DR remediation plan generated directly from the complete diff — targeted actions for each drift item with nothing left to memory or guesswork.",
+          stageIndex: 2,
+        },
+        {
+          persona: "Greg",
+          type: "skill",
+          title: "Atlas AI Insight & Automation — post-remediation validation runs automatically",
+          description: "After remediation, Atlas automatically re-compares DR and production and confirms equivalence, so Greg knows the remediation actually closed the gaps before the next DR test.",
+          stageIndex: 2,
+        },
+
+        // Step 4 — Simulate
+        {
+          persona: "Greg",
+          type: "skill",
+          title: "Atlas AI Insight & Automation — isolation-based DR simulation at production load",
+          description: "Atlas provisions an isolated DR simulation environment and runs a simulated failover under production-level load, producing a certified pass result before the real DR test ever runs.",
+          stageIndex: 3,
+        },
+        {
+          persona: "Quinn",
+          type: "gain",
+          title: "New User Capability — objective readiness verdict",
+          description: "Quinn makes the go/no-go decision for the DR test based on Atlas’s simulation pass/fail verdict, not just team assessment — an objective, reproducible readiness signal.",
+          stageIndex: 3,
+        },
+
+        // Step 5 — Record
+        {
+          persona: "Derek",
+          type: "time",
+          title: "Time Saving — days manual documentation → automatic",
+          description: "Complete DR readiness history — assessments, drift alerts, remediation actions, and simulation results — generated automatically from Atlas, eliminating days of manual documentation.",
+          stageIndex: 4,
+        },
+        {
+          persona: "Derek",
+          type: "gain",
+          title: "New User Capability — Derek independently produces DR compliance evidence from Atlas",
+          description: "Regulatory DR test evidence (DORA, SOX) is produced directly from Atlas’s DR readiness history — Derek can satisfy compliance requirements without orchestrating a separate evidence-gathering project with Greg and Zach.",
+          stageIndex: 4,
+        },
       ],
       externalTouchpoints: [
         { type: "enrichment", product: "Concert4Z", title: "Assess Business Context", summary: "Business service topology enriches severity with business-service criticality ranking.", stageIndex: 0 },
