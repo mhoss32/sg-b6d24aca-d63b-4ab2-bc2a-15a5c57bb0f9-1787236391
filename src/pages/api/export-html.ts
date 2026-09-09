@@ -36,7 +36,7 @@ const toBeConfig: Record<string, { color: string; bg: string; border: string; la
     bg: "rgba(34,211,238,0.1)",
     border: "rgba(34,211,238,0.3)",
     label: "Time Saving",
-    iconSvg: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    iconSvg: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
   },
   gain: {
     color: "#c084fc",
@@ -50,7 +50,7 @@ const toBeConfig: Record<string, { color: string; bg: string; border: string; la
     bg: "rgba(74,222,128,0.1)",
     border: "rgba(74,222,128,0.3)",
     label: "Atlas AI & Automation",
-    iconSvg: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.43.28a2 2 0 0 0 1.68.05 1 1 0 0 1 1.4 1.4 5 5 0 0 1-1.06 5.85l-.84.85a3 3 0 0 1-3.88.27"/><path d="m18 15-2-2"/></svg>',
+    iconSvg: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="8" width="10" height="8" rx="2" ry="2"/><rect x="9" y="4" width="6" height="4" rx="1" ry="1"/><circle cx="11" cy="11" r="1"/><circle cx="15" cy="11" r="1"/><path d="M10 14h4"/><path d="M7 10H5a1 1 0 0 1-1-1V8"/><path d="M17 10h2a1 1 0 0 0 1-1V8"/><path d="M10 4V2"/><path d="M14 4V2"/></svg>',
   },
 };
 
