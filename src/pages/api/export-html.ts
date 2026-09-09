@@ -228,7 +228,7 @@ function renderFlow(flow: FlowDiagram, isAsIs: boolean, ucId: string) {
                   </div>
                 </details>
               `);
-              }).join(")}
+              }).join("")}
             </div>
           </div>`;
         }).join("")})
