@@ -14,6 +14,7 @@ import {
   Plus,
   Pencil,
   Coins,
+  Bot,
 } from "lucide-react";
 import type { FlowStage, FlowDiagram as FlowDiagramType, FlowMarker, ExternalTouchpoint } from "@/data/productData";
 import { externalProducts, isTier1Persona } from "@/data/productData";
@@ -72,7 +73,7 @@ const toBeMarkerConfig: Record<string, MarkerStyle> = {
     label: "New User Capability",
   },
   skill: {
-    icon: Handshake,
+    icon: Bot,
     color: "text-green-400",
     bg: "bg-green-400/10",
     border: "border-green-400/30",
