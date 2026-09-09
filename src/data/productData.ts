@@ -1343,12 +1343,55 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Govern", description: "Create change record and seal audit trail." },
       ],
       markers: [
-        { persona: "Zach", type: "time", title: "Lost Time — 2–4 hours per environment to understand PTF state", description: "Querying SMP/E requires ISPF dialogs with no natural language interface.", stageIndex: 0 },
-        { persona: "Zach", type: "time", title: "Lost Time — 4–8 hours manual impact analysis per patch batch", description: "Impact assessment requires manually cross-referencing PTFs against topology.", stageIndex: 1 },
-        { persona: "Zach", type: "pain", title: "Business Impact — missed co-requisites cause failed production apply", description: "Prerequisite chains navigated manually; a missed co-requisite causes outage.", stageIndex: 2 },
-        { persona: "Zach", type: "time", title: "Lost Time — 2–5 days to provision test environment", description: "Test environments provisioned manually; frequently skipped under pressure.", stageIndex: 3 },
-        { persona: "Zach", type: "time", title: "Lost Time — 4–16 hours manual test execution", description: "No automated test scaffolding; coverage depends on individual discipline.", stageIndex: 5 },
-        { persona: "Zach", type: "pain", title: "Business Impact — emergency patches bypass normal process", description: "No fast-track workflow that is also safe; teams forced to choose speed or rigor.", stageIndex: 7 },
+        // S1 — Routine PTF Maintenance (as-is pains)
+        { persona: "Zach", type: "time", title: "Lost Time — 2–4 hours per environment to understand PTF state", description: "Querying SMP/E for PTF inventory and prerequisite chains requires ISPF dialogs with no natural language interface — slow and expert-dependent.", stageIndex: 0 },
+        { persona: "Stan", type: "time", title: "Lost Time — hours per quarter monitoring middleware fix lists", description: "Subsystem-specific maintenance gaps (CICS, Db2, MQ) are not surfaced automatically — Stan must monitor IBM fix lists and product announcements manually.", stageIndex: 0 },
+
+        { persona: "Zach", type: "time", title: "Lost Time — 4–8 hours manual impact analysis per patch batch", description: "Impact assessment requires manually cross-referencing PTF descriptions against application topology — a process relying entirely on expert knowledge not documented anywhere.", stageIndex: 1 },
+        { persona: "Zach", type: "pain", title: "Business Impact — changes proceed with incomplete impact knowledge", description: "Most organizations cannot confidently answer \"what will break if I apply this PTF?\" without hours of multi-team investigation, increasing the risk of production incidents.", stageIndex: 1 },
+        { persona: "Stan", type: "skill", title: "Skill Gap / Bottleneck — cross-subsystem analysis depends on convening SMEs", description: "Each subsystem specialist only knows their own domain; cross-subsystem impact (CICS → Db2 contention scenarios) requires convening Zach, Stan, the DBA, and MQ admin simultaneously.", stageIndex: 1 },
+
+        { persona: "Zach", type: "time", title: "Lost Time — 2–4 hours prerequisite tracing with SMP/E", description: "PTF prerequisite and co-requisite chains are navigated manually in SMP/E; a missed co-requisite can cause a failed production apply.", stageIndex: 2 },
+        { persona: "Zach", type: "pain", title: "Business Impact — plan quality relies entirely on human memory", description: "No AI-generated plan tied to the actual topology — plans are built from memory and informal processes, making quality dependent on whoever writes it.", stageIndex: 2 },
+        { persona: "Stan", type: "time", title: "Lost Time — 1–2 days of back-and-forth to align subsystem scope", description: "For middleware patches, Stan's sign-off on the subsystem scope requires manual coordination with Zach via email or meetings.", stageIndex: 2 },
+
+        { persona: "Zach", type: "time", title: "Lost Time — 2–5 days to provision a realistic test environment", description: "Test environments are provisioned manually — slow, error-prone, and frequently skipped under time pressure so production becomes the de facto test environment.", stageIndex: 3 },
+        { persona: "Alice", type: "skill", title: "Skill Gap / Bottleneck — Alice cannot provision test environments alone", description: "Mid-level engineers cannot independently provision test environments; every provisioning step requires Zach's involvement or a separate infrastructure team request.", stageIndex: 3 },
+
+        { persona: "Zach", type: "time", title: "Lost Time — 2–6 hours to deploy application components into test", description: "Application component deployment into a test environment is a manual, multi-step process — each component must be configured separately before testing can begin.", stageIndex: 4 },
+
+        { persona: "Zach", type: "time", title: "Lost Time — 4–16 hours of manual test execution per patch cycle", description: "Test execution is manual; there is no automated test scaffolding tied to the specific change. Coverage depends entirely on individual engineer discipline.", stageIndex: 5 },
+        { persona: "Stan", type: "skill", title: "Skill Gap / Bottleneck — subsystem validation isolated from overall change view", description: "Subsystem-specific validation results are reviewed separately by Stan in isolation from Zach's overall plan — there is no shared artifact tying subsystem sign-off to the global patch cycle.", stageIndex: 5 },
+        { persona: "Alice", type: "skill", title: "Skill Gap / Bottleneck — every test failure escalates to Zach", description: "Test failures require Zach to investigate — mid-level engineers lack the context to diagnose PTF-related test failures independently.", stageIndex: 5 },
+
+        { persona: "Zach", type: "time", title: "Lost Time — 1–2 hours assembling evidence before promotion decision", description: "Test evidence is assembled manually from multiple sources — spreadsheets, logs, and email — before Zach can make a production promotion decision.", stageIndex: 6 },
+        { persona: "Quinn", type: "skill", title: "Skill Gap / Bottleneck — Quinn needs a separate summary to approve promotion", description: "Approving production promotion requires a non-technical summary that Zach must produce separately; there is no management-ready artifact generated from the technical work.", stageIndex: 6 },
+
+        { persona: "Zach", type: "pain", title: "Business Impact — emergency patches bypass normal process", description: "Emergency patches bypass normal process because there is no fast-track workflow that is also safe — teams are forced to choose between speed and rigor.", stageIndex: 7 },
+        { persona: "Zach", type: "pain", title: "Business Impact — rollback planning is improvised under pressure", description: "Rollback planning is informal; when a patch causes a problem the remediation path is improvised during an outage rather than planned in advance.", stageIndex: 7 },
+
+        { persona: "Zach", type: "time", title: "Lost Time — 1–3 hours retrospective change record assembly", description: "Change records are assembled after the fact from memory and email threads — a separate manual step that often gets skipped under time pressure.", stageIndex: 8 },
+        { persona: "Annette", type: "time", title: "Lost Time — 1–2 hours per cycle pulling change evidence from disparate tools", description: "Monitoring change execution and reviewing change records requires querying multiple systems — no single source of truth ties the full patch cycle together.", stageIndex: 8 },
+
+        // S2 — Security PTF Application (as-is pains, mapped onto same stages)
+        { persona: "Zach", type: "time", title: "Lost Time — 2–3 days to answer \"are we exposed?\"", description: "Answering \"are we exposed?\" to a security advisory requires logging into ISPF on each LPAR, running SMP/E or GIMAPI queries, and cross-referencing results manually across the estate.", stageIndex: 0 },
+        { persona: "Sage", type: "skill", title: "Skill Gap / Bottleneck — Sage cannot determine exposure independently", description: "Sage has no direct way to determine exposure without going through Zach first and is dependent on a verbal summary rather than real data.", stageIndex: 0 },
+
+        { persona: "Zach", type: "time", title: "Lost Time — 4–8 hours cross-referencing multi-LPAR query results", description: "Manually cross-referencing exposure results across LPARs for a security PTF relies entirely on expert memory and ad hoc spreadsheets.", stageIndex: 1 },
+        { persona: "Zach", type: "pain", title: "Business Impact — detection always lags advisory publication", description: "There is no proactive signal before a CVE is publicly published — exposure is discovered reactively from the advisory instead of from continuous monitoring.", stageIndex: 1 },
+
+        { persona: "Zach", type: "time", title: "Lost Time — 1–3 days senior engineer time for blast radius", description: "Blast radius analysis for a security patch has no automated tooling — it requires the most experienced engineer to trace dependencies from memory.", stageIndex: 2 },
+        { persona: "Sage", type: "pain", title: "Business Impact — no auditable blast radius picture for security posture", description: "There is no unified, query-ready blast radius artifact Sage can use to defend certificate and compliance posture in audits.", stageIndex: 2 },
+
+        { persona: "Zach", type: "pain", title: "Business Impact — prerequisite mistakes cause failed security patch applies", description: "PTF prerequisite chain resolution is manual; a missed co-requisite causes a failed apply that may be discovered only during a production change window.", stageIndex: 3 },
+
+        { persona: "Zach", type: "time", title: "Lost Time — 2–5 days to provision and configure security patch labs", description: "Lab environments for security PTFs take days to provision and configure; under time pressure this step is skipped and production becomes the de facto test.", stageIndex: 4 },
+        { persona: "Alice", type: "skill", title: "Skill Gap / Bottleneck — delegated remediation still blocked on Zach", description: "Remediation steps delegated by Zach lack the context needed to execute them safely; Alice still requires Zach's availability for every significant action.", stageIndex: 4 },
+
+        { persona: "Zach", type: "pain", title: "Business Impact — multi-LPAR security apply sequenced from memory", description: "Multi-LPAR apply for security PTFs is sequenced from memory; shared Db2 or MQ dependencies are a coordination risk during emergency windows.", stageIndex: 7 },
+
+        { persona: "Zach", type: "time", title: "Lost Time — 2–4 hours assembling security patch audit trail", description: "The full security patch audit trail is assembled after the fact from memory, email threads, and change tickets.", stageIndex: 8 },
+        { persona: "Sage", type: "pain", title: "Business Impact — incomplete security patch evidence for auditors", description: "Without an automated record, there is no auditor-ready evidence package for security PTF remediation without repeating much of the investigation work.", stageIndex: 8 }
       ],
     },
     toBe: {
@@ -1365,27 +1408,163 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Govern", description: "Atlas generates complete traceability automatically." },
       ],
       markers: [
-        { persona: "Zach", type: "time", title: "Time Saving — proactive PTF gap surfacing without manual initiation", description: "Atlas identifies what needs attention without quarterly SMP/E review.", stageIndex: 0 },
-        { persona: "Zach", type: "time", title: "Time Saving — 4–8 hours → under 30 minutes for impact analysis", description: "Full impact understood in minutes with prerequisite chains resolved.", stageIndex: 1 },
-        { persona: "Stan", type: "time", title: "Time Saving — 1–2 days → structured workflow in Atlas", description: "Stan reviews and approves subsystem scope directly in Atlas.", stageIndex: 2 },
-        { persona: "Alice", type: "gain", title: "New User Capability — Alice participates in test setup independently", description: "Mid-level engineers can follow Atlas provisioning specification.", stageIndex: 3 },
-        { persona: "Zach", type: "time", title: "Time Saving — 4–16 hours → automated test execution", description: "Atlas runs test package and surfaces pass/fail with context.", stageIndex: 5 },
-        { persona: "Zach", type: "skill", title: "Atlas AI Insight — rollback plan generated alongside execution", description: "Rollback is planned before execution begins, not improvised.", stageIndex: 7 },
+        // S1 — Routine PTF Maintenance (to-be wows)
+        { persona: "Zach", type: "time", title: "Time Saving — proactive PTF gap surfacing", description: "Atlas proactively surfaces PTF gaps; Zach no longer needs to initiate quarterly SMP/E reviews to discover what needs attention.", stageIndex: 0 },
+        { persona: "Stan", type: "gain", title: "New User Capability — subsystem SMEs see their own maintenance gaps", description: "Subsystem-specific maintenance gaps are surfaced directly to Stan — MQ, CICS, Db2 SMEs see their subsystem's patch needs without Zach as an intermediary.", stageIndex: 0 },
+
+        { persona: "Zach", type: "time", title: "Time Saving — 4–8 hours → under 30 minutes for impact analysis", description: "Full impact of a PTF batch — which subsystems, applications, and transactions are affected, with prerequisite chains resolved — is understood in minutes.", stageIndex: 1 },
+        { persona: "Stan", type: "skill", title: "Atlas AI & Automation — cross-subsystem risk compounding made visible", description: "Atlas surfaces subsystem-specific impact and cross-subsystem risks automatically, using its unified topology model rather than relying on SME memory.", stageIndex: 1 },
+
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — topology-aware plan generation", description: "AI-generated plan anchored to the actual topology — PTF prerequisites resolved, apply order determined, and test scenarios scoped to the affected applications.", stageIndex: 2 },
+        { persona: "Stan", type: "time", title: "Time Saving — 1–2 days coordination → structured plan sign-off", description: "Stan reviews and approves the subsystem scope directly in Atlas; his sign-off is captured in the plan, eliminating days of email back-and-forth.", stageIndex: 2 },
+
+        { persona: "Zach", type: "time", title: "Time Saving — 2–5 days → automated test environment provisioning", description: "Test environment specification is generated automatically and provisioned as a monoplex L2 virtual LPAR matching production characteristics.", stageIndex: 3 },
+        { persona: "Alice", type: "gain", title: "New User Capability — Alice participates in test setup independently", description: "Mid-level engineers can follow Atlas's provisioning specification and participate in test setup without needing Zach for every step.", stageIndex: 3 },
+
+        { persona: "Zach", type: "time", title: "Time Saving — automatic application deployment into test", description: "Application components are deployed automatically into the test environment from the Atlas topology model; the test environment is ready without manual component-by-component configuration.", stageIndex: 4 },
+
+        { persona: "Zach", type: "time", title: "Time Saving — 4–16 hours → automated test execution", description: "Atlas runs the test package and surfaces pass/fail with context; standard scenarios no longer require manual test writing and execution.", stageIndex: 5 },
+        { persona: "Stan", type: "gain", title: "New User Capability — subsystem-specific validation in context", description: "Subsystem-specific test results are reviewed by Stan in Atlas with clear attribution to his subsystem, letting him sign off in context.", stageIndex: 5 },
+        { persona: "Alice", type: "gain", title: "New User Capability — failure attribution without Zach", description: "Test failures are attributed by Atlas to specific dependencies; Alice can diagnose and iterate without escalating every failure to Zach.", stageIndex: 5 },
+
+        { persona: "Zach", type: "time", title: "Time Saving — evidence pre-assembled for promotion decision", description: "Zach sees a clear recommendation with supporting evidence — test results, subsystem sign-offs, prerequisite resolution, and maintenance window fit — all in one view.", stageIndex: 6 },
+        { persona: "Quinn", type: "gain", title: "New User Capability — Quinn makes informed production decisions", description: "Atlas presents a non-technical risk summary alongside the technical evidence, enabling Quinn to approve or defer production promotion without a separate briefing.", stageIndex: 6 },
+
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — rollback plan generated with execution plan", description: "Rollback plan is generated alongside the execution plan; if the patch must be reversed, the rollback path is already documented and validated.", stageIndex: 7 },
+
+        { persona: "Zach", type: "time", title: "Time Saving — change traceability generated automatically", description: "Complete traceability from detection through production apply is generated automatically — no manual change record assembly required.", stageIndex: 8 },
+        { persona: "Annette", type: "time", title: "Time Saving — single source of truth for patch cycles", description: "Annette queries Atlas for a full patch cycle record rather than assembling evidence from multiple tools.", stageIndex: 8 },
+
+        // S2 — Security PTF Application (to-be wows, mapped to same stages)
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — proactive security PTF gap detection", description: "Atlas surfaces FIXCAT security gaps without a user query, shortening the detection-to-response window for CRIT/HIGH vulnerabilities.", stageIndex: 0 },
+        { persona: "Sage", type: "gain", title: "New User Capability — Sage initiates CISO brief from Atlas data", description: "Sage receives a proactive security patch alert with concrete exposure data and can brief the CISO immediately without waiting for Zach's manual investigation.", stageIndex: 0 },
+
+        { persona: "Zach", type: "time", title: "Time Saving — 2–3 days → minutes to answer \"are we exposed?\"", description: "Atlas queries all connected LPARs simultaneously and answers \"are we exposed?\" in minutes, replacing multi-day SMP/E investigations.", stageIndex: 1 },
+        { persona: "Sage", type: "gain", title: "New User Capability — direct exposure visibility for security", description: "Sage has direct access to a structured exposure picture — affected LPARs, products, and PTF gaps — without depending on Zach's verbal summary.", stageIndex: 1 },
+
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — topology-based blast radius", description: "Blast radius is a topology map rather than a guess — Atlas traverses the dependency graph and names each reachable system and dataset.", stageIndex: 2 },
+        { persona: "Sage", type: "time", title: "Time Saving — 1–3 days → under 30 minutes for a CISO-ready brief", description: "Sage can produce a CISO-ready exposure brief in under 30 minutes from Atlas's blast radius and exposure outputs.", stageIndex: 2 },
+
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — PTF prerequisite and co-requisite resolution", description: "Security PTF prerequisite chains are resolved automatically; Atlas eliminates the leading cause of PTF-related production outages.", stageIndex: 3 },
+
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — test environment always part of security patch workflow", description: "Security patches follow the same validated workflow as routine patches — including automated test environment provisioning and validation — without forcing a choice between speed and rigor.", stageIndex: 4 },
+        { persona: "Alice", type: "gain", title: "New User Capability — delegated security remediation with guardrails", description: "Atlas generates step-by-step guidance for delegated security remediation work, enabling Alice to execute with guardrails instead of supervision.", stageIndex: 4 },
+
+        { persona: "Zach", type: "skill", title: "Atlas AI & Automation — dependency-aware security apply sequencing", description: "Atlas orchestrates the security patch apply across LPARs in dependency-aware order, avoiding cross-LPAR coordination failures.", stageIndex: 7 },
+
+        { persona: "Zach", type: "time", title: "Time Saving — security patch audit trail generated automatically", description: "Security patch audit trail — exposure assessment, blast radius, plan, tests, applies, and validations — is generated automatically from Atlas's record.", stageIndex: 8 },
+        { persona: "Sage", type: "gain", title: "New User Capability — auditor-ready security remediation evidence", description: "Sage delivers an auditor-ready security remediation evidence package from Atlas without repeating the underlying investigation.", stageIndex: 8 }
       ],
       externalTouchpoints: [
-        { type: "handoff", product: "Bob PPZ", title: "Validate Test Failure", steps: [{ label: "Atlas produced", description: "Test reveals CICS API behavior change affecting a COBOL program." }, { label: "Atlas directs", description: "User directed to Bob PPZ with failure attribution." }, { label: "Bob PPZ returns", description: "Corrected code artifact; Atlas re-runs tests." }], stageIndex: 5 },
-        { type: "handoff", product: "Bob PPZ", title: "Decide Middleware Patches", steps: [{ label: "Atlas produced", description: "Test results indicate application code changes required." }, { label: "Atlas directs", description: "Developer directed to Bob PPZ with full context." }, { label: "Bob PPZ returns", description: "Resolved items returned before production promotion." }], stageIndex: 6 },
-        { type: "enrichment", product: "Bob PPZ", title: "Analyze Impact", summary: "Enriched analysis identifies which COBOL programs use specific API calls modified by the PTF.", stageIndex: 1 },
-        { type: "enrichment", product: "Bob PPZ", title: "Plan Test Scenarios", summary: "Test scenarios enriched with code-level targets — specific transactions and data paths.", stageIndex: 2 },
-        { type: "handoff", product: "Concert4Z", title: "Detect PTF Gap", steps: [{ label: "Concert4Z produced", description: "Risk Management identifies missing critical or HIPER PTFs." }, { label: "Concert4Z directs", description: "Initiated change passes to Atlas for full intelligence." }, { label: "Atlas returns", description: "Atlas completes patch cycle; Concert4Z sees risk resolved." }], stageIndex: 0 },
-        { type: "handoff", product: "Concert4Z", title: "Post-Apply Monitoring", steps: [{ label: "Atlas produced", description: "Patch applied to production." }, { label: "Concert4Z directs", description: "Observe and Optimize monitor for post-patch regressions." }, { label: "Atlas returns", description: "If regression detected, Atlas investigates and plans fix." }], stageIndex: 8 },
-        { type: "enrichment", product: "Concert4Z", title: "Analyze Baseline", summary: "Production performance baselines improve specificity of pre/post behavioral comparison.", stageIndex: 1 },
-        { type: "enrichment", product: "Concert4Z", title: "Validate Coverage", summary: "ZEN data identifies most active transaction flows for prioritization.", stageIndex: 5 },
-        { type: "handoff", product: "Terraform", title: "Assess PTF Readiness", steps: [{ label: "Atlas produced", description: "Readiness gate requires infrastructure confirmation." }, { label: "Atlas directs", description: "Team runs terraform plan against LPAR workspace." }, { label: "Terraform returns", description: "Infrastructure parity confirmation incorporated into readiness output." }], stageIndex: 1 },
-        { type: "handoff", product: "Terraform", title: "Provision Test Environment", steps: [{ label: "Atlas produced", description: "Infrastructure specification generated from plan." }, { label: "Atlas directs", description: "Terraform provisions LPAR resources in isolated workspace." }, { label: "Terraform returns", description: "Terraform-provisioned test environment ready for patch apply." }], stageIndex: 3 },
-        { type: "enrichment", product: "Terraform", title: "Plan Maintenance Window", summary: "Terraform state file provides LPAR metadata for maintenance window slot assignment.", stageIndex: 2 },
-        { type: "enrichment", product: "Terraform", title: "Record Audit Trail", summary: "Versioned state file provides automatic before/after infrastructure snapshot.", stageIndex: 8 },
-      ],
+        {
+          type: "handoff",
+          product: "Bob PPZ",
+          title: "Validate Test Failure",
+          steps: [
+            { label: "Atlas produced", description: "Atlas's test reveals a CICS API behavior change introduced by a PTF that a COBOL program relies on; the failure is attributed to a specific program and call path." },
+            { label: "Atlas directs", description: "The user is directed to Bob PPZ with failure attribution — affected program, subsystem behavior change, and failing scenario — for code-level correction." },
+            { label: "Bob PPZ returns", description: "A corrected code artifact. Atlas re-runs targeted tests and incorporates the fix into the promotion package." }
+          ],
+          stageIndex: 5
+        },
+        {
+          type: "handoff",
+          product: "Bob PPZ",
+          title: "Decide Middleware Patches",
+          steps: [
+            { label: "Atlas produced", description: "Test results for middleware patches indicate application code changes are required before production promotion." },
+            { label: "Atlas directs", description: "Application owners are directed to Bob PPZ with full context — affected programs, dependency graph, and failing behaviors." },
+            { label: "Bob PPZ returns", description: "Resolved code artifacts returned to Atlas for re-validation before Quinn authorizes promotion." }
+          ],
+          stageIndex: 6
+        },
+        {
+          type: "enrichment",
+          product: "Bob PPZ",
+          title: "Analyze Impact",
+          summary: "Bob PPZ's ZUnderstand metadata enriches Atlas's impact analysis by identifying which COBOL programs use specific API calls modified by a given PTF.",
+          stageIndex: 1
+        },
+        {
+          type: "enrichment",
+          product: "Bob PPZ",
+          title: "Plan Test Scenarios",
+          summary: "Atlas uses ZUnderstand to enrich test scenarios with code-level targets — specific transactions, program entry points, and data paths that exercise constructs touched by the patch.",
+          stageIndex: 2
+        },
+        {
+          type: "handoff",
+          product: "Concert4Z",
+          title: "Detect PTF Gap",
+          steps: [
+            { label: "Concert4Z produced", description: "Concert for Z's Risk Management module detects missing critical or HIPER PTFs across the estate." },
+            { label: "Concert4Z directs", description: "The risk triggers an Atlas patch workflow for full impact analysis and planning." },
+            { label: "Atlas returns", description: "Atlas completes the patch cycle; Concert4Z sees the risk resolved and associates the Atlas change record with the risk item." }
+          ],
+          stageIndex: 0
+        },
+        {
+          type: "handoff",
+          product: "Concert4Z",
+          title: "Post-Apply Monitoring",
+          steps: [
+            { label: "Atlas produced", description: "Atlas has applied patches to production and recorded the change." },
+            { label: "Concert4Z directs", description: "Concert4Z's Observe and Optimize modules monitor for post-patch regressions in production behavior." },
+            { label: "Atlas returns", description: "If Concert4Z detects regressions, Atlas is invoked to investigate, attribute to specific PTFs, and plan remediation or rollback." }
+          ],
+          stageIndex: 8
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Analyze Baseline",
+          summary: "Concert4Z's production performance baselines improve the specificity of Atlas's pre/post behavioral comparison during patch validation.",
+          stageIndex: 1
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Validate Coverage",
+          summary: "ZEN runtime relationship data identifies the most active production transaction flows so Atlas can prioritize test coverage on the paths that matter most.",
+          stageIndex: 5
+        },
+        {
+          type: "handoff",
+          product: "Terraform",
+          title: "Assess PTF Readiness",
+          steps: [
+            { label: "Atlas produced", description: "Atlas adds an infrastructure readiness gate to the patch plan." },
+            { label: "Atlas directs", description: "Teams run terraform plan against each target LPAR workspace to confirm zero infrastructure drift before patching." },
+            { label: "Terraform returns", description: "Plan outputs confirm infrastructure parity or surface drift that must be resolved before proceeding; Atlas incorporates this into readiness." }
+          ],
+          stageIndex: 1
+        },
+        {
+          type: "handoff",
+          product: "Terraform",
+          title: "Provision Test Environment",
+          steps: [
+            { label: "Atlas produced", description: "Atlas generates the infrastructure specification for the test LPAR." },
+            { label: "Atlas directs", description: "Terraform provisions LPAR resources in an isolated workspace that mirrors production's infrastructure." },
+            { label: "Terraform returns", description: "A Terraform-provisioned test environment ready for patch apply and validation." }
+          ],
+          stageIndex: 3
+        },
+        {
+          type: "enrichment",
+          product: "Terraform",
+          title: "Plan Maintenance Window",
+          summary: "Terraform's state file provides LPAR metadata and grouping that Atlas uses to assign LPARs to maintenance window slots safely.",
+          stageIndex: 2
+        },
+        {
+          type: "enrichment",
+          product: "Terraform",
+          title: "Record Audit Trail",
+          summary: "Terraform's versioned state file produces automatic before/after infrastructure snapshots complementing Atlas's patch evidence package.",
+          stageIndex: 8
+        }
+      ]
     },
     capabilities: [
       { name: "System Discovery", timeline: "GA", description: "Complete environment inventory" },
