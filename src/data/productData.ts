@@ -2412,12 +2412,122 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Audit", description: "Manual assembly of evidence from notes and tool outputs." },
       ],
       markers: [
-        { persona: "Annette", type: "time", title: "Lost Time — 1–3 days per manual parity check", description: "Engineers export configuration and compare in spreadsheets; done at most quarterly.", stageIndex: 0 },
-        { persona: "Annette", type: "pain", title: "Business Impact — unauthorized changes invisible until symptom", description: "No automated detection; changes without records only found by accident or audit.", stageIndex: 1 },
-        { persona: "Greg", type: "pain", title: "Business Impact — no data for parity governance", description: "Cannot tell if environment parity is improving or degrading over time.", stageIndex: 2 },
-        { persona: "Annette", type: "skill", title: "Skill Gap — cannot investigate without Zach", description: "Undocumented change investigation requires log assembly across non-integrated tools.", stageIndex: 3 },
-        { persona: "Zach", type: "time", title: "Lost Time — hours to days full realignment", description: "Each parameter difference corrected individually using appropriate subsystem tool.", stageIndex: 4 },
-        { persona: "Annette", type: "time", title: "Lost Time — hours assembling evidence per audit cycle", description: "Drift investigation and resolution record assembled manually from notes.", stageIndex: 5 },
+        // Step 1 — Detect
+        {
+          persona: "Annette",
+          type: "time",
+          title: "Lost Time — 1–3 days per manual parity check",
+          description: "Environment comparison is manual: engineers export configuration parameters from ISPF or SMP/E and compare in spreadsheets or scripts. Done infrequently and error-prone.",
+          stageIndex: 0,
+        },
+        {
+          persona: "Annette",
+          type: "pain",
+          title: "Business Impact — unauthorized changes are invisible until they cause a symptom or an auditor flags them",
+          description: "Unauthorized change detection relies entirely on change management process compliance — if someone makes a change without a change record, the only detection mechanism is a human noticing a behavioral difference.",
+          stageIndex: 0,
+        },
+        {
+          persona: "Zach",
+          type: "pain",
+          title: "Business Impact — post-change drift goes undetected without a systematic validation step",
+          description: "Post-change validation is informal — after a planned change there is no systematic check that the environment reached the intended state.",
+          stageIndex: 0,
+        },
+
+        // Step 2 — Attribute
+        {
+          persona: "Annette",
+          type: "time",
+          title: "Lost Time — hours to days reconstructing what changed, when, and from what value",
+          description: "When an unauthorized configuration change is detected, Annette has no immediate evidence — just a behavioral symptom and no starting point for investigation.",
+          stageIndex: 1,
+        },
+        {
+          persona: "Annette",
+          type: "skill",
+          title: "Skill Gap / Bottleneck — Annette cannot investigate undocumented changes without escalating to Zach",
+          description: "Investigating undocumented changes requires assembling evidence from system logs, SYSLOG, SMF data — tools that do not integrate and require expert interpretation.",
+          stageIndex: 1,
+        },
+        {
+          persona: "Zach",
+          type: "time",
+          title: "Lost Time — half a day to 2 days per 'test doesn't match prod' investigation",
+          description: "\"QA doesn't look like prod\" situations are resolved by guesswork and manual parameter comparison — often by Zach, who has better things to do.",
+          stageIndex: 1,
+        },
+
+        // Step 3 — Surface
+        {
+          persona: "Greg",
+          type: "pain",
+          title: "Business Impact — no data for parity governance",
+          description: "No drift trend reporting — Greg cannot tell whether environment parity is improving or degrading over time because there is no continuous measurement.",
+          stageIndex: 2,
+        },
+        {
+          persona: "Alex",
+          type: "time",
+          title: "Lost Time — half a day of manual comparison before performance testing",
+          description: "When investigating whether a QA environment is production-equivalent for performance testing, there is no structured parity report to reference.",
+          stageIndex: 2,
+        },
+        {
+          persona: "Annette",
+          type: "skill",
+          title: "Skill Gap / Bottleneck — Annette cannot triage drift findings without Zach's interpretation",
+          description: "Raw parameter diffs without risk classification — Annette must interpret whether a Db2 ZPARM change is a compliance risk, stability risk, or cosmetic drift, without context.",
+          stageIndex: 2,
+        },
+
+        // Step 4 — Investigate
+        {
+          persona: "Annette",
+          type: "time",
+          title: "Lost Time — hours per investigation assembling basic evidence",
+          description: "No consolidated starting point for investigation — Annette receives a symptom, not a structured finding with evidence attached.",
+          stageIndex: 3,
+        },
+        {
+          persona: "Zach",
+          type: "time",
+          title: "Lost Time — hours of Zach's time repeating investigations Annette cannot perform",
+          description: "Escalation from Annette always requires Zach to do the same log-reading investigation she cannot — no self-service investigation path.",
+          stageIndex: 3,
+        },
+
+        // Step 5 — Remediate
+        {
+          persona: "Zach",
+          type: "time",
+          title: "Lost Time — hours to days for a full QA-to-production realignment",
+          description: "Environment realignment is fully manual — each parameter difference must be corrected individually using the appropriate subsystem tool.",
+          stageIndex: 4,
+        },
+        {
+          persona: "Greg",
+          type: "pain",
+          title: "Business Impact — incomplete remediations leave residual drift undetected",
+          description: "No validation that the realignment reached the intended state — the comparison must be repeated manually after remediation to confirm.",
+          stageIndex: 4,
+        },
+
+        // Step 6 — Audit
+        {
+          persona: "Annette",
+          type: "time",
+          title: "Lost Time — hours assembling evidence per audit cycle",
+          description: "Audit trail for drift investigation and resolution must be assembled manually from notes and tool outputs — no continuous record.",
+          stageIndex: 5,
+        },
+        {
+          persona: "Derek",
+          type: "pain",
+          title: "Business Impact — recurring audit findings for undocumented drift even when changes were benign",
+          description: "Change record completeness is consistently the most labor-intensive section of audit prep — undocumented changes produce audit findings whether they were benign or not.",
+          stageIndex: 5,
+        },
       ],
     },
     toBe: {
@@ -2431,18 +2541,145 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Audit", description: "Complete incident record generated automatically for every detection and resolution." },
       ],
       markers: [
-        { persona: "Annette", type: "skill", title: "Atlas AI Insight — continuous baseline diff runs automatically", description: "Drift alert received before behavioral symptom; no manual comparison needed.", stageIndex: 0 },
-        { persona: "Annette", type: "time", title: "Time Saving — hours to days → immediate evidence", description: "Configuration delta, timestamp, and attribution provided in the Atlas alert.", stageIndex: 1 },
-        { persona: "Annette", type: "gain", title: "New User Capability — Annette triages independently", description: "Risk classification enables accept/escalate decisions without Zach's interpretation.", stageIndex: 2 },
-        { persona: "Zach", type: "time", title: "Time Saving — hours to days → targeted plan", description: "Environment realignment plan generated by Atlas; post-remediation validation automatic.", stageIndex: 4 },
-        { persona: "Annette", type: "time", title: "Time Saving — hours assembling evidence → automatic", description: "Incident audit trail generated for every drift detection and resolution.", stageIndex: 5 },
+        // Step 1 — Detect
+        {
+          persona: "Annette",
+          type: "skill",
+          title: "Atlas AI Insight & Automation — continuous baseline diff runs automatically",
+          description: "Drift alert received before a behavioral symptom appears — Atlas detects the configuration change, not just the downstream consequence.",
+          stageIndex: 0,
+        },
+        {
+          persona: "Annette",
+          type: "skill",
+          title: "Atlas AI Insight & Automation — undocumented change detection from combined Config-as-Code and change history",
+          description: "Atlas compares current Config-as-Code state against the last registered baseline and identifies every configuration change with no corresponding approved change record.",
+          stageIndex: 0,
+        },
+
+        // Step 2 — Attribute
+        {
+          persona: "Annette",
+          type: "time",
+          title: "Time Saving — hours to days reconstructing evidence → immediate evidence in the Atlas alert",
+          description: "Undocumented change investigation starts with evidence, not guesswork — Atlas provides the configuration delta, previous value, timestamp, affected component, and user ID attribution immediately.",
+          stageIndex: 1,
+        },
+        {
+          persona: "Annette",
+          type: "gain",
+          title: "New User Capability — Annette independently investigates and makes accept/escalate decisions",
+          description: "Annette can triage, decide, and act on drift findings without escalating to Zach for the basic facts.",
+          stageIndex: 1,
+        },
+
+        // Step 3 — Surface
+        {
+          persona: "Annette",
+          type: "gain",
+          title: "New User Capability — risk classification enables Annette to triage drift findings",
+          description: "Findings classified by risk at detection time — Annette knows whether a Db2 ZPARM change is a compliance risk, stability risk, or cosmetic drift without Zach's interpretation.",
+          stageIndex: 2,
+        },
+        {
+          persona: "Greg",
+          type: "skill",
+          title: "Atlas AI Insight & Automation — drift trend reports show whether parity is improving or degrading",
+          description: "Drift trend reports over time — Greg can measure whether environment parity is improving as a result of governance changes, with real data.",
+          stageIndex: 2,
+        },
+        {
+          persona: "Alex",
+          type: "time",
+          title: "Time Saving — half a day manual comparison → seconds via QA parity query",
+          description: "QA parity report on demand — \"is this environment production-equivalent for performance testing?\" answered by Atlas in a single query.",
+          stageIndex: 2,
+        },
+
+        // Step 4 — Investigate
+        {
+          persona: "Annette",
+          type: "gain",
+          title: "New User Capability — investigations start from structured Atlas evidence",
+          description: "Every investigation starts with Atlas's structured evidence — Annette has a specific, verifiable starting point rather than a blank-page investigation.",
+          stageIndex: 3,
+        },
+        {
+          persona: "Zach",
+          type: "time",
+          title: "Time Saving — escalations start from Atlas evidence, not raw symptoms",
+          description: "When Annette does escalate, the investigation is already structured — Zach reviews evidence instead of repeating Annette's discovery work.",
+          stageIndex: 3,
+        },
+
+        // Step 5 — Remediate
+        {
+          persona: "Zach",
+          type: "time",
+          title: "Time Saving — hours to days → targeted Atlas-generated realignment plan",
+          description: "Environment realignment plan generated by Atlas — targeted to only the parameters that differ and need correction, no manual parameter-by-parameter correction.",
+          stageIndex: 4,
+        },
+        {
+          persona: "Zach",
+          type: "skill",
+          title: "Atlas AI Insight & Automation — post-remediation validation runs automatically",
+          description: "Post-remediation validation is automatic — Atlas confirms the environment reached the intended state and the drift is closed without a separate manual check.",
+          stageIndex: 4,
+        },
+
+        // Step 6 — Audit
+        {
+          persona: "Annette",
+          type: "time",
+          title: "Time Saving — hours assembling evidence → automatic incident trail",
+          description: "Incident audit trail generated automatically for every drift detection and resolution — Annette can close incidents with a complete, continuous record rather than assembling it manually.",
+          stageIndex: 5,
+        },
+        {
+          persona: "Derek",
+          type: "gain",
+          title: "New User Capability — Derek produces drift-related audit evidence directly from Atlas",
+          description: "Change record completeness improves for the Atlas estate — every Atlas-detected and Atlas-resolved drift item has a documented trail, reducing recurring audit findings for undocumented drift.",
+          stageIndex: 5,
+        },
       ],
       externalTouchpoints: [
         { type: "enrichment", product: "Concert4Z", title: "Detect Behavioral Signal", summary: "Concert4Z detects behavioral drift before configuration drift; combined signal confirms significance.", stageIndex: 0 },
         { type: "enrichment", product: "Concert4Z", title: "Surface Risk Context", summary: "Incident history enriches risk classification — drift on previously flagged systems elevated in severity.", stageIndex: 2 },
-        { type: "handoff", product: "Terraform", title: "Compare Environments", steps: [{ label: "Atlas produced", description: "Atlas requests Terraform plan output for infrastructure-layer diff." }, { label: "Atlas directs", description: "Terraform plan compared against declared HCL configuration." }, { label: "Terraform returns", description: "Infrastructure-layer diff incorporated into Atlas comparison." }], stageIndex: 1 },
-        { type: "handoff", product: "Terraform", title: "Remediate Infrastructure", steps: [{ label: "Atlas produced", description: "Drift item identified as infrastructure-layer change outside Terraform workflow." }, { label: "Atlas directs", description: "Team applies Terraform plan restoring LPAR to declared state." }, { label: "Terraform returns", description: "Apply completion confirmation; Atlas marks resolved." }], stageIndex: 4 },
-        { type: "handoff", product: "Terraform", title: "Validate Post-Remediation", steps: [{ label: "Atlas produced", description: "Remediation complete; validation required." }, { label: "Atlas directs", description: "Fresh terraform plan requested for each environment." }, { label: "Terraform returns", description: "Clean plan outputs confirm zero infrastructure drift." }], stageIndex: 4 },
+        {
+          type: "handoff",
+          product: "Terraform",
+          title: "Compare Environments",
+          steps: [
+            { label: "Atlas produced", description: "Atlas requests Terraform plan output for infrastructure-layer diff." },
+            { label: "Atlas directs", description: "Terraform plan compared against declared HCL configuration." },
+            { label: "Terraform returns", description: "Infrastructure-layer diff incorporated into Atlas comparison." },
+          ],
+          stageIndex: 1,
+        },
+        {
+          type: "handoff",
+          product: "Terraform",
+          title: "Remediate Infrastructure",
+          steps: [
+            { label: "Atlas produced", description: "Drift item identified as infrastructure-layer change outside Terraform workflow." },
+            { label: "Atlas directs", description: "Team applies Terraform plan restoring LPAR to declared state." },
+            { label: "Terraform returns", description: "Apply completion confirmation; Atlas marks resolved." },
+          ],
+          stageIndex: 4,
+        },
+        {
+          type: "handoff",
+          product: "Terraform",
+          title: "Validate Post-Remediation",
+          steps: [
+            { label: "Atlas produced", description: "Remediation complete; validation required." },
+            { label: "Atlas directs", description: "Fresh terraform plan requested for each environment." },
+            { label: "Terraform returns", description: "Clean plan outputs confirm zero infrastructure drift." },
+          ],
+          stageIndex: 4,
+        },
         { type: "enrichment", product: "Terraform", title: "Detect Trigger", summary: "Terraform scheduled plan surfaces infrastructure drift as trigger for Atlas investigation.", stageIndex: 0 },
         { type: "enrichment", product: "Terraform", title: "Record Evidence", summary: "State version history provides infrastructure-layer parity record for audit.", stageIndex: 5 },
       ],
