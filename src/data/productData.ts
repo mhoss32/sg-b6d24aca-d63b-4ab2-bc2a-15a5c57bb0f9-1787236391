@@ -1980,7 +1980,7 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
   "uc-09": {
     id: "uc-09",
     label: "UC-09: Application Modernization",
-    description: "Legacy application analysis, technical debt identification, and safe phased modernization.",
+    description: "Legacy application analysis, technical debt identification, and safe phased modernization — turning \"we cannot safely touch this\" into a phased, validated, risk-controlled project.",
     personas: [
       { name: "Angie", role: "Application Architect", engagement: "Primary" },
       { name: "Kathleen", role: "z/OS Application Developer (experienced)", engagement: "Secondary" },
@@ -1997,12 +1997,120 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
         { name: "Promote", description: "Production promotion requires multi-team handoff for every phase." },
       ],
       markers: [
-        { persona: "Angie", type: "time", title: "Lost Time — weeks to months manual research", description: "Manually reading code, interviewing experts, reviewing CSD and Db2 catalog.", stageIndex: 0 },
-        { persona: "Angie", type: "pain", title: "Business Impact — plans built on incomplete understanding", description: "Research produces no structured artifact; plans acknowledge their own incompleteness.", stageIndex: 0 },
-        { persona: "Angie", type: "time", title: "Lost Time — weeks identifying technical debt", description: "Manual identification of deprecated APIs, monolithic structures, duplicated logic.", stageIndex: 1 },
-        { persona: "Kathleen", type: "pain", title: "Business Impact — runtime failures from dynamic dependencies", description: "Static analysis misses dynamic call patterns; changes cause unexpected failures.", stageIndex: 2 },
-        { persona: "Kathleen", type: "time", title: "Lost Time — hours manual regression scoping", description: "Regression test coverage depends on developer knowledge of what the phase changed.", stageIndex: 3 },
-        { persona: "Kathleen", type: "time", title: "Lost Time — hours multi-team coordination per phase", description: "Production promotion requires Zach for configuration steps every phase.", stageIndex: 4 },
+        // Step 1 — Analyze (stageIndex 0)
+        {
+          persona: "Angie",
+          type: "time",
+          title: "Lost Time — weeks to months in a manual research phase",
+          description: "Modernization projects begin with a research phase that takes weeks or months — manually reading code, interviewing the few remaining experts, and reviewing CICS CSD definitions and Db2 catalog entries before any modernization work can start.",
+          stageIndex: 0,
+        },
+        {
+          persona: "Angie",
+          type: "pain",
+          title: "Business Impact — modernization plans built on incomplete analysis",
+          description: "The research phase is expensive, incomplete, and produces no structured artifact; modernization plans are built on an understanding that everyone involved acknowledges is incomplete.",
+          stageIndex: 0,
+        },
+        {
+          persona: "Kathleen",
+          type: "pain",
+          title: "Business Impact — original design intent is no longer available",
+          description: "The people who built the legacy applications are often gone; the design intent and rationale needed to modernize safely is no longer available from the original authors.",
+          stageIndex: 0,
+        },
+        {
+          persona: "Deb",
+          type: "pain",
+          title: "Business Impact — high-risk tightly coupled code with unknown blast radius",
+          description: "Tightly coupled code — monolithic copybooks, shared Db2 plans, and deeply shared structures — carries high risk because the blast radius of changes is not fully known.",
+          stageIndex: 0,
+        },
+
+        // Step 2 — Plan (stageIndex 1)
+        {
+          persona: "Angie",
+          type: "time",
+          title: "Lost Time — weeks identifying technical debt across large codebases",
+          description: "There is no automated technical debt identification; Angie must manually identify deprecated APIs, monolithic structures, and duplicated logic from code review and expert interviews.",
+          stageIndex: 1,
+        },
+        {
+          persona: "Greg",
+          type: "skill",
+          title: "Skill Gap / Bottleneck — infrastructure implications assessed informally",
+          description: "Infrastructure implications of modernization decisions are assessed informally — Greg must be consulted for every decision with infrastructure impact, creating a serial dependency and slowing the plan.",
+          stageIndex: 1,
+        },
+        {
+          persona: "Angie",
+          type: "pain",
+          title: "Business Impact — no data-driven modernization prioritization",
+          description: "Modernization prioritization is based on estimated impact and risk, not on data-driven coupling analysis and blast radius quantification — the most dangerous changes may not be scheduled last or given appropriate validation resources.",
+          stageIndex: 1,
+        },
+
+        // Step 3 — Execute Phase (stageIndex 2)
+        {
+          persona: "Kathleen",
+          type: "pain",
+          title: "Business Impact — static-only analysis hides runtime dependencies",
+          description: "Code-level changes to tightly coupled legacy code carry high risk because the full runtime call chain is not visible from static analysis; dynamic dependencies only surface during testing or in production.",
+          stageIndex: 2,
+        },
+        {
+          persona: "Deb",
+          type: "skill",
+          title: "Skill Gap / Bottleneck — Deb cannot independently execute modernization phases",
+          description: "Early-tenure developers working on lower-risk modernization phases lack the system context to work safely; Deb depends on Kathleen's oversight for every non-trivial change.",
+          stageIndex: 2,
+        },
+        {
+          persona: "Zach",
+          type: "time",
+          title: "Lost Time — hours to days per phase of Zach’s infrastructure work",
+          description: "Infrastructure configuration changes triggered by modernization — CICS definitions, Db2 parameter changes, IMS setup — require Zach's involvement in every phase, consuming scarce senior engineer time.",
+          stageIndex: 2,
+        },
+
+        // Step 4 — Validate Phase (stageIndex 3)
+        {
+          persona: "Kathleen",
+          type: "pain",
+          title: "Business Impact — validation in non-isolated environments is unreliable",
+          description: "Phase validation environments are not isolated; testing occurs in shared or production-similar environments, creating risk of interference and making regression signals harder to interpret.",
+          stageIndex: 3,
+        },
+        {
+          persona: "Kathleen",
+          type: "time",
+          title: "Lost Time — hours per phase manually scoping regression tests",
+          description: "Regression test coverage depends on the developer's knowledge of what the phase changed — systematic scope definition is not automated, so Kathleen spends hours defining what to test.",
+          stageIndex: 3,
+        },
+        {
+          persona: "Deb",
+          type: "skill",
+          title: "Skill Gap / Bottleneck — Deb must escalate every non-trivial test failure",
+          description: "Test failures on modernization phases require Kathleen's diagnosis; Deb lacks the runtime call chain knowledge to attribute failures to specific coupling points and cannot resolve them independently.",
+          stageIndex: 3,
+        },
+
+        // Step 5 — Promote (stageIndex 4)
+        {
+          persona: "Kathleen",
+          type: "time",
+          title: "Lost Time — hours of multi-team coordination per phase promotion",
+          description: "Production promotion for each modernization phase requires Zach for configuration steps and multi-team coordination, even for routine phases; there is no streamlined, developer-native promotion path.",
+          stageIndex: 4,
+        },
+        {
+          persona: "Angie",
+          type: "pain",
+          title: "Business Impact — architectural drift accumulates silently across phases",
+          description: "There is no mechanism to verify that the promoted phase conforms to the intended architecture; regression from architectural intent can accumulate phase by phase over a multi-year modernization program.",
+          stageIndex: 4,
+        },
       ],
     },
     toBe: {
@@ -2010,31 +2118,269 @@ export const useCaseDetails: Record<string, UseCaseDetail> = {
       stages: [
         { name: "Analyze", description: "Atlas produces complete structure, technical debt, and dependency map in minutes." },
         { name: "Plan", description: "Atlas generates prioritized modernization plan from technical debt analysis." },
-        { name: "Execute Phase", description: "Full runtime call chain visible before changes; Atlas-orchestrated configuration." },
-        { name: "Validate Phase", description: "Phase regression testing scoped automatically; isolated environment provisioned." },
-        { name: "Promote", description: "Atlas-orchestrated phase promotion with architectural conformance checking." },
+        { name: "Execute Phase", description: "Full runtime call chain visible before changes; Atlas-orchestrated configuration for each phase." },
+        { name: "Validate Phase", description: "Phase regression testing scoped automatically; isolated environment provisioned per phase." },
+        { name: "Promote", description: "Atlas-orchestrated phase promotion with architectural conformance checking before production apply." },
       ],
       markers: [
-        { persona: "Angie", type: "time", title: "Time Saving — weeks to months → minutes for analysis", description: "Complete application structure from topology model and ZUnderstand dynamic call chains.", stageIndex: 0 },
-        { persona: "Angie", type: "skill", title: "Atlas AI Insight — data-driven prioritization", description: "Plan generated from technical debt analysis, coupling scores, and deadline surfacing.", stageIndex: 1 },
-        { persona: "Kathleen", type: "skill", title: "Atlas AI Insight — runtime call chain prevents silent failures", description: "ZUnderstand dynamic call chain makes dynamic dependencies visible before changes.", stageIndex: 2 },
-        { persona: "Kathleen", type: "time", title: "Time Saving — hours → automatic regression scoping", description: "Test targets generated from programs and call chains the phase changed.", stageIndex: 3 },
-        { persona: "Angie", type: "skill", title: "Atlas AI Insight — architectural conformance check", description: "Promoted code checked against intended architecture before production apply.", stageIndex: 4 },
+        // Step 1 — Analyze (stageIndex 0)
+        {
+          persona: "Angie",
+          type: "time",
+          title: "Time Saving — weeks to months → minutes for modernization analysis",
+          description: "Complete application structure, technical debt profile, and dependency map produced in minutes from Atlas's topology model and ZUnderstand's dynamic call chain analysis — replacing weeks or months of manual research.",
+          stageIndex: 0,
+        },
+        {
+          persona: "Kathleen",
+          type: "skill",
+          title: "Atlas AI Insight & Automation — runtime call chain visible before changes",
+          description: "Runtime call chain analysis from ZUnderstand shows which programs actually call which others at runtime — monolithic copybook decomposition and other high-risk changes are planned from actual usage, not from static assumptions.",
+          stageIndex: 0,
+        },
+        {
+          persona: "Deb",
+          type: "gain",
+          title: "New User Capability — Deb sees safe decomposition boundaries before coding",
+          description: "Atlas surfaces which fields in a shared copybook are actually used by which programs at runtime, so Deb knows the safe decomposition boundary before making any changes.",
+          stageIndex: 0,
+        },
+
+        // Step 2 — Plan (stageIndex 1)
+        {
+          persona: "Angie",
+          type: "skill",
+          title: "Atlas AI Insight & Automation — data-driven modernization prioritization",
+          description: "Prioritized modernization plan generated by Atlas from technical debt analysis, coupling risk scores, blast radius quantification, and approaching deadlines — not from rough expert estimation.",
+          stageIndex: 1,
+        },
+        {
+          persona: "Greg",
+          type: "gain",
+          title: "New User Capability — Greg reviews infrastructure implications per phase",
+          description: "Infrastructure implications of each modernization phase are reviewed through Atlas — structural changes that affect CICS definitions, Db2 parameters, or IMS setup are identified before the phase plan is finalized.",
+          stageIndex: 1,
+        },
+
+        // Step 3 — Execute Phase (stageIndex 2)
+        {
+          persona: "Kathleen",
+          type: "skill",
+          title: "Atlas AI Insight & Automation — safe execution on tightly coupled code",
+          description: "Full runtime call chain is visible before making changes to tightly coupled code, so Kathleen can confirm the safety of a change before writing it.",
+          stageIndex: 2,
+        },
+        {
+          persona: "Deb",
+          type: "gain",
+          title: "New User Capability — Deb executes lower-risk phases from Atlas context",
+          description: "Atlas provides the system context for Deb's phase; she works from Atlas's dependency analysis and phase specification, not from her own incomplete mental model.",
+          stageIndex: 2,
+        },
+        {
+          persona: "Zach",
+          type: "time",
+          title: "Time Saving — hours to days per phase → authorization-only for Zach",
+          description: "Infrastructure configuration changes for modernization phases are Atlas-orchestrated — Zach authorizes within guardrails rather than manually executing every configuration step.",
+          stageIndex: 2,
+        },
+
+        // Step 4 — Validate Phase (stageIndex 3)
+        {
+          persona: "Kathleen",
+          type: "time",
+          title: "Time Saving — hours of manual regression scoping → automatic",
+          description: "Phase regression testing is scoped automatically from Atlas's impact analysis — test targets are generated from the programs and call chains the phase changed.",
+          stageIndex: 3,
+        },
+        {
+          persona: "Deb",
+          type: "gain",
+          title: "New User Capability — Deb diagnoses phase test failures independently",
+          description: "Test failures are attributed by Atlas to specific coupling points and dependencies, enabling Deb to diagnose and fix failures independently instead of escalating every issue to Kathleen.",
+          stageIndex: 3,
+        },
+        {
+          persona: "Kathleen",
+          type: "time",
+          title: "Time Saving — isolated, production-like phase validation environments",
+          description: "Phase validation runs in an isolated environment provisioned and configured by Atlas, providing consistent, production-representative conditions for every phase without manual setup.",
+          stageIndex: 3,
+        },
+
+        // Step 5 — Promote (stageIndex 4)
+        {
+          persona: "Kathleen",
+          type: "time",
+          title: "Time Saving — hours of multi-team coordination → Atlas-orchestrated promotion",
+          description: "Atlas-orchestrated phase promotion — the developer initiates, Atlas handles the configuration steps, and Zach authorizes gates; multi-team handoff coordination is no longer required for every routine phase.",
+          stageIndex: 4,
+        },
+        {
+          persona: "Angie",
+          type: "skill",
+          title: "Atlas AI Insight & Automation — architectural conformance checked per phase",
+          description: "Each phase promotion is reviewed against Angie’s architectural specification — Atlas checks that the promoted code conforms to the intended architecture before production apply, preventing silent architectural drift.",
+          stageIndex: 4,
+        },
       ],
       externalTouchpoints: [
-        { type: "handoff", product: "Bob PPZ", title: "Execute Phase Code Changes", steps: [{ label: "Atlas produced", description: "Complete phase specification with coupling analysis and blast radius." }, { label: "Atlas directs", description: "Developer uses ZUnderstand for business rule extraction and implementation planning." }, { label: "Bob PPZ returns", description: "Phase-completed code artifacts." }], stageIndex: 2 },
-        { type: "handoff", product: "Bob PPZ", title: "Validate Phase Fix", steps: [{ label: "Atlas produced", description: "Test failure attributed to coupling point." }, { label: "Atlas directs", description: "Failure context passed to Bob PPZ for precise adjustment." }, { label: "Bob PPZ returns", description: "Corrected artifact; Atlas re-validates." }], stageIndex: 3 },
-        { type: "handoff", product: "Bob PPZ", title: "Promote Conformance", steps: [{ label: "Atlas produced", description: "Architectural conformance check identifies deviation." }, { label: "Atlas directs", description: "Finding returned to Bob PPZ for targeted adjustment." }, { label: "Bob PPZ returns", description: "Corrected artifact before production apply." }], stageIndex: 4 },
-        { type: "enrichment", product: "Bob PPZ", title: "Analysis Business Rules", summary: "Business rule extraction, data dictionary, precise execution paths, and coupling scores enrich the modernization analysis.", stageIndex: 0 },
-        { type: "enrichment", product: "Bob PPZ", title: "Plan Risk Assessment", summary: "Phase risk ratings enriched with implementation risk assessment from ZUnderstand.", stageIndex: 1 },
-        { type: "enrichment", product: "Bob PPZ", title: "Validate Coverage", summary: "Regression test suite enriched with code-level execution path coverage.", stageIndex: 3 },
-        { type: "enrichment", product: "Concert4Z", title: "Analyze Active Paths", summary: "ZEN runtime data distinguishes active from dormant code paths; dead code identified for safe removal.", stageIndex: 0 },
-        { type: "enrichment", product: "Concert4Z", title: "Plan Prioritization", summary: "Production incident history provides real-world risk context for modernization prioritization.", stageIndex: 1 },
-        { type: "enrichment", product: "Concert4Z", title: "Promote Baseline", summary: "Post-promotion monitoring confirms modernized application behaves correctly in production.", stageIndex: 4 },
-        { type: "handoff", product: "Terraform", title: "Provision Dual Environments", steps: [{ label: "Atlas produced", description: "Two infrastructure specifications: legacy and target architecture." }, { label: "Atlas directs", description: "Terraform provisions both environments in isolated workspaces." }, { label: "Terraform returns", description: "Both environments confirmed for equivalence testing." }], stageIndex: 3 },
-        { type: "handoff", product: "Terraform", title: "Promote Target Infrastructure", steps: [{ label: "Atlas produced", description: "Modernization target requires new infrastructure type." }, { label: "Atlas directs", description: "Terraform provisions target infrastructure for promotion stage." }, { label: "Terraform returns", description: "Infrastructure apply log for promotion record." }], stageIndex: 4 },
-        { type: "enrichment", product: "Terraform", title: "Assess Readiness", summary: "Terraform coverage indicates cleaner path to modernization for declaratively managed components.", stageIndex: 0 },
-        { type: "enrichment", product: "Terraform", title: "Record Lifecycle", summary: "Workspace history provides lifecycle of legacy and target environments for evidence package.", stageIndex: 4 },
+        {
+          type: "handoff",
+          product: "Bob PPZ",
+          title: "Execute Phase Code Changes",
+          steps: [
+            {
+              label: "Atlas produced",
+              description: "Atlas has produced a complete modernization phase specification — which programs are in scope, what changes are required, their coupling relationships, and the blast radius.",
+            },
+            {
+              label: "Atlas directs",
+              description: "Developer moves into Bob PPZ with full context. ZUnderstand provides business rule extraction, data flow analysis, and precise implementation planning for the code-level modernization work.",
+            },
+            {
+              label: "Bob PPZ returns",
+              description: "Phase-completed code artifacts are returned to Atlas, which then validates them in isolated environments before promotion.",
+            },
+          ],
+          stageIndex: 2,
+        },
+        {
+          type: "handoff",
+          product: "Bob PPZ",
+          title: "Validate Phase Fix",
+          steps: [
+            {
+              label: "Atlas produced",
+              description: "Atlas phase validation surfaces a regression test failure attributed to a specific coupling point or execution path introduced in the modernization phase.",
+            },
+            {
+              label: "Atlas directs",
+              description: "Failure context — program, call chain, and failing scenario — is passed to Bob PPZ for precise code-level adjustment using ZUnderstand.",
+            },
+            {
+              label: "Bob PPZ returns",
+              description: "A corrected code artifact is returned to Atlas; Atlas re-runs the targeted tests and updates the validation status.",
+            },
+          ],
+          stageIndex: 3,
+        },
+        {
+          type: "handoff",
+          product: "Bob PPZ",
+          title: "Promote Conformance",
+          steps: [
+            {
+              label: "Atlas produced",
+              description: "Atlas architectural conformance check for a phase identifies a deviation from target architecture just before production promotion.",
+            },
+            {
+              label: "Atlas directs",
+              description: "The deviation finding is returned to Bob PPZ with full architectural context so the developer can adjust code to match the intended architecture.",
+            },
+            {
+              label: "Bob PPZ returns",
+              description: "Corrected artifact is returned to Atlas; Atlas re-validates and proceeds with promotion once conformance is confirmed.",
+            },
+          ],
+          stageIndex: 4,
+        },
+        {
+          type: "enrichment",
+          product: "Bob PPZ",
+          title: "Analysis Business Rules",
+          summary: "Business rule extraction, data dictionary, precise execution paths, and coupling scores from ZUnderstand enrich Atlas’s modernization analysis, making technical debt and coupling risk visible at code level.",
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Bob PPZ",
+          title: "Plan Risk Assessment",
+          summary: "Phase risk ratings are enriched with implementation risk assessment from ZUnderstand — complexity and coupling metrics inform the modernization plan.",
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Bob PPZ",
+          title: "Validate Coverage",
+          summary: "Regression test suites generated by Atlas are enriched with code-level execution path coverage, ensuring tests exercise the constructs actually changed by modernization.",
+          stageIndex: 3,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Analyze Active Paths",
+          summary: "ZEN runtime data from Concert4Z distinguishes active from dormant code paths; dead code is identified for safe removal, and active high-risk paths are prioritized for modernization.",
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Plan Prioritization",
+          summary: "Production incident history from Concert4Z provides real-world risk context, helping Atlas prioritize modernization phases for applications that have caused recent incidents.",
+          stageIndex: 1,
+        },
+        {
+          type: "enrichment",
+          product: "Concert4Z",
+          title: "Promote Baseline",
+          summary: "Post-promotion monitoring from Concert4Z confirms that the modernized application behaves correctly in production and maintains expected performance profiles.",
+          stageIndex: 4,
+        },
+        {
+          type: "handoff",
+          product: "Terraform",
+          title: "Provision Dual Environments",
+          steps: [
+            {
+              label: "Atlas produced",
+              description: "Atlas generates two infrastructure specifications — one for the current (legacy) environment and one for the target (modernized) architecture.",
+            },
+            {
+              label: "Atlas directs",
+              description: "Terraform provisions both environments in isolated workspaces, ensuring equivalence testing can occur without impacting production.",
+            },
+            {
+              label: "Terraform returns",
+              description: "Both environments are confirmed ready; Atlas deploys legacy and modernized versions for side-by-side equivalence tests.",
+            },
+          ],
+          stageIndex: 3,
+        },
+        {
+          type: "handoff",
+          product: "Terraform",
+          title: "Promote Target Infrastructure",
+          steps: [
+            {
+              label: "Atlas produced",
+              description: "Modernization target requires new infrastructure types or topology changes for production.",
+            },
+            {
+              label: "Atlas directs",
+              description: "Terraform provisions or updates the target infrastructure for promotion stages according to Atlas’s plan.",
+            },
+            {
+              label: "Terraform returns",
+              description: "Terraform’s apply log and workspace history form the infrastructure-layer evidence for the modernization promotion record.",
+            },
+          ],
+          stageIndex: 4,
+        },
+        {
+          type: "enrichment",
+          product: "Terraform",
+          title: "Assess Readiness",
+          summary: "Terraform coverage indicates a cleaner path to modernization for declaratively managed components; Atlas factors workspace coverage into readiness and risk scoring.",
+          stageIndex: 0,
+        },
+        {
+          type: "enrichment",
+          product: "Terraform",
+          title: "Record Lifecycle",
+          summary: "Terraform workspace history records the lifecycle of legacy and target environments, enriching Atlas’s modernization evidence package.",
+          stageIndex: 4,
+        },
       ],
     },
     capabilities: [
